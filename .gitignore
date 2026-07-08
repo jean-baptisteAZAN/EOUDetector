@@ -1,6 +1,79 @@
-__pycache__/
-*.pyc
+# ─── Secrets / credentials (NEVER push) ───
 .env
-.venv/
+.env.*
+!.env.example
+*.key
+*.pem
+hf_token*
+.hf_token
+
+# ─── Patient data / PHI — medical transcripts & call audio (GDPR: NEVER push) ───
+data/
+datasets/
+raw/
+transcripts/
+*.jsonl
+*.csv
+*.tsv
+*.parquet
+*.wav
+*.mp3
+*.flac
+*.ogg
+# keep folder placeholders
+!**/.gitkeep
+
+# ─── Model weights & training outputs (huge) ───
 models/
 *.onnx
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.gguf
+# HF Trainer output dirs (checkpoint-*/optimizer.pt etc.)
+checkpoint-*/
+*-eou/
+notebooks/camembert-eou/
+runs/
+outputs/
+wandb/
+trackio/
+.cache/
+hf_cache/
+
+# ─── Python ───
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# ─── Notebooks ───
+.ipynb_checkpoints
+**/.ipynb_checkpoints/
+
+# ─── Tooling caches ───
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ─── IDE / editor ───
+.idea/
+.vscode/
+*.swp
+
+# ─── OS ───
+.DS_Store
+Thumbs.db
+
+# ─── Local agent config ───
+.claude/
