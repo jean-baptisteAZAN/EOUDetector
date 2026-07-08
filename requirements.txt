@@ -1,0 +1,13 @@
+numpy>=1.26
+soundfile>=0.12
+scipy>=1.11
+sounddevice>=0.4
+onnxruntime>=1.17
+silero-vad>=5.1
+torch>=2.2
+azure-cognitiveservices-speech>=1.42
+huggingface_hub>=0.23
+transformers>=4.40
+python-dotenv>=1.0
+pytest>=8.0
+pytest-asyncio>=0.23
