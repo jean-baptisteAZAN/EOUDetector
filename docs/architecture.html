@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Semantically-Aware EOU Detection — Contribution &amp; Architecture</title>
+<style>
+  :root{
+    --bg:#0d1017; --bg2:#12161f; --bg3:#161c28;
+    --line:#232b3a; --line2:#2e3646;
+    --ink:#e9ecf3; --muted:#98a2b8; --faint:#6a7488;
+    --ac:#f4a63c; --lex:#3fd3c1; --fuse:#9a8cff; --veto:#ff6a6a;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px;background-position:center;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(154,140,255,.11),transparent 60%),
+               radial-gradient(90% 60% at 100% 0,rgba(63,211,193,.06),transparent 55%);}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px;position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+  h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.08}
+  a{color:inherit}
+
+  header{padding:70px 0 32px;border-bottom:1px solid var(--line)}
+  .hero-eyebrow{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--fuse);box-shadow:0 0 12px var(--fuse)}
+  h1{font-size:clamp(34px,5.6vw,58px)}
+  h1 .sem{color:var(--fuse)}
+  .tagline{margin-top:18px;font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:52ch;line-height:1.5}
+  .tagline b{color:var(--ac);font-weight:700}.tagline i{color:var(--lex);font-style:normal;font-weight:700}
+  .scope{margin-top:22px;font-family:var(--mono);font-size:12px;color:var(--faint);display:flex;flex-wrap:wrap;gap:8px 22px}
+  .scope b{color:var(--muted);font-weight:400}
+
+  section{padding:54px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-n{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  h2{font-size:clamp(23px,3.2vw,30px)}
+  .lede{color:var(--muted);max-width:66ch;margin:12px 0 30px;font-size:15.5px}
+
+  /* thesis banner */
+  .thesis{background:linear-gradient(180deg,var(--bg2),#0e1622);border:1px solid rgba(154,140,255,.4);border-radius:16px;padding:26px 28px;margin-top:26px}
+  .thesis .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fuse);margin-bottom:12px}
+  .thesis p{margin:0;font-size:clamp(17px,2.3vw,21px);font-weight:700;letter-spacing:-.01em;line-height:1.4}
+  .thesis .hi{color:var(--fuse)}
+
+  /* problem cards */
+  .fp{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .fp .card{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:18px;position:relative;overflow:hidden}
+  .fp .card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--veto)}
+  .fp h3{font-size:14.5px;margin-bottom:6px}.fp p{margin:0;color:var(--muted);font-size:13.5px}
+  .fp .ex{margin-top:11px;font-family:var(--mono);font-size:12px;color:var(--ink);background:#0e1420;border:1px solid var(--line);border-radius:8px;padding:7px 9px}
+  .fp .ex .cut{color:var(--veto)}
+
+  /* versus: prior art vs contribution */
+  .versus{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .vcol{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--bg2)}
+  .vcol.us{border-color:rgba(154,140,255,.45);box-shadow:0 0 0 1px rgba(154,140,255,.12)}
+  .vcol .h{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px}
+  .vcol.prior .h{color:var(--faint)} .vcol.us .h{color:var(--fuse)}
+  .vcol ul{margin:0;padding:0;list-style:none}
+  .vcol li{position:relative;padding:7px 0 7px 22px;font-size:14px;color:var(--muted);border-top:1px solid var(--line)}
+  .vcol li:first-child{border-top:0}
+  .vcol.prior li::before{content:"×";position:absolute;left:0;color:var(--faint);font-weight:700}
+  .vcol.us li::before{content:"+";position:absolute;left:0;color:var(--fuse);font-weight:800}
+  .vcol.us li{color:var(--ink)}
+  .refs{margin-top:14px;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .refs a{color:var(--muted);border-bottom:1px solid var(--line);text-decoration:none}
+
+  /* method: optimal stopping */
+  .method{display:grid;grid-template-columns:1.05fr .95fr;gap:22px;align-items:start}
+  .eq{background:#0e1420;border:1px solid var(--line2);border-radius:13px;padding:20px;font-family:var(--mono);font-size:14px;line-height:1.9;color:var(--ink)}
+  .eq .c{color:var(--fuse)} .eq .a{color:var(--veto)} .eq .b{color:var(--lex)}
+  .eq .lbl{color:var(--faint);font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;display:block;margin-bottom:10px}
+  .mnotes{margin:0;padding:0;list-style:none}
+  .mnotes li{padding:9px 0 9px 24px;position:relative;color:var(--muted);font-size:14.5px;border-top:1px solid var(--line)}
+  .mnotes li:first-child{border-top:0}
+  .mnotes li::before{content:"›";position:absolute;left:2px;color:var(--fuse);font-weight:800}
+  .mnotes b{color:var(--ink);font-weight:700}
+
+  /* pareto evidence */
+  .evidence{display:grid;grid-template-columns:1fr .9fr;gap:24px;align-items:center}
+  .chart{border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,#0f1420,#0b0e15);padding:14px}
+  .chart svg{width:100%;height:auto;display:block}
+  .baselines .b-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+  .baselines .b-item:first-child{border-top:0}
+  .baselines .b-item i{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+  .baselines .b-item b{color:var(--ink);font-weight:700;font-family:var(--mono);font-size:12.5px}
+  .tag-target{font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:10px}
+
+  /* pipeline */
+  .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-bottom:22px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:middle}
+  .pipe{display:flex;align-items:stretch;overflow-x:auto;padding-bottom:8px}
+  .stage{min-width:142px;flex:0 0 auto;display:flex;flex-direction:column;justify-content:center}
+  .node{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:14px 15px}
+  .node .k{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:5px}
+  .node .t{font-weight:700;font-size:14px;line-height:1.25}.node .s{color:var(--muted);font-size:12px;margin-top:4px;font-family:var(--mono)}
+  .arrow{flex:0 0 auto;align-self:center;color:var(--faint);font-size:19px;padding:0 9px}
+  .branches{flex:0 0 auto;display:flex;flex-direction:column;gap:12px;justify-content:center;min-width:210px}
+  .node.ac{border-color:rgba(244,166,60,.5)}.node.ac .k{color:var(--ac)}
+  .node.lex{border-color:rgba(63,211,193,.5)}.node.lex .k{color:var(--lex)}
+  .node.fuse{border-color:rgba(154,140,255,.6);box-shadow:0 0 0 1px rgba(154,140,255,.16)}.node.fuse .k{color:var(--fuse)}
+  .node .p{font-family:var(--mono);font-size:11.5px;margin-top:7px;display:inline-block;padding:2px 8px;border-radius:20px;border:1px solid var(--line)}
+  .node.ac .p{color:var(--ac)}.node.lex .p{color:var(--lex)}.node.fuse .p{color:var(--fuse)}
+  .brace{flex:0 0 auto;align-self:center;width:14px;height:110px;border-left:2px solid var(--line);border-radius:8px;margin:0 2px}
+  .pipe-cap{color:var(--faint);font-size:13px;margin-top:14px;max-width:70ch}
+  .pipe-cap b{color:var(--lex)}.pipe-cap em{color:var(--fuse);font-style:normal}
+
+  /* modules */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);font-weight:400}
+  td .iface{font-family:var(--mono);color:var(--ink);font-size:12.5px}
+  td .impl{color:var(--muted)} td .swp{color:var(--faint);font-size:12px}
+  tr:last-child td{border-bottom:0}
+
+  footer{padding:40px 0 66px;color:var(--faint);font-family:var(--mono);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+
+  @media(max-width:800px){
+    .fp,.versus,.method,.evidence{grid-template-columns:1fr}
+    .pipe{flex-direction:column}.stage,.branches{min-width:0}
+    .arrow{transform:rotate(90deg);padding:6px 0}.brace{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="dot"></span><span class="eyebrow">MSc · Conversational AI · contribution brief</span></div>
+    <h1>Towards <span class="sem">Semantically-Aware</span><br>End-of-Utterance Detection.</h1>
+    <p class="tagline">Deciding when a caller has finished is a <b>cost</b> decision, not a timeout. We fuse a <b>waveform</b> and a <i>half-formed sentence</i> into a calibrated completion probability, then <span style="color:var(--fuse);font-weight:700">stop optimally</span>.</p>
+    <div class="scope">
+      <b>domain</b> French medical telephony · <b>signals</b> acoustic + lexical · <b>runtime</b> real-time, CPU, LLM-free
+    </div>
+  </div>
+</header>
+
+<!-- 01 PROBLEM -->
+<section id="problem">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">01</span><h2>The interruption problem</h2></div>
+    <p class="lede">A voice-activity detector hears silence and assumes the turn is over — so the agent talks over a caller who is mid-name, mid-number, or mid-thought. A fixed silence timeout can only trade one failure for the other: cut too early, or wait too long.</p>
+    <div class="fp">
+      <div class="card"><h3>Spelling a name</h3><p>Letters arrive with gaps between them.</p><div class="ex">…c'est m a r<span class="cut">▮ cut</span></div></div>
+      <div class="card"><h3>Numbers &amp; dates</h3><p>Dictated in bursts, not one breath.</p><div class="ex">…née le douze<span class="cut">▮ cut</span></div></div>
+      <div class="card"><h3>Thinking pauses</h3><p>A trailing connector: not done.</p><div class="ex">…donc je<span class="cut">▮ cut</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 GAP + CONTRIBUTION -->
+<section id="contribution">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">02</span><h2>What's new here</h2></div>
+    <p class="lede">Fusing acoustic and lexical cues for turn detection is an active area (FastTurn, JAL-Turn, 2026). The mechanism isn't the contribution — the <em>decision</em> is: existing systems classify hold/shift against a learned or fixed threshold. We reframe endpointing itself.</p>
+    <div class="versus">
+      <div class="vcol prior">
+        <div class="h">Prior work (2026)</div>
+        <ul>
+          <li>Acoustic + semantic fusion → hold/shift classifier</li>
+          <li>Learned or fixed decision threshold (ad-hoc)</li>
+          <li>Often an LLM in the loop; joint model trained end-to-end</li>
+          <li>English / generic; uncalibrated confidence</li>
+        </ul>
+        <div class="refs">cf. <a href="https://arxiv.org/abs/2604.01897">FastTurn</a> · <a href="https://arxiv.org/html/2603.26515v1">JAL-Turn</a></div>
+      </div>
+      <div class="vcol us">
+        <div class="h">This project</div>
+        <ul>
+          <li>Endpointing as <b style="color:var(--fuse)">optimal stopping under uncertainty</b></li>
+          <li>Threshold <b style="color:var(--fuse)">derived</b> from an interruption-vs-latency cost model</li>
+          <li>Calibrated fused probability; off-the-shelf models, LLM-free, CPU</li>
+          <li>French medical dictation cases + weak-supervision labels</li>
+        </ul>
+        <div class="refs">contribution = the stopping rule + calibration, not the fusion</div>
+      </div>
+    </div>
+    <div class="thesis">
+      <div class="k">Contribution · one line</div>
+      <p>Frame semantic end-of-utterance detection as <span class="hi">optimal stopping</span>: a calibrated completion probability (acoustic + lexical) drives a <span class="hi">cost-sensitive stopping rule</span> that provably dominates fixed and learned thresholds on the latency / false-cut trade-off.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 03 METHOD -->
+<section id="method">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">03</span><h2>Endpointing as optimal stopping</h2></div>
+    <p class="lede">At every micro-pause, don't check a threshold — weigh the cost of acting now against the cost of waiting, and stop when acting wins. In a medical call, cutting off a patient costs far more than a little latency, so the rule is principled, not tuned.</p>
+    <div class="method">
+      <div class="eq">
+        <span class="lbl">decision at each pause t</span>
+        stop &nbsp;⇔&nbsp; <span class="c">E[cost | stop]</span> ≤ <span class="c">E[cost | wait]</span><br><br>
+        <span class="lbl">expected cost of stopping</span>
+        = <span class="a">(1 − p̂<sub>eou</sub>) · C<sub>cut</sub></span><br>
+        &nbsp;&nbsp;+ <span class="b">latency(t) · C<sub>lat</sub></span><br><br>
+        <span class="lbl">p̂<sub>eou</sub> = calibrated fusion(p_ac, p_lex)</span>
+      </div>
+      <ul class="mnotes">
+        <li><b>Calibrated probability.</b> p̂<sub>eou</sub> must mean what it says — a prerequisite the existing models skip. Calibration is a contribution in itself.</li>
+        <li><b>Cost model, not magic numbers.</b> C<sub>cut</sub> ≫ C<sub>lat</sub> encodes the safety-critical asymmetry; the threshold falls out of it.</li>
+        <li><b>Anticipation.</b> A confident stop fires on the shortest pause; uncertainty buys more listening — up to a hard ceiling.</li>
+        <li><b>Bilateral veto</b> feeds the probability: either branch strongly "not done" (spelling, open number) pulls p̂<sub>eou</sub> down.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 04 EVIDENCE -->
+<section id="evidence">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">04</span><h2>How we prove "better"</h2></div>
+    <p class="lede">One claim, one curve. The stopping rule traces an operating frontier on latency vs false-cut rate; we show it Pareto-dominates every baseline — lower interruptions at equal latency, or lower latency at equal interruptions.</p>
+    <div class="evidence">
+      <div class="chart">
+        <svg viewBox="0 0 560 330" role="img" aria-label="Latency vs false-cut Pareto plot">
+          <!-- axes -->
+          <line x1="60" y1="30" x2="60" y2="272" stroke="#2e3646"/>
+          <line x1="60" y1="272" x2="524" y2="272" stroke="#2e3646"/>
+          <!-- gridlines -->
+          <line x1="60" y1="210" x2="524" y2="210" stroke="#1b2230"/>
+          <line x1="60" y1="150" x2="524" y2="150" stroke="#1b2230"/>
+          <line x1="60" y1="90"  x2="524" y2="90"  stroke="#1b2230"/>
+          <text x="52" y="276" fill="#6a7488" font-size="10" text-anchor="end" font-family="monospace">0</text>
+          <text x="52" y="214" fill="#6a7488" font-size="10" text-anchor="end" font-family="monospace">10</text>
+          <text x="52" y="154" fill="#6a7488" font-size="10" text-anchor="end" font-family="monospace">20</text>
+          <text x="52" y="94"  fill="#6a7488" font-size="10" text-anchor="end" font-family="monospace">30</text>
+          <text x="14" y="150" fill="#98a2b8" font-size="11" text-anchor="middle" font-family="monospace" transform="rotate(-90 14 150)">false-cut rate (%)</text>
+          <text x="292" y="300" fill="#98a2b8" font-size="11" text-anchor="middle" font-family="monospace">endpoint latency (ms)</text>
+          <text x="120" y="290" fill="#6a7488" font-size="9" text-anchor="middle" font-family="monospace">250</text>
+          <text x="405" y="290" fill="#6a7488" font-size="9" text-anchor="middle" font-family="monospace">1500</text>
+          <!-- fixed-timeout baseline curve (dashed grey) -->
+          <polyline points="117,90 405,198" fill="none" stroke="#4a5568" stroke-width="1.5" stroke-dasharray="4 4"/>
+          <circle cx="117" cy="90" r="5" fill="#8a94a6"/><text x="126" y="86" fill="#8a94a6" font-size="10" font-family="monospace">VAD short</text>
+          <circle cx="405" cy="198" r="5" fill="#8a94a6"/><text x="360" y="214" fill="#8a94a6" font-size="10" font-family="monospace">VAD long</text>
+          <!-- single-modality baselines -->
+          <circle cx="198" cy="162" r="6" fill="#f4a63c"/><text x="208" y="160" fill="#f4a63c" font-size="10" font-family="monospace">acoustic-only</text>
+          <circle cx="221" cy="186" r="6" fill="#3fd3c1"/><text x="231" y="200" fill="#3fd3c1" font-size="10" font-family="monospace">lexical-only</text>
+          <!-- our frontier -->
+          <polyline points="129,210 175,234 244,246 336,252" fill="none" stroke="#9a8cff" stroke-width="2.5"/>
+          <circle cx="129" cy="210" r="4.5" fill="#9a8cff"/><circle cx="175" cy="234" r="4.5" fill="#9a8cff"/>
+          <circle cx="244" cy="246" r="4.5" fill="#9a8cff"/><circle cx="336" cy="252" r="4.5" fill="#9a8cff"/>
+          <text x="300" y="238" fill="#9a8cff" font-size="10.5" font-family="monospace" font-weight="bold">optimal stopping (ours)</text>
+          <!-- better arrow -->
+          <text x="150" y="266" fill="#6a7488" font-size="10" font-family="monospace">◤ better</text>
+        </svg>
+      </div>
+      <div class="baselines">
+        <div class="b-item"><i style="background:#8a94a6"></i><span><b>VAD + fixed timeout</b> — the incumbent; one point, one compromise</span></div>
+        <div class="b-item"><i style="background:var(--ac)"></i><span><b>Smart Turn only</b> — acoustic completion</span></div>
+        <div class="b-item"><i style="background:var(--lex)"></i><span><b>CamemBERT only</b> — lexical completion</span></div>
+        <div class="b-item"><i style="background:var(--fuse)"></i><span><b>Optimal stopping</b> — a frontier that dominates them all</span></div>
+        <div class="tag-target">Illustrative target · positions to be measured on the labelled clip set</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 ARCHITECTURE -->
+<section id="architecture">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">05</span><h2>How it's realised</h2></div>
+    <p class="lede">Silero VAD gates the stream and fires the decision at each micro-pause. Two off-the-shelf branches feed the calibrated probability; nothing on the decision path waits for the ASR.</p>
+    <div class="legend">
+      <span><i style="background:var(--ac)"></i>acoustic · p_ac</span>
+      <span><i style="background:var(--lex)"></i>lexical · p_lex</span>
+      <span><i style="background:var(--fuse)"></i>calibrated p̂_eou → stop rule</span>
+      <span><i style="background:var(--veto)"></i>veto · hold</span>
+    </div>
+    <div class="pipe">
+      <div class="stage"><div class="node"><div class="k">input</div><div class="t">Audio 16 kHz</div><div class="s">mic · wav replay</div></div></div>
+      <div class="arrow">→</div>
+      <div class="stage"><div class="node"><div class="k">gate</div><div class="t">Silero VAD</div><div class="s">micro-pause</div></div></div>
+      <div class="arrow">→</div>
+      <div class="brace"></div>
+      <div class="branches">
+        <div class="node ac"><div class="k">acoustic</div><div class="t">Smart Turn v3</div><div class="s">ONNX · buffer</div><span class="p">→ p_ac</span></div>
+        <div class="node lex"><div class="k">lexical</div><div class="t">CamemBERT + FR veto</div><div class="s">latest partial</div><span class="p">→ p_lex</span></div>
+      </div>
+      <div class="brace"></div>
+      <div class="arrow">→</div>
+      <div class="stage"><div class="node fuse"><div class="k">fuse + calibrate</div><div class="t">p̂_eou</div><div class="s">veto → probability</div><span class="p">calibrated</span></div></div>
+      <div class="arrow">→</div>
+      <div class="stage"><div class="node fuse"><div class="k">decision</div><div class="t">Stop rule</div><div class="s">cost-sensitive</div><span class="p">WAIT / STOP</span></div></div>
+    </div>
+    <p class="pipe-cap">Lexical is read as a <b>snapshot</b> of the newest ASR partial — never an await — so the decision is bounded by one acoustic inference (~25–80 ms), <em>never by ASR lag</em>. Every stage sits behind an interface; the rule/logistic fusion swaps for a learned one with no caller change.</p>
+  </div>
+</section>
+
+<!-- 06 MODULES -->
+<section id="modules">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">06</span><h2>Replaceable by design</h2></div>
+    <table>
+      <thead><tr><th>Interface</th><th>Implementation</th><th>Swap</th></tr></thead>
+      <tbody>
+        <tr><td class="iface">VAD</td><td class="impl">Silero (in-process)</td><td class="swp">any frame detector</td></tr>
+        <tr><td class="iface">ASR</td><td class="impl">Azure Speech · recognizing partials</td><td class="swp">self-hosted STT</td></tr>
+        <tr><td class="iface">AcousticEOU</td><td class="impl">Smart Turn v3 (ONNX)</td><td class="swp">other turn model</td></tr>
+        <tr><td class="iface">LexicalEOU</td><td class="impl">CamemBERT + FR heuristic veto</td><td class="swp">heuristic-only</td></tr>
+        <tr><td class="iface">Fusion / decision</td><td class="impl">Calibrated prob → cost-sensitive stop</td><td class="swp">learned fusion</td></tr>
+        <tr><td class="iface">AudioSource</td><td class="impl">Mic · WavStream (real-time replay)</td><td class="swp">reproducible streams</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%">
+    <span>Towards Semantically-Aware EOU Detection · MSc contribution brief</span>
+    <a href="https://github.com/jean-baptisteAZAN/EOUDetector">github.com/jean-baptisteAZAN/EOUDetector</a>
+  </div>
+</footer>
+
+</body>
+</html>

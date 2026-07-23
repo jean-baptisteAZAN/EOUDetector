@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ticket — Data for the Semantic-EOU dataset</title>
+<style>
+  :root{
+    --bg:#0d1017; --bg2:#12161f; --bg3:#161c28;
+    --line:#232b3a; --line2:#2e3646;
+    --ink:#e9ecf3; --muted:#98a2b8; --faint:#6a7488;
+    --ac:#f4a63c; --lex:#3fd3c1; --fuse:#9a8cff; --veto:#ff6a6a; --ok:#4fd39a;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px;background-position:center;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(154,140,255,.10),transparent 60%),
+               radial-gradient(90% 60% at 100% 0,rgba(63,211,193,.06),transparent 55%);}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 24px;position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--faint)}
+  h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  a{color:inherit}
+
+  header{padding:58px 0 26px;border-bottom:1px solid var(--line)}
+  .tik{display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap}
+  .badge{font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  h1{font-size:clamp(27px,4.4vw,42px)}
+  .goal{margin-top:14px;font-size:clamp(15px,2.1vw,18px);color:var(--muted);max-width:66ch}
+  .goal b{color:var(--lex);font-weight:700}
+
+  section{padding:42px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:8px}
+  .sec-n{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  h2{font-size:clamp(20px,3vw,26px)}
+  .lede{color:var(--muted);max-width:70ch;margin:10px 0 22px;font-size:15px}
+  .lede b{color:var(--ink)}
+
+  /* master key callout */
+  .key{background:linear-gradient(180deg,var(--bg2),#0e1622);border:1px solid rgba(154,140,255,.4);border-radius:15px;padding:22px 24px}
+  .key .k{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--fuse);margin-bottom:10px}
+  .key p{margin:0;font-size:16px;color:var(--ink);line-height:1.5}
+  .key p b{color:var(--fuse)}
+  .key .s{margin-top:12px;font-size:14px;color:var(--muted)}
+
+  /* bucket blocks */
+  .bk{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:16px}
+  .bk-h{display:flex;align-items:center;gap:12px;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .bk-h .n{font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 9px;border-radius:6px}
+  .bk-h .t{font-weight:800;font-size:15.5px}
+  .bk-h .d{color:var(--faint);font-size:12.5px;margin-left:auto;font-family:var(--mono)}
+  .bk.mirror .bk-h{background:rgba(63,211,193,.07)} .bk.mirror .n{color:var(--lex);background:rgba(63,211,193,.13)}
+  .bk.derive .bk-h{background:rgba(154,140,255,.07)} .bk.derive .n{color:var(--fuse);background:rgba(154,140,255,.13)}
+  .bk.add .bk-h{background:rgba(244,166,60,.07)} .bk.add .n{color:var(--ac);background:rgba(244,166,60,.13)}
+  .row{display:grid;grid-template-columns:200px 1fr 220px;gap:16px;padding:12px 18px;border-top:1px solid var(--line);align-items:start}
+  .row:first-child{border-top:0}
+  .row .f{font-family:var(--mono);font-size:12.5px;color:var(--ink);font-weight:700}
+  .row .w{color:var(--muted);font-size:13.5px}
+  .row .src{font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .row .src b{color:var(--muted);font-weight:400}
+  @media(max-width:760px){ .row{grid-template-columns:1fr;gap:5px} }
+
+  pre{background:#0e1420;border:1px solid var(--line2);border-radius:12px;padding:18px;overflow-x:auto;font-family:var(--mono);font-size:12.5px;line-height:1.6;color:var(--ink);margin:16px 0 0}
+  pre .c{color:var(--faint)} pre .s{color:var(--lex)} pre .k{color:var(--fuse)}
+
+  .note{background:linear-gradient(180deg,#1a1510,#0f0c08);border:1px solid rgba(244,166,60,.35);border-radius:13px;padding:18px 20px;margin-bottom:20px}
+  .note .k{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ac);margin-bottom:9px}
+  .note p{margin:0;color:var(--muted);font-size:14px}
+  .ac{margin:0;padding:0;list-style:none}
+  .ac li{padding:9px 0 9px 26px;position:relative;border-top:1px solid var(--line);color:var(--muted);font-size:14.5px}
+  .ac li:first-child{border-top:0}
+  .ac li::before{content:"☐";position:absolute;left:2px;color:var(--fuse)}
+  .ac li b{color:var(--ink)}
+
+  footer{padding:32px 0 58px;color:var(--faint);font-family:var(--mono);font-size:12px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="tik"><span class="badge">TICKET</span><span class="badge">data</span><span class="badge">housemade → psql</span><span class="badge">+ audio</span></div>
+    <div class="eyebrow">Semantic EOU · dataset sourcing</div>
+    <h1>Get the EOU dataset out of housemade</h1>
+    <p class="goal">Most of what the semantic end-of-utterance dataset needs <b>already exists in housemade</b> (Mongo + call logs + Azure audio). The task is to <b>mirror it into psql</b>, hand over <b>audio access</b>, and reconstruct the rest <b>offline</b>. Only one thing genuinely needs new capture.</p>
+  </div>
+</header>
+
+<!-- A: MASTER KEY -->
+<section>
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">A</span><h2>The master key: audio</h2></div>
+    <div class="key">
+      <div class="k">Principle</div>
+      <p>With the <b>stereo call recording</b> (caller + agent channels) plus the transcripts and call logs, we can <b>reconstruct almost the whole dataset offline</b> — caller-only audio, VAD segments, true end-of-turn, pauses, latency, and the fini/pas_fini labels.</p>
+      <p class="s">The only signal that can't be recovered retroactively is the live ASR-partials trajectory — and even that we regenerate for evaluation by replaying the caller audio through our own ASR. So new prod logging is nearly optional; <b style="color:var(--ink)">audio access is what unblocks the project</b>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- B: THREE BUCKETS -->
+<section>
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">B</span><h2>What goes where</h2></div>
+    <p class="lede">Three buckets. Bucket 1 is the eng work (persist housemade → psql + expose audio). Bucket 2 we do ourselves offline. Bucket 3 is the only genuinely new capture, and it isn't blocking.</p>
+
+    <!-- Bucket 1 -->
+    <div class="bk mirror">
+      <div class="bk-h"><span class="n">1 · MIRROR</span><span class="t">Already in housemade → store in psql</span><span class="d">eng · persist what exists</span></div>
+      <div class="row"><div class="f">transcript_turns</div><div class="w">Role-tagged turns (user / bot). Already partly exported; keep per-turn, not concatenated.</div><div class="src"><b>Mongo</b> context.messagesHistory</div></div>
+      <div class="row"><div class="f">stt_final + ts</div><div class="w">Per user turn: the STT final text and the millisecond timestamp it was emitted. Cleaner than the stored transcript on echo-contaminated calls.</div><div class="src"><b>callLogs</b> "STT: … - &lt;text&gt;"</div></div>
+      <div class="row"><div class="f">bot_reply_ts</div><div class="w">Timestamp the agent started replying (TTS events) — gives the current system's response latency.</div><div class="src"><b>callLogs</b> TTS lines</div></div>
+      <div class="row"><div class="f">audio_ref</div><div class="w">Pointer to the stereo recording so we can fetch it. This is the unlock.</div><div class="src"><b>Azure Blob</b> ${uuid}.wav</div></div>
+      <div class="row"><div class="f">interruption_counts</div><div class="w">aiInterrupted / humanInterrupter per call.</div><div class="src"><b>timeLogs</b> · "[Call End Stats]"</div></div>
+      <div class="row"><div class="f">segmentation_timeout</div><div class="w">The silence-timeout value actually used (e.g. 500 / 1700 ms) — the incumbent endpoint mechanism's parameter.</div><div class="src"><b>STT config</b> per call</div></div>
+      <div class="row"><div class="f">call_meta</div><div class="w">uuid, callSid, from/to, direction, callDate, endedReason, motif.</div><div class="src"><b>callSchema</b> / analytics</div></div>
+    </div>
+
+    <!-- Bucket 2 -->
+    <div class="bk derive">
+      <div class="bk-h"><span class="n">2 · DERIVE</span><span class="t">Missing, but reconstructable offline (we do it)</span><span class="d">no eng work</span></div>
+      <div class="row"><div class="f">caller_audio</div><div class="w">Caller-only channel, extracted from the stereo recording (customer track).</div><div class="src"><b>from</b> audio_ref</div></div>
+      <div class="row"><div class="f">true_end_of_turn</div><div class="w">The real instant the caller stopped — offline VAD / alignment on the caller channel. Ground truth for latency &amp; calibration.</div><div class="src"><b>from</b> caller_audio</div></div>
+      <div class="row"><div class="f">endpoint_latency</div><div class="w">bot_reply_ts − true_end_of_turn. The real latency of the current system.</div><div class="src"><b>from</b> audio + logs</div></div>
+      <div class="row"><div class="f">label · fini / pas_fini</div><div class="w">Resume-after-pause: did the caller continue after the pause? Derived from turn sequence + audio.</div><div class="src"><b>from</b> turns + audio</div></div>
+      <div class="row"><div class="f">false_cut</div><div class="w">Agent spoke then the caller kept going (overlap) — a labelled premature cut.</div><div class="src"><b>from</b> audio overlap</div></div>
+      <div class="row"><div class="f">hardcase_tag</div><div class="w">spelling / number / date / hesitation — regex on the user text.</div><div class="src"><b>from</b> stt_final</div></div>
+    </div>
+
+    <!-- Bucket 3 -->
+    <div class="bk add">
+      <div class="bk-h"><span class="n">3 · ADD</span><span class="t">Genuinely new capture — going forward, not blocking</span><span class="d">optional for the POC</span></div>
+      <div class="row"><div class="f">asr_partials_trace</div><div class="w">The sequence of interim `recognizing` hypotheses with timestamps. Never captured (finals only). We regenerate it for eval by replaying audio through our own ASR, so it's only needed if we want the real prod partial cadence at scale.</div><div class="src"><b>new</b> recognizing handler</div></div>
+      <div class="row"><div class="f">durable per-pause log</div><div class="w">Structured per-micro-pause records in a store without the current 24 h expiry — for continuous data collection at scale.</div><div class="src"><b>new</b> durable store</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- C: psql shape -->
+<section>
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">C</span><h2>psql shape (Bucket 1)</h2></div>
+    <p class="lede">One row per call, joinable by <b>uuid</b> with the existing transcript export.</p>
+<pre><span class="c">-- one row per call (mirror of housemade)</span>
+{
+  <span class="k">uuid</span>, <span class="k">call_sid</span>, <span class="k">call_date</span>, <span class="k">from</span>, <span class="k">to</span>, <span class="k">direction</span>, <span class="k">ended_reason</span>, <span class="k">motif</span>,
+  <span class="k">segmentation_timeout_ms</span>,
+  <span class="k">ai_interrupted</span>, <span class="k">human_interrupter</span>,
+  <span class="k">audio_ref</span>: <span class="s">"blob://…/${uuid}.wav"</span>,          <span class="c">// stereo caller+agent</span>
+  <span class="k">turns</span>: [
+    { <span class="k">role</span>: <span class="s">"user"</span>, <span class="k">stt_final</span>: <span class="s">"c'est le zéro six"</span>, <span class="k">stt_final_ts_ms</span>: 18144 },
+    { <span class="k">role</span>: <span class="s">"bot"</span>,  <span class="k">text</span>: <span class="s">"quel numéro ?"</span>,      <span class="k">reply_ts_ms</span>: 18990 }
+  ]
+}</pre>
+  </div>
+</section>
+
+<!-- D -->
+<section>
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">D</span><h2>The one ask · out of scope · acceptance</h2></div>
+    <div class="note">
+      <div class="k">The single blocker</div>
+      <p><b style="color:var(--ink)">Audio access.</b> A way to fetch the stereo recording per uuid (a recording endpoint, or a Blob SAS/URL stored on the call). Everything in Bucket 2 depends on it.</p>
+    </div>
+    <div class="note">
+      <div class="k">Deferred — not this ticket</div>
+      <p><b style="color:var(--ink)">Anonymisation / PHI</b> comes later: mirror the raw fields first to validate the dataset, then pseudonymise names/numbers + set retention. Bucket 3 (partials, durable per-pause store) is also deferred — not needed to build or evaluate the POC.</p>
+    </div>
+    <ul class="ac">
+      <li><b>Audio reachable per uuid</b> (endpoint or Blob ref on the call record).</li>
+      <li><b>Bucket 1 mirrored to psql</b>: per-turn stt_final + timestamps, bot_reply_ts, audio_ref, interruption counts, segmentation_timeout, call_meta.</li>
+      <li><b>Joinable by uuid</b> with the existing transcript export.</li>
+      <li>Bucket 2 is on us — no eng action; Bucket 3 deferred.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Semantic EOU · data sourcing ticket · housemade → psql + audio</div>
+</footer>
+
+</body>
+</html>

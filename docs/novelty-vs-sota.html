@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Novelty vs State of the Art — Semantically-Aware EOU</title>
+<style>
+  :root{
+    --bg:#0d1017; --bg2:#12161f; --bg3:#161c28;
+    --line:#232b3a; --line2:#2e3646;
+    --ink:#e9ecf3; --muted:#98a2b8; --faint:#6a7488;
+    --ac:#f4a63c; --lex:#3fd3c1; --fuse:#9a8cff; --veto:#ff6a6a; --ok:#4fd39a;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:44px 44px;background-position:center;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(154,140,255,.11),transparent 60%),
+               radial-gradient(90% 60% at 100% 0,rgba(63,211,193,.06),transparent 55%);}
+  .wrap{max-width:1060px;margin:0 auto;padding:0 24px;position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--faint)}
+  h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.09}
+  a{color:inherit}
+
+  header{padding:66px 0 30px;border-bottom:1px solid var(--line)}
+  .hero-eyebrow{display:flex;gap:10px;align-items:center;margin-bottom:18px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--fuse);box-shadow:0 0 12px var(--fuse)}
+  h1{font-size:clamp(32px,5.2vw,54px)}
+  .tagline{margin-top:16px;font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:56ch;line-height:1.5}
+  .tagline em{color:var(--fuse);font-style:normal;font-weight:700}
+  .nav{margin-top:20px;font-family:var(--mono);font-size:12px;color:var(--faint)}
+  .nav a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+
+  section{padding:50px 0;border-bottom:1px solid var(--line)}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .sec-n{font-family:var(--mono);font-size:12px;color:var(--faint)}
+  h2{font-size:clamp(22px,3.1vw,29px)}
+  .lede{color:var(--muted);max-width:68ch;margin:12px 0 26px;font-size:15.5px}
+
+  .thesis{background:linear-gradient(180deg,var(--bg2),#0e1622);border:1px solid rgba(154,140,255,.4);border-radius:16px;padding:24px 26px}
+  .thesis .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fuse);margin-bottom:12px}
+  .thesis p{margin:0;font-size:clamp(16px,2.2vw,20px);font-weight:700;letter-spacing:-.01em;line-height:1.42}
+  .thesis .hi{color:var(--fuse)}
+  .thesis .sub{margin-top:14px;font-size:14px;font-weight:400;color:var(--muted);line-height:1.5}
+
+  /* positioning matrix */
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:720px}
+  th,td{text-align:left;padding:12px 13px;border-bottom:1px solid var(--line);vertical-align:middle}
+  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400;background:#0e1420}
+  tbody tr:last-child td{border-bottom:0}
+  td.sys{font-weight:700;color:var(--ink)} td .yr{color:var(--faint);font-weight:400;font-family:var(--mono);font-size:11px}
+  .yes{color:var(--ok);font-weight:700} .no{color:var(--veto);font-weight:700} .warn{color:var(--ac);font-weight:700}
+  td.small{color:var(--muted);font-family:var(--mono);font-size:12px}
+  tr.ours td{background:rgba(154,140,255,.08)}
+  tr.ours td.sys{color:var(--fuse)}
+  tr.ours{box-shadow:inset 3px 0 0 var(--fuse)}
+  .reads{margin-top:12px;font-family:var(--mono);font-size:11.5px;color:var(--faint)}
+  .reads a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+
+  /* differentiator cards */
+  .diffs{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .diff{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:18px}
+  .diff .vs{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);margin-bottom:9px}
+  .diff .they{color:var(--muted);font-size:13.5px;margin:0 0 10px}
+  .diff .we{color:var(--ink);font-size:14px;margin:0;padding-left:20px;position:relative}
+  .diff .we::before{content:"+";position:absolute;left:0;color:var(--fuse);font-weight:800}
+  .diff.gap{border-color:rgba(63,211,193,.4)}
+  .diff.gap .vs{color:var(--lex)}
+
+  /* metrics */
+  .mtable td .m{font-family:var(--mono);color:var(--ink);font-size:12.5px}
+  .mtable td .d{color:var(--muted)}
+  .mtable td .r{font-family:var(--mono);font-size:11.5px}
+  .r.err{color:var(--veto)} .r.speed{color:var(--lex)} .r.star{color:var(--fuse)}
+  .headline{margin-top:18px;font-size:14.5px;color:var(--muted);border-left:2px solid var(--fuse);padding:6px 0 6px 16px}
+  .headline b{color:var(--fuse)}
+
+  /* baselines */
+  .bl{display:grid;gap:2px}
+  .bl .row{display:grid;grid-template-columns:1fr;gap:2px;padding:12px 0;border-top:1px solid var(--line)}
+  .bl .row:first-child{border-top:0}
+  .bl .name{font-weight:700;font-size:14.5px}
+  .bl .repo{font-family:var(--mono);font-size:12px;color:var(--lex)}
+  .bl .desc{color:var(--muted);font-size:13.5px}
+
+  /* eval steps + caveats */
+  .steps{display:grid;gap:2px;margin-bottom:24px}
+  .step{display:grid;grid-template-columns:44px 1fr;gap:16px;padding:13px 0;border-top:1px solid var(--line)}
+  .step:first-child{border-top:0}
+  .step .num{font-family:var(--mono);font-size:20px;font-weight:800;color:var(--faint)}
+  .step p{margin:0;color:var(--muted);font-size:14.5px}
+  .step code{font-family:var(--mono);font-size:.85em;color:var(--ink);background:#0e1420;border:1px solid var(--line);padding:1px 6px;border-radius:6px}
+  .caveat{background:linear-gradient(180deg,#1a1510,#0f0c08);border:1px solid rgba(244,166,60,.4);border-radius:14px;padding:20px 22px}
+  .caveat .k{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ac);margin-bottom:12px}
+  .caveat ul{margin:0;padding-left:18px} .caveat li{color:var(--muted);font-size:14px;margin:6px 0}
+  .caveat b{color:var(--ink)}
+
+  footer{padding:40px 0 64px;color:var(--faint);font-family:var(--mono);font-size:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  footer a{color:var(--muted);text-decoration:none;border-bottom:1px solid var(--line)}
+
+  @media(max-width:800px){ .diffs{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="hero-eyebrow"><span class="dot"></span><span class="eyebrow">MSc · state-of-the-art positioning</span></div>
+    <h1>Novelty vs the<br>State of the Art.</h1>
+    <p class="tagline">Fusing acoustic and lexical cues for turn detection is a crowded 2026 area. The mechanism isn't the contribution — the <em>decision</em> is.</p>
+    <div class="nav">companion: <a href="architecture.html">architecture &amp; flows →</a></div>
+  </div>
+</header>
+
+<!-- 01 THESIS -->
+<section id="thesis">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">01</span><h2>The unclaimed conjunction</h2></div>
+    <p class="lede">Across five systems (2024–2026), the two pillars of our approach each appear <em>separately</em> — but never together, and <b style="color:var(--ink)">no system reports any calibration diagnostic</b>.</p>
+    <div class="thesis">
+      <div class="k">Contribution · one line</div>
+      <p>A streaming EOU detector that <span class="hi">fuses acoustic + lexical into a calibrated completion probability</span>, and decides via a <span class="hi">cost-sensitive optimal-stopping rule</span>.</p>
+      <p class="sub">Fusion systems (FastTurn, JAL-Turn) decide by argmax / a fixed threshold on uncalibrated scores. The one cost-aware system (Endpoint Anticipation) is acoustic-only and uncalibrated. The French fusion model is offline. The conjunction is open.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 02 MATRIX -->
+<section id="matrix">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">02</span><h2>Positioning matrix</h2></div>
+    <div class="tw">
+      <table>
+        <thead><tr>
+          <th>System</th><th>Acoustic + lexical</th><th>Decision method</th><th>Calibrated</th><th>Cost / optimal-stopping</th><th>Lang</th><th>Code</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td class="sys">FastTurn <span class="yr">’26</span></td>
+            <td class="yes">✓ LLM + Conformer</td><td class="small">4-state argmax</td>
+            <td class="no">✗</td><td class="no">✗</td><td class="small">zh+en</td><td class="yes">✓ test set</td>
+          </tr>
+          <tr>
+            <td class="sys">JAL-Turn <span class="yr">’26</span></td>
+            <td class="yes">✓ cross-attention</td><td class="small">binary, fixed τ=0.5</td>
+            <td class="no">✗</td><td class="no">✗</td><td class="small">multi+ja</td><td class="no">✗ data only</td>
+          </tr>
+          <tr>
+            <td class="sys">Endpoint Anticipation <span class="yr">’26</span></td>
+            <td class="no">✗ acoustic-only</td><td class="small">per-horizon threshold θ</td>
+            <td class="no">✗</td><td class="warn">⚠ cost-aware</td><td class="small">en</td><td class="yes">✓</td>
+          </tr>
+          <tr>
+            <td class="sys">French terminality <span class="yr">’24</span></td>
+            <td class="yes">✓ wav2vec2+FlauBERT</td><td class="small">offline classifier</td>
+            <td class="no">✗</td><td class="no">✗</td><td class="warn">fr</td><td class="yes">✓ code+data</td>
+          </tr>
+          <tr class="ours">
+            <td class="sys">Ours</td>
+            <td class="yes">✓ Smart Turn + CamemBERT</td><td class="small" style="color:var(--fuse)">optimal-stopping on cost</td>
+            <td class="yes">✓ ECE</td><td class="yes">✓ explicit cost model</td><td class="small" style="color:var(--fuse)">fr, streaming</td><td class="small">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="reads">read in full: <a href="https://arxiv.org/abs/2604.01897">FastTurn 2604.01897</a> · <a href="https://arxiv.org/abs/2603.26515">JAL-Turn 2603.26515</a> · <a href="https://arxiv.org/abs/2606.13450">Endpoint Anticipation 2606.13450</a> · <a href="https://arxiv.org/abs/2406.10073">French terminality 2406.10073</a> · Survey IWSDS 2025</div>
+  </div>
+</section>
+
+<!-- 03 DIFFERENTIATORS -->
+<section id="diff">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">03</span><h2>What we add, vs whom</h2></div>
+    <div class="diffs">
+      <div class="diff">
+        <div class="vs">vs FastTurn / JAL-Turn</div>
+        <p class="they">They fuse acoustic + lexical, but decide by argmax / τ=0.5 on uncalibrated scores.</p>
+        <p class="we">Calibration + an optimal-stopping decision.</p>
+      </div>
+      <div class="diff">
+        <div class="vs">vs Endpoint Anticipation</div>
+        <p class="they">The only cost-aware system — but acoustic-only, uncalibrated, per-horizon threshold.</p>
+        <p class="we">Lexical fusion + calibration + sequential optimal stopping with an explicit cost.</p>
+      </div>
+      <div class="diff">
+        <div class="vs">vs French terminality</div>
+        <p class="they">French + fusion, but offline classification of a pre-segmented chunk.</p>
+        <p class="we">Streaming real-time endpointing + calibration + cost.</p>
+      </div>
+      <div class="diff gap">
+        <div class="vs">vs the field</div>
+        <p class="they">Survey: 72% of works don't compare to prior; ⅓ use no public corpus; nobody calibrates.</p>
+        <p class="we">A calibrated, comparable evaluation — a contribution in itself.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 04 METRICS -->
+<section id="metrics">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">04</span><h2>Metrics we measure on</h2></div>
+    <div class="tw">
+      <table class="mtable">
+        <thead><tr><th>Metric</th><th>Definition</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><span class="m">Cut-in rate</span></td><td class="d">FP / (FP+TN) — non-endpoints wrongly triggered (interruptions)</td><td><span class="r err">primary error ↓</span></td></tr>
+          <tr><td><span class="m">Miss rate</span></td><td class="d">FN / (TP+FN) — real turn-ends missed → added latency</td><td><span class="r err">error ↓</span></td></tr>
+          <tr><td><span class="m">F1 (shift)</span></td><td class="d">precision/recall harmonic mean on end-of-turn</td><td><span class="r">quality</span></td></tr>
+          <tr><td><span class="m">Endpoint latency</span></td><td class="d">ms from true end-of-turn to trigger; median + p90</td><td><span class="r speed">speed ↓</span></td></tr>
+          <tr><td><span class="m">Operating curve</span></td><td class="d">latency vs cut-in, swept over the cost ratio</td><td><span class="r star">headline (Pareto)</span></td></tr>
+          <tr><td><span class="m">Calibration (ECE)</span></td><td class="d">expected calibration error + reliability plot</td><td><span class="r star">our differentiator</span></td></tr>
+          <tr><td><span class="m">Efficiency</span></td><td class="d">ms/decision on CPU, params, no LLM</td><td><span class="r">vs heavy SOTA</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="headline">Headline claim = our optimal-stopping rule <b>Pareto-dominates</b> the baselines on latency vs cut-in, <b>plus</b> lower ECE (they're uncalibrated) and higher hard-case hold-rate.</p>
+  </div>
+</section>
+
+<!-- 05 BASELINES -->
+<section id="baselines">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">05</span><h2>Baselines (reproducible on one GPU)</h2></div>
+    <div class="bl">
+      <div class="row"><span class="name">VAP — field-standard hold/shift</span><span class="repo">github.com/ErikEkstedt/VAP</span><span class="desc">The natural first baseline; small, pretrained.</span></div>
+      <div class="row"><span class="name">Endpoint Anticipation — the cost/latency competitor</span><span class="repo">github.com/bloodraven66/EndpointAnticipation · + Full-Duplex-Bench</span><span class="desc">The system to beat on the cost/latency framing.</span></div>
+      <div class="row"><span class="name">French termClassif — French fusion reference</span><span class="repo">github.com/ina-foss/termClassif</span><span class="desc">Code + data; offline, French.</span></div>
+      <div class="row"><span class="name">Own ablations</span><span class="repo">acoustic-only · lexical-only · fusion+fixed-threshold · VAD+timeout</span><span class="desc">Fusion+fixed-threshold isolates the optimal-stopping gain; VAD+timeout is the incumbent.</span></div>
+      <div class="row"><span class="name">Benchmarks / data</span><span class="repo">FastTurn test set · Easy-Turn / smart-turn STurn-v3 (HF) · TurnGPT</span><span class="desc">Released turn-labelled sets + a text-only EOU-probability baseline.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 PLAN + CAVEATS -->
+<section id="plan">
+  <div class="wrap">
+    <div class="sec-head"><span class="sec-n">06</span><h2>Evaluation plan &amp; honest caveats</h2></div>
+    <div class="steps">
+      <div class="step"><div class="num">1</div><p>Sweep the cost ratio <code>C_cut / C_lat</code> → traces our operating curve.</p></div>
+      <div class="step"><div class="num">2</div><p>Plot latency-vs-cut-in for every baseline + ours; show Pareto domination.</p></div>
+      <div class="step"><div class="num">3</div><p>Reliability diagram + ECE, ours vs baselines (they report none).</p></div>
+      <div class="step"><div class="num">4</div><p>Per-category hold-rate on hard cases (spelling / number / date / hesitation).</p></div>
+      <div class="step"><div class="num">5</div><p>Report CPU ms/decision + params — efficiency vs LLM-based SOTA.</p></div>
+    </div>
+    <div class="caveat">
+      <div class="k">Say this plainly in the meeting</div>
+      <ul>
+        <li><b>Endpoint Anticipation is close</b> — it is genuinely cost-aware. Our edge is <b>lexical fusion + calibration + true sequential optimal stopping</b>, not "cost-awareness" alone.</li>
+        <li>FastTurn / JAL-Turn / EPA are <b>2026 pre-prints</b> — numbers may shift; cite as very recent.</li>
+        <li>Everything downstream needs the <b>labelled audio with t_end</b> — latency, the operating curve, and calibration all derive from it. Data is the gating dependency.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;width:100%">
+    <span>Novelty vs State of the Art · MSc brief</span>
+    <a href="https://github.com/jean-baptisteAZAN/EOUDetector">github.com/jean-baptisteAZAN/EOUDetector</a>
+  </div>
+</footer>
+
+</body>
+</html>
