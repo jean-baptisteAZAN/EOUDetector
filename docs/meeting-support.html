@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EOU — Meeting support</title>
+<style>
+  :root{
+    --bg:#0d1017; --bg2:#12161f; --bg3:#161c28;
+    --line:#232b3a; --line2:#2e3646;
+    --ink:#e9ecf3; --muted:#98a2b8; --faint:#6a7488;
+    --ac:#f4a63c; --lex:#3fd3c1; --fuse:#9a8cff; --veto:#ff6a6a; --ok:#4fd39a;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.6;-webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:46px 46px;background-position:center;}
+  body::before{content:"";position:fixed;inset:0;pointer-events:none;
+    background:radial-gradient(120% 80% at 50% -10%,rgba(154,140,255,.11),transparent 60%),
+               radial-gradient(90% 60% at 100% 0,rgba(63,211,193,.06),transparent 55%);}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 26px;position:relative}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--faint)}
+  h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.08}
+  a{color:inherit}
+
+  header{padding:72px 0 34px;border-bottom:1px solid var(--line)}
+  .dotrow{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--fuse);box-shadow:0 0 12px var(--fuse)}
+  h1{font-size:clamp(34px,6vw,62px)}
+  h1 .sem{color:var(--fuse)}
+  .sub{margin-top:18px;font-size:clamp(16px,2.3vw,21px);color:var(--muted);max-width:52ch;line-height:1.5}
+  .agenda{margin-top:26px;display:flex;flex-wrap:wrap;gap:10px}
+  .agenda a{font-family:var(--mono);font-size:12.5px;color:var(--muted);border:1px solid var(--line);border-radius:20px;padding:6px 14px;text-decoration:none}
+  .agenda a b{color:var(--faint);margin-right:6px}
+
+  section{padding:64px 0;border-bottom:1px solid var(--line)}
+  .kicker{font-family:var(--mono);font-size:12px;color:var(--faint);margin-bottom:10px}
+  h2{font-size:clamp(26px,3.8vw,38px)}
+  .lede{color:var(--muted);max-width:70ch;margin:16px 0 34px;font-size:16.5px}
+  .lede b{color:var(--ink)}
+
+  /* --- SOTA matrix --- */
+  .tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+  thead th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400;background:#0e1420;text-align:left;padding:12px 14px}
+  td{padding:12px 14px;border-top:1px solid var(--line);vertical-align:middle}
+  td.sys{font-weight:700} td .yr{color:var(--faint);font-weight:400;font-family:var(--mono);font-size:11px}
+  .yes{color:var(--ok);font-weight:700}.no{color:var(--veto);font-weight:700}.warn{color:var(--ac);font-weight:700}
+  td.small{color:var(--muted);font-family:var(--mono);font-size:12px}
+  tr.ours td{background:rgba(154,140,255,.08)} tr.ours td.sys{color:var(--fuse)} tr.ours{box-shadow:inset 3px 0 0 var(--fuse)}
+  .thesis{margin-top:26px;background:linear-gradient(180deg,var(--bg2),#0e1622);border:1px solid rgba(154,140,255,.42);border-radius:16px;padding:24px 26px}
+  .thesis .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fuse);margin-bottom:12px}
+  .thesis p{margin:0;font-size:clamp(17px,2.3vw,21px);font-weight:700;line-height:1.4}
+  .thesis .hi{color:var(--fuse)}
+
+  /* --- dataset fields --- */
+  .field{display:grid;grid-template-columns:230px 1fr;gap:22px;padding:16px 0;border-top:1px solid var(--line);align-items:start}
+  .field:first-of-type{border-top:0}
+  .field .f{font-family:var(--mono);font-size:13.5px;font-weight:700}
+  .field .f .b{display:block;font-weight:400;font-size:11px;color:var(--faint);margin-top:4px}
+  .field .why{color:var(--muted);font-size:15px}
+  .field .why .u{font-weight:700}
+  .f.lex .f-dot,.u.lex{color:var(--lex)} .f.ac .u,.f.ac{color:inherit}
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:5px;margin-left:8px;vertical-align:middle}
+  .tag.lex{color:var(--lex);background:rgba(63,211,193,.13)} .tag.ac{color:var(--ac);background:rgba(244,166,60,.13)}
+  .tag.dec{color:var(--fuse);background:rgba(154,140,255,.13)} .tag.lbl{color:var(--ok);background:rgba(79,211,154,.13)}
+  .proof{margin-top:26px;background:#0e1420;border:1px solid var(--line2);border-radius:13px;padding:18px 20px;font-family:var(--mono);font-size:12.5px;color:var(--muted);overflow-x:auto}
+  .proof .h{color:var(--faint);text-transform:uppercase;letter-spacing:.14em;font-size:10.5px;margin-bottom:10px}
+  .proof .p{color:var(--lex)} .proof .arrow{color:var(--faint)}
+  .gate{margin-top:18px;font-size:14px;color:var(--muted);border-left:2px solid var(--ok);padding:6px 0 6px 16px}
+  .gate b{color:var(--ink)}
+
+  /* --- levels --- */
+  .levels{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .lv{border:1px solid var(--line);border-radius:14px;padding:20px;background:var(--bg2);position:relative}
+  .lv .n{font-family:var(--mono);font-size:11px;color:var(--faint);letter-spacing:.1em}
+  .lv h3{font-size:16px;margin:8px 0 10px}
+  .lv p{margin:0;color:var(--muted);font-size:13.5px}
+  .lv .verdict{margin-top:12px;font-family:var(--mono);font-size:11.5px;font-weight:700}
+  .lv.cur{border-color:rgba(63,211,193,.4)} .lv.cur .verdict{color:var(--lex)}
+  .lv.pick{border-color:rgba(154,140,255,.55);box-shadow:0 0 0 1px rgba(154,140,255,.15)} .lv.pick .verdict{color:var(--fuse)}
+  .lv.later{border-color:rgba(255,106,106,.35)} .lv.later .verdict{color:var(--veto)}
+  .insight{margin-top:26px;background:linear-gradient(180deg,var(--bg2),#0e1622);border:1px solid rgba(154,140,255,.4);border-radius:16px;padding:24px 26px}
+  .insight .k{font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--fuse);margin-bottom:12px}
+  .insight p{margin:0;font-size:clamp(16px,2.2vw,20px);font-weight:700;line-height:1.42}
+  .insight p em{color:var(--fuse);font-style:normal}
+  .reasons{margin:22px 0 0;padding:0;list-style:none;display:grid;gap:2px}
+  .reasons li{padding:11px 0 11px 26px;position:relative;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+  .reasons li:first-child{border-top:0}
+  .reasons li::before{content:"→";position:absolute;left:0;color:var(--fuse);font-weight:800}
+  .reasons li b{color:var(--ink)}
+
+  /* --- status --- */
+  .status{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:13px;padding:18px}
+  .card .h{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+  .card.done .h{color:var(--ok)} .card.next .h{color:var(--fuse)}
+  .card ul{margin:0;padding:0;list-style:none}
+  .card li{padding:7px 0 7px 20px;position:relative;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
+  .card li:first-child{border-top:0}
+  .card.done li::before{content:"✓";position:absolute;left:0;color:var(--ok)}
+  .card.next li::before{content:"›";position:absolute;left:1px;color:var(--fuse);font-weight:800}
+  .card li b{color:var(--ink)}
+
+  footer{padding:40px 0 70px;color:var(--faint);font-family:var(--mono);font-size:12px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:18px 0 0;font-family:var(--mono);font-size:12px;color:var(--muted)}
+  .legend i{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:middle}
+  @media(max-width:820px){ .levels,.status{grid-template-columns:1fr} .field{grid-template-columns:1fr;gap:6px} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="dotrow"><span class="dot"></span><span class="eyebrow">MSc · progress review</span></div>
+    <h1>Towards <span class="sem">Semantically-Aware</span><br>End-of-Utterance Detection</h1>
+    <p class="sub">Knowing when a caller has finished — deciding it as a <b>cost</b>, learning it from a <b>real, auto-labelled</b> data source.</p>
+    <div class="agenda">
+      <a href="#sota"><b>01</b> Novelty &amp; positioning</a>
+      <a href="#gold"><b>02</b> The gold dataset</a>
+      <a href="#one"><b>03</b> One model vs pipelines</a>
+      <a href="#now"><b>04</b> Where we are</a>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--ac)"></i>acoustic</span>
+      <span><i style="background:var(--lex)"></i>lexical</span>
+      <span><i style="background:var(--fuse)"></i>decision / novelty</span>
+      <span><i style="background:var(--ok)"></i>labels</span>
+    </div>
+  </div>
+</header>
+
+<!-- 01 NOVELTY -->
+<section id="sota">
+  <div class="wrap">
+    <div class="kicker">01 · contribution</div>
+    <h2>Novelty — honestly, in a crowded field</h2>
+    <p class="lede">The ingredients all exist now — including LiveKit's turn-detector + its <b>eot-bench</b> (a public latency-vs-false-cutoff Pareto benchmark). Owning that is the strength of the framing. Here's what <b>is</b>, and what <b>isn't</b>, the contribution.</p>
+    <div class="tw">
+      <table>
+        <thead><tr><th>System</th><th>Ac + lex fusion</th><th>Decision</th><th>Calibrated</th><th>Cost model</th></tr></thead>
+        <tbody>
+          <tr><td class="sys">FastTurn / JAL-Turn <span class="yr">’26</span></td><td class="yes">✓ (LLM / cross-attn)</td><td class="small">argmax / fixed τ</td><td class="no">✗</td><td class="no">✗</td></tr>
+          <tr><td class="sys">LiveKit + eot-bench <span class="yr">’26</span></td><td class="no">✗ text-only (+ VAD)</td><td class="small">swept threshold → Pareto</td><td class="no">✗</td><td class="warn">⚠ empirical frontier</td></tr>
+          <tr><td class="sys">Endpoint Anticipation <span class="yr">’26</span></td><td class="no">✗ acoustic-only</td><td class="small">per-horizon θ</td><td class="no">✗</td><td class="warn">⚠ cost-aware</td></tr>
+          <tr class="ours"><td class="sys">Ours</td><td class="yes">✓ Smart Turn + CamemBERT</td><td class="small" style="color:var(--fuse)">cost-optimal stopping</td><td class="yes">✓ ECE</td><td class="yes">✓ explicit cost</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="note" style="margin:22px 0 0">
+      <div class="k">What is NOT the contribution (be honest)</div>
+      <p><b style="color:var(--ink)">Fusion</b> (FastTurn, JAL-Turn), the <b style="color:var(--ink)">Pareto operating curve</b> (eot-bench), <b style="color:var(--ink)">"beating LiveKit"</b>, and <b style="color:var(--ink)">"better on French"</b> — all taken or incremental. Don't pitch these. The field moved this month; the honest move is to scope the contribution precisely.</p>
+    </div>
+
+    <div class="thesis" style="margin-top:22px">
+      <div class="k">Our contribution · three things</div>
+      <p style="font-size:16px;font-weight:400;color:var(--muted);line-height:1.5;margin:0 0 4px">Not a new SOTA method — an applied + principled + resource contribution:</p>
+    </div>
+    <ul class="reasons">
+      <li><b>Calibrated, cost-sensitive optimal stopping.</b> Others sweep a threshold and never calibrate. We derive the stop from an explicit interruption-vs-latency <em style="color:var(--fuse);font-style:normal">cost</em> over a <em style="color:var(--fuse);font-style:normal">calibrated</em> fused (acoustic + lexical) probability — a principled operating point instead of an empirical one.</li>
+      <li><b>A French medical-telephony EOU benchmark, from real production calls.</b> eot-bench is generic/multilingual; ours exposes the <em style="color:var(--fuse);font-style:normal">dictation failure modes</em> (spelling, numbers, dates) generic models miss. A resource + domain analysis.</li>
+      <li><b>Weak-supervision auto-labelling from production</b> (resume-after-pause) — a scalable way to build EOU datasets with no manual annotation.</li>
+    </ul>
+
+    <div class="gate" style="border-color:var(--lex);margin-top:24px">
+      <b>Evaluation — one harness, two datasets.</b> <span style="color:var(--lex)">eot-bench</span> (Apache-2.0 + CC-BY-4.0) = the standard, comparable, French subset runnable <b style="color:var(--ink)">now</b>; our <span style="color:var(--lex)">gold FR-medical set</span> = same schema, same Pareto metrics (latency vs false-cutoff). The LiveKit <em>model</em> is license-restricted → we cite their published numbers, we don't run their weights.
+    </div>
+  </div>
+</section>
+
+<!-- 02 GOLD DATASET -->
+<section id="gold">
+  <div class="wrap">
+    <div class="kicker">02 · data</div>
+    <h2>The gold dataset — captured in prod</h2>
+    <p class="lede">Rather than synthetic data, we instrumented the production voice pipeline to log, per call, exactly the signals the model needs — <b>auto-labelled, at real volume, in real inference conditions</b>. Each field earns its place:</p>
+
+    <div class="field">
+      <div class="f lex">asr_partials<span class="b">the recognizing trajectory</span></div>
+      <div class="why"><span class="tag lex">lexical</span> The stream of interim ASR hypotheses (<code>bonjour → bonjour j'aimerais → …</code>). <span class="u">Real incomplete→complete sequences</span> — every partial is a natural "not-done" example, the final a "done". Richer than synthetic truncation, and it matches what the model sees live.</div>
+    </div>
+    <div class="field">
+      <div class="f">caller_text<span class="b">caller-only, raw ASR</span></div>
+      <div class="why"><span class="tag lex">lexical</span> The patient's words only — no agent echo. Clean, unformatted, exactly the inference input.</div>
+    </div>
+    <div class="field">
+      <div class="f">audio_ref + timestamps<span class="b">recording + pause/decision/reply</span></div>
+      <div class="why"><span class="tag ac">acoustic</span><span class="tag dec">decision</span> The recording pointer + per-turn timing. Unlocks the <span class="u">acoustic branch</span> (Smart Turn on the audio), the <span class="u">true end-of-turn &amp; latency</span> (from the waveform), and <span class="u">calibration</span>.</div>
+    </div>
+    <div class="field">
+      <div class="f">outcome<span class="b">resume-after-pause · was_interrupted</span></div>
+      <div class="why"><span class="tag lbl">labels</span> Did the caller continue after the pause? Was the agent cut off? These raw signals <span class="u">auto-derive the fini / pas_fini label + false-cut</span> — no manual annotation.</div>
+    </div>
+    <div class="field">
+      <div class="f">segmentation_timeout · interrupt counts<span class="b">current system behaviour</span></div>
+      <div class="why"><span class="tag dec">baseline</span> What the live VAD-timeout system decided — our <span class="u">incumbent baseline</span> to beat.</div>
+    </div>
+    <div class="field">
+      <div class="f">hardcase_tag<span class="b">spelling / number / date</span></div>
+      <div class="why"><span class="tag lbl">eval</span> Auto-tags the hard cases → <span class="u">per-category hold-rate</span> (the exact failures we target).</div>
+    </div>
+
+    <div class="proof">
+      <div class="h">Real capture — live test call, turn 0</div>
+      <span class="p">"bonjour"</span> <span class="arrow">→</span> <span class="p">"bonjour j'aimerais"</span> <span class="arrow">→</span> <span class="p">"bonjour j'aimerais pr"</span> <span class="arrow">→</span> <span class="p">"bonjour j'aimerais prendre un rendez vous"</span>
+      &nbsp;&nbsp;|&nbsp;&nbsp; ts, decision, audio_ref all captured.
+    </div>
+    <div class="gate"><b>GDPR-gated</b>: capture runs only for orgs with the <code>EOU_DATASET_CAPTURE</code> feature enabled (internal test orgs), default off.</div>
+  </div>
+</section>
+
+<!-- 03 ONE MODEL vs PIPELINES -->
+<section id="one">
+  <div class="wrap">
+    <div class="kicker">03 · architecture</div>
+    <h2>One model that does everything — or separate pipelines?</h2>
+    <p class="lede">A single end-to-end model that ingests audio+text and outputs the decision is tempting. But "specialised model" spans three levels, and the level matters.</p>
+    <div class="levels">
+      <div class="lv cur">
+        <div class="n">LEVEL 1</div><h3>Late fusion</h3>
+        <p>Two off-the-shelf / fine-tuned models (Smart Turn + CamemBERT), fused by rule/logistic on their scores.</p>
+        <div class="verdict">current · cheap · interpretable</div>
+      </div>
+      <div class="lv pick">
+        <div class="n">LEVEL 2</div><h3>Learned joint head</h3>
+        <p>A small head trained on our labels over the two <b>frozen</b> encoders' embeddings. Only the head learns.</p>
+        <div class="verdict">the experiment to run</div>
+      </div>
+      <div class="lv later">
+        <div class="n">LEVEL 3</div><h3>Full end-to-end joint</h3>
+        <p>Train both encoders jointly — this is exactly FastTurn / JAL-Turn.</p>
+        <div class="verdict">future work, not now</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="k">Key insight</div>
+      <p>Our novelty is in the <em>decision layer</em> (optimal stopping + calibration), <em>orthogonal to the representation</em>. Whatever produces the probability — late fusion, a joint head, or a full joint model — the calibrated cost-sensitive decision sits on top. A monolithic model doesn't <em>add</em> novelty; it just competes with the SOTA on their turf.</p>
+    </div>
+    <ul class="reasons">
+      <li><b>Level 3 = SOTA turf</b> — a from-scratch joint model re-does FastTurn/JAL-Turn with far less data → less novel, not more.</li>
+      <li><b>Data-hungry &amp; timeline risk</b> — end-to-end joint needs thousands of aligned examples + GPU; we have 4 weeks for methodology + eval.</li>
+      <li><b>Modular wins operationally</b> — each branch swappable &amp; independently improvable, interpretable, runs on CPU without an LLM (our efficiency angle).</li>
+      <li><b>Level 2 is the real test</b> — "does a specialised model beat late fusion?" as the learned-fusion ablation, feasible with limited data, without touching the novelty.</li>
+      <li><b>The data pipeline enables Level 3 later</b> — it accumulates exactly the aligned, labelled examples a future joint model would need.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- 04 STATUS -->
+<section id="now">
+  <div class="wrap">
+    <div class="kicker">04 · status</div>
+    <h2>Where we are &amp; next</h2>
+    <p class="lede">Calendar: end of week 3. We invested in a <b>real auto-labelled data source</b> (the prod pipeline) instead of synthetic — a deliberate ~1-week trade that makes the evaluation far more credible. Everything else is de-risked and ready.</p>
+
+    <div class="thesis" style="border-color:rgba(79,211,154,.42);margin:0 0 24px">
+      <div class="k" style="color:var(--ok)">First result · semantic baseline (text-only)</div>
+      <p style="font-size:15.5px;font-weight:400;color:var(--muted);line-height:1.5;margin:0 0 4px">
+        Lexical <code style="font-family:var(--mono);color:var(--lex)">fini/pas_fini</code> dataset from <b style="color:var(--ink)">549 historical calls · 2 571 caller turns</b>; first baseline on held-out calls — no audio needed:
+      </p>
+      <div class="tw" style="margin-top:16px">
+        <table>
+          <thead><tr><th>Model</th><th>Accuracy</th><th>F1 (fini)</th><th>Cut-in ↓</th><th>Miss</th></tr></thead>
+          <tbody>
+            <tr><td class="sys">FR heuristic veto <span class="yr">floor</span></td><td class="small">62.9%</td><td class="small">70.9%</td><td class="small">65.0%</td><td class="small">9.0%</td></tr>
+            <tr><td class="sys">TF-IDF + LogReg</td><td class="small">81.1%</td><td class="small">81.8%</td><td class="small">23.1%</td><td class="small">14.7%</td></tr>
+            <tr class="ours"><td class="sys" style="color:var(--ok)">CamemBERT (fine-tuned)</td><td class="small" style="color:var(--ink)">89.0%</td><td class="small" style="color:var(--ink)">89.0%</td><td class="small" style="color:var(--ink)">12.1%</td><td class="small">9.9%</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="font-size:13.5px;font-weight:400;color:var(--faint);line-height:1.5;margin:14px 0 0">
+        Clean progression 63% → 81% → <b style="color:var(--muted)">89%</b> accuracy; the fine-tuned model cuts the interruption rate 65% → <b style="color:var(--muted)">12%</b>.
+      </p>
+    </div>
+
+    <div class="note" style="margin:0 0 24px">
+      <div class="k">Limitations · we likely overfit — read 89% as a signal, not the number</div>
+      <ul style="margin:0;padding-left:18px;color:var(--muted);font-size:14px;line-height:1.65">
+        <li><b style="color:var(--ink)">Train/val divergence</b> — training loss keeps falling (0.33 → 0.22) but validation loss bottoms at epoch 2 then rises (0.334 → 0.354): a mild overfit. Best-epoch is kept, but the margin is thin.</li>
+        <li><b style="color:var(--ink)">Length shortcut</b> — prefixes are systematically shorter than full turns, so the model can partly cheat on "short = not done" instead of learning semantics. Needs length-controlled negatives + eval.</li>
+        <li><b style="color:var(--ink)">Narrow data</b> — ~550 calls, single domain → the held-out score is in-distribution and optimistic; cross-domain / real conditions would drop it.</li>
+        <li><b style="color:var(--ink)">Weak, circular labels</b> — labels = where the current system ended the turn, so the model partly learns to predict <em>that system</em>, not ground-truth completeness.</li>
+      </ul>
+      <p style="margin:12px 0 0;color:var(--faint);font-size:13.5px;line-height:1.5">The truer, harder evaluation comes from the <b style="color:var(--muted)">gold audio labels</b> (accumulating) + regularization + harder negatives. We expect the real number to be lower — and that's fine: this is a first signal that the lexical signal is learnable.</p>
+    </div>
+
+    <div class="status">
+      <div class="card done">
+        <div class="h">Done</div>
+        <ul>
+          <li><b>Novelty scoped honestly</b> (calibrated cost decision + FR-medical benchmark + weak-sup labelling)</li>
+          <li><b>eot-bench recon</b> — licences cleared (Apache/CC-BY), integration path + French subset</li>
+          <li><b>Prod data pipeline</b> shipped + validated end-to-end, GDPR-gated</li>
+          <li><b>Export tooling</b> ready (psql → JSONL + audio)</li>
+          <li><b>Lexical dataset</b> from 549 historical calls (2 571 turns)</li>
+          <li><b>Semantic model — CamemBERT fine-tuned: 89% F1, cut-in 12%</b></li>
+        </ul>
+      </div>
+      <div class="card next">
+        <div class="h">Next (catch-up)</div>
+        <ul>
+          <li><b>Adopt eot-bench</b> (Apache/CC-BY) → run on the French subset <b>now</b>, no gold needed</li>
+          <li><b>Smart Turn adapter</b> (already in eot-bench) = acoustic baseline; write our fused calibrated adapter</li>
+          <li><b>Fusion + calibration + optimal stopping</b> → operating curve on eot-bench</li>
+          <li><b>Package gold FR-medical</b> in the same schema → domain eval as volume lands</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">Semantically-Aware EOU Detection · progress review · github.com/jean-baptisteAZAN/EOUDetector</div>
+</footer>
+
+</body>
+</html>
