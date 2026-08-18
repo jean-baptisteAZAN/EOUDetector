@@ -33,15 +33,35 @@ stays final-only and is untouched).
 ## Run the demo
 
 ```bash
-# Replay a wav as a real-time stream (Azure ASR + Smart Turn):
+# Replay a wav as a real-time stream (Azure ASR + Smart Turn + CamemBERT):
 python demo.py --wav path/to/clip.wav
 
 # Live microphone:
 python demo.py --mic
 
+# Rule-based lexical instead of the fine-tuned CamemBERT:
+python demo.py --mic --lexical rules
+
 # Fully offline smoke (no creds, no models):
-python demo.py --wav path/to/clip.wav --no-realtime --asr scripted --acoustic stub
+python demo.py --wav path/to/clip.wav --no-realtime --asr scripted --acoustic stub --lexical rules
 ```
+
+The lexical branch defaults to the fine-tuned **CamemBERT** (`models/camembert-eou`,
+the model behind the reported fusion result), guarded by the French heuristic veto
+for the hard incomplete classes; pass `--lexical rules` for the pure rule engine.
+
+## Live web front
+
+A one-page browser UI to record from the mic and watch the pipeline live
+(partial transcript, `p_ac` / `p_lex` / `p_eou` bars, per-pause ENDPOINT/WAIT):
+
+```bash
+export $(grep -v '^#' .env | xargs)     # load Azure creds (needed for the text branch)
+python webdemo.py                        # then open http://127.0.0.1:8970
+```
+
+It drives the exact same `EouSession` as the CLI demo and the production path
+(Smart Turn + CamemBERT → fusion → endpoint); heavy models load once at startup.
 
 Each line logs: `p_ac`, `p_lex`, `p_eou`, decision, required/observed silence,
 and **decision latency**.

@@ -10,7 +10,7 @@ from eou_detector.asr.azure_asr import AzureSpeechASR
 from eou_detector.asr.scripted_asr import ScriptedASR
 from eou_detector.eou.acoustic import (
     SmartTurnV3, StubAcousticEOU, find_smart_turn_model)
-from eou_detector.eou.lexical import FrenchSemanticEOU
+from eou_detector.eou.lexical import FrenchSemanticEOU, CamembertLexicalEOU
 from eou_detector.fusion.rules import RuleFusion
 from eou_detector.endpoint.controller import EndpointController
 from eou_detector.orchestrator import Orchestrator
@@ -49,8 +49,12 @@ def build_components(args, settings):
                   "(run: python scripts/fetch_models.py); using stub acoustic")
         acoustic = StubAcousticEOU(0.5)
 
-    lexical = FrenchSemanticEOU()
-    print("[info] lexical: French semantic rules (homemade, prod-safe)")
+    if args.lexical == "camembert":
+        lexical = CamembertLexicalEOU()
+        print("[info] lexical: CamemBERT fine-tuned (models/camembert-eou)")
+    else:
+        lexical = FrenchSemanticEOU()
+        print("[info] lexical: French semantic rules (homemade, prod-safe)")
     fusion = RuleFusion(settings)
     endpoint = EndpointController(settings)
     return source, vad, asr, acoustic, lexical, fusion, endpoint
@@ -65,6 +69,9 @@ def main():
                     help="replay wav as fast as possible (no pacing)")
     ap.add_argument("--asr", choices=["azure", "scripted"], default="azure")
     ap.add_argument("--acoustic", choices=["smart_turn", "stub"], default="smart_turn")
+    ap.add_argument("--lexical", choices=["camembert", "rules"], default="camembert",
+                    help="lexical branch: fine-tuned CamemBERT (real POC, default) "
+                         "or the homemade French rules")
     ap.add_argument("--smart-turn-onnx", default=None,
                     help="explicit Smart Turn ONNX path "
                          "(default: auto-discover best variant in models/)")

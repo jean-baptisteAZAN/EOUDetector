@@ -20,7 +20,7 @@ LexicalEOU interface (this implementation is French-only by design for now).
 """
 import abc
 import re
-from typing import Tuple
+from typing import Optional, Tuple
 
 from eou_detector.types import LexResult
 
@@ -176,3 +176,57 @@ class FrenchSemanticEOU(LexicalEOU):
             score -= 0.10
         score = min(0.98, max(0.02, score))
         return LexResult(score, False, "leaning_complete")
+
+
+class CamembertLexicalEOU(LexicalEOU):
+    """Fine-tuned CamemBERT completeness classifier -- the lexical model behind
+    the reported fusion result -- optionally guarded by the French heuristic veto
+    for the hard incomplete classes (spelling, open numbers, hesitation, trailing
+    function words).
+
+    ``p_lex`` = model P(class 'fini' | latest partial transcript). Weights live in
+    ``models/camembert-eou`` (config ``id2label {0: pas_fini, 1: fini}``). Torch and
+    transformers are imported lazily so the rule-based path stays dependency-light.
+    ``predict`` is called off the event loop (in an executor) by ``EouSession``.
+    """
+
+    def __init__(self, model_dir: str = "models/camembert-eou",
+                 veto_guard: bool = True, max_len: int = 64,
+                 device: Optional[str] = None):
+        import torch
+        from transformers import (AutoModelForSequenceClassification,
+                                  AutoTokenizer)
+        self._torch = torch
+        self._tok = AutoTokenizer.from_pretrained(model_dir)
+        self._model = AutoModelForSequenceClassification.from_pretrained(model_dir)
+        self._model.eval()
+        self._device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+        self._model.to(self._device)
+        self._max_len = max_len
+        self._pos = self._positive_index()
+        # Guard reuses the deterministic French rules for the three false-positive
+        # classes the classifier can miss on very short partials.
+        self._guard = FrenchSemanticEOU() if veto_guard else None
+
+    def _positive_index(self) -> int:
+        id2label = getattr(self._model.config, "id2label", None) or {}
+        for k, v in id2label.items():
+            if str(v).strip().lower() in ("fini", "complete", "eot", "end"):
+                return int(k)
+        return 1 if getattr(self._model.config, "num_labels", 2) > 1 else 0
+
+    def predict(self, text: str) -> LexResult:
+        raw = (text or "").strip()
+        if not raw:
+            return LexResult(0.5, False, "empty")
+        if self._guard is not None:
+            g = self._guard.predict(raw)
+            if g.veto:
+                return LexResult(g.p_lex, True, f"veto:{g.reason}")
+        enc = self._tok(raw, truncation=True, max_length=self._max_len,
+                        return_tensors="pt")
+        enc = {k: v.to(self._device) for k, v in enc.items()}
+        with self._torch.no_grad():
+            logits = self._model(**enc).logits[0]
+            p = self._torch.softmax(logits, dim=-1)[self._pos].item()
+        return LexResult(float(p), False, "camembert")

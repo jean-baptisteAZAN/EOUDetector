@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EOU — live demo</title>
+<style>
+  :root{--audio:#e08a1e;--texte:#0f9d8f;--fusion:#5b54d6;--line:#e4e4e7;--ink:#1a1a1a;--mut:#666}
+  *{box-sizing:border-box}
+  body{max-width:720px;margin:0 auto;padding:32px 20px 80px;
+    font:15px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;color:var(--ink)}
+  h1{font-size:19px;font-weight:600;margin:0 0 2px}
+  .sub{color:var(--mut);font-size:13px;margin:0 0 20px}
+  .row{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+  button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:10px 20px;cursor:pointer;color:#fff;background:#1a1a1a}
+  button.rec{background:#c8322b}
+  button:disabled{opacity:.4;cursor:default}
+  .dot{width:9px;height:9px;border-radius:50%;background:#bbb}
+  .dot.on{background:#c8322b;box-shadow:0 0 0 4px rgba(200,50,43,.18)}
+  .status{color:var(--mut);font-size:13px}
+  .transcript{border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-height:52px;
+    font-size:16px;margin-bottom:20px;background:#fafafa}
+  .transcript .ph{color:#aaa}
+  .bars{display:grid;gap:10px;margin-bottom:22px}
+  .bar{display:grid;grid-template-columns:64px 1fr 46px;align-items:center;gap:10px}
+  .bar .lab{font-size:12px;color:var(--mut)}
+  .track{height:14px;background:#f0f0f0;border-radius:7px;overflow:hidden}
+  .fill{height:100%;width:0;border-radius:7px;transition:width .12s linear}
+  .bar .val{font-variant-numeric:tabular-nums;font-size:13px;text-align:right;color:#333}
+  h2{font-size:13px;font-weight:600;color:var(--mut);text-transform:uppercase;letter-spacing:.05em;margin:0 0 8px}
+  .log{border:1px solid var(--line);border-radius:8px;overflow:hidden}
+  .ev{display:grid;grid-template-columns:72px 1fr auto;gap:10px;padding:8px 12px;border-top:1px solid #f0f0f0;font-size:13px;align-items:baseline}
+  .ev:first-child{border-top:0}
+  .badge{font-weight:600;font-size:11px;padding:2px 8px;border-radius:5px}
+  .badge.ENDPOINT{background:#0f9d8f;color:#fff}
+  .badge.WAIT{background:#eee;color:#555}
+  .ev .meta{color:var(--mut);font-variant-numeric:tabular-nums}
+  .ev .reason{color:#999;font-size:12px}
+  .empty{padding:16px;color:#aaa;font-size:13px}
+  .warn{background:#fff6e5;border:1px solid #f0d9a8;color:#8a6d1f;padding:8px 12px;border-radius:8px;font-size:13px;margin-bottom:16px;display:none}
+</style>
+</head>
+<body>
+<h1>End-of-utterance detection — live demo</h1>
+<p class="sub">Browser mic → VAD → Smart Turn (audio) + CamemBERT (text) → fusion → decision. Same core as the POC. Speech is French (fr-FR).</p>
+
+<div id="warn" class="warn"></div>
+
+<div class="row">
+  <button id="btn">Record</button>
+  <span id="dot" class="dot"></span>
+  <span id="status" class="status">ready</span>
+</div>
+
+<div class="transcript"><span id="tr" class="ph">The partial transcript will appear here as you speak…</span></div>
+
+<div class="bars">
+  <div class="bar"><span class="lab">audio</span><div class="track"><div id="f_ac" class="fill" style="background:var(--audio)"></div></div><span id="v_ac" class="val">—</span></div>
+  <div class="bar"><span class="lab">text</span><div class="track"><div id="f_lex" class="fill" style="background:var(--texte)"></div></div><span id="v_lex" class="val">—</span></div>
+  <div class="bar"><span class="lab">fusion</span><div class="track"><div id="f_eou" class="fill" style="background:var(--fusion)"></div></div><span id="v_eou" class="val">—</span></div>
+</div>
+
+<h2>Decisions (at each micro-pause)</h2>
+<div class="log" id="log"><div class="empty">No decision yet. Speak, then pause.</div></div>
+
+<script>
+const $ = id => document.getElementById(id);
+let ws, ctx, node, stream, recording = false, logEmpty = true;
+
+function setBars(ac, lex, eou){
+  const set = (f,v,x)=>{ $(f).style.width=(x*100).toFixed(0)+'%'; $(v).textContent=x.toFixed(2); };
+  set('f_ac','v_ac',ac); set('f_lex','v_lex',lex); set('f_eou','v_eou',eou);
+}
+
+function addDecision(d){
+  if(logEmpty){ $('log').innerHTML=''; logEmpty=false; }
+  const el = document.createElement('div');
+  el.className = 'ev';
+  el.innerHTML = `<span class="badge ${d.decision}">${d.decision}</span>`
+    + `<span class="reason">${d.reason}${d.lex_reason?' · '+d.lex_reason:''}</span>`
+    + `<span class="meta">sil ${Math.round(d.silence_ms)}ms · lat ${Math.round(d.latency_ms)}ms</span>`;
+  $('log').prepend(el);
+  setBars(d.p_ac, d.p_lex, d.p_eou);
+}
+
+function downsample(buf, inRate, outRate){
+  if(outRate === inRate) return buf;
+  const ratio = inRate / outRate, out = new Float32Array(Math.floor(buf.length / ratio));
+  for(let i=0;i<out.length;i++) out[i] = buf[Math.floor(i*ratio)];
+  return out;
+}
+function toInt16(f32){
+  const i16 = new Int16Array(f32.length);
+  for(let i=0;i<f32.length;i++){ let s=Math.max(-1,Math.min(1,f32[i])); i16[i]=s<0?s*0x8000:s*0x7fff; }
+  return i16;
+}
+
+async function start(){
+  ws = new WebSocket((location.protocol==='https:'?'wss':'ws')+'://'+location.host+'/ws');
+  ws.binaryType = 'arraybuffer';
+  ws.onmessage = ev => {
+    const m = JSON.parse(ev.data);
+    if(m.type==='hello'){
+      $('status').textContent = 'audio: '+m.acoustic+' · ASR: '+m.asr;
+      if(m.asr==='disabled'){ const w=$('warn'); w.style.display='block';
+        w.textContent="Azure ASR disabled (no credentials): the text branch will stay empty. Set AZURE_STT_API_KEY / AZURE_STT_REGION in .env."; }
+    } else if(m.type==='partial'){
+      $('tr').className=''; $('tr').textContent = m.text || '…';
+    } else if(m.type==='decision'){
+      addDecision(m);
+    }
+  };
+  ws.onclose = ()=>{ if(recording) stop(); };
+  await new Promise(r=>{ ws.onopen=r; });
+
+  stream = await navigator.mediaDevices.getUserMedia({audio:{channelCount:1,echoCancellation:true,noiseSuppression:true}});
+  try { ctx = new AudioContext({sampleRate:16000}); } catch(e){ ctx = new AudioContext(); }
+  const src = ctx.createMediaStreamSource(stream);
+  node = ctx.createScriptProcessor(2048,1,1);
+  src.connect(node); node.connect(ctx.destination);
+  node.onaudioprocess = e => {
+    if(!recording || ws.readyState!==1) return;
+    const f = downsample(e.inputBuffer.getChannelData(0), ctx.sampleRate, 16000);
+    ws.send(toInt16(f).buffer);
+  };
+  recording = true;
+  $('btn').textContent='Stop'; $('btn').classList.add('rec');
+  $('dot').classList.add('on'); $('status').textContent='recording…';
+}
+
+function stop(){
+  recording = false;
+  try{ node && node.disconnect(); }catch(e){}
+  try{ ctx && ctx.close(); }catch(e){}
+  try{ stream && stream.getTracks().forEach(t=>t.stop()); }catch(e){}
+  try{ if(ws && ws.readyState===1){ ws.send('stop'); ws.close(); } }catch(e){}
+  $('btn').textContent='Record'; $('btn').classList.remove('rec');
+  $('dot').classList.remove('on'); $('status').textContent='stopped';
+}
+
+$('btn').onclick = ()=>{ recording ? stop() : start().catch(err=>{ $('status').textContent='error: '+err.message; }); };
+</script>
+</body>
+</html>

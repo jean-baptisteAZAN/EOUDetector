@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corpus Index — Semantically-Aware End-of-Utterance Detection</title>
+<style>
+  body{max-width:820px;margin:0 auto;padding:48px 24px 96px;
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    color:#1a1a1a;background:#fff;}
+  h1{font-size:24px;font-weight:600;line-height:1.3;margin:0 0 4px}
+  h2{font-size:15px;font-weight:600;margin:38px 0 10px;padding-bottom:6px;border-bottom:1px solid #e2e2e2}
+  a{color:#1a4fd6;text-decoration:none} a:hover{text-decoration:underline}
+  p{margin:0 0 14px}
+  .meta{color:#555;font-size:14px;margin:0 0 22px}
+  .meta span{margin-right:18px}
+  .lead{color:#333}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  td{padding:5px 12px 5px 0;vertical-align:top;border-top:1px solid #f0f0f0}
+  tr:first-child td{border-top:0}
+  td.file{white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  td.desc{color:#555}
+  .note{font-size:14px;color:#555;background:#f7f7f7;border:1px solid #e2e2e2;border-radius:6px;padding:14px 16px;margin-top:12px}
+  footer{margin-top:48px;color:#999;font-size:13px;border-top:1px solid #e2e2e2;padding-top:16px}
+</style>
+</head>
+<body>
+
+<h1>Towards Semantically-Aware End-of-Utterance Detection for Conversational AI Systems</h1>
+<p class="meta">
+  <span>Jean-Baptiste Azan</span>
+  <span>Supervisor: Palani</span>
+  <span>MSc project corpus, August 2026</span>
+</p>
+
+<p class="lead">Real-time detection of when a caller has finished speaking, for a French medical voice agent,
+by fusing an acoustic signal (Smart Turn v3) and a lexical signal (CamemBERT) over a voice-activity gate,
+with a calibrated, cost-sensitive endpoint decision. Fusing audio and text raises the per-span accuracy
+score from 0.814 to 0.897 (improvement 0.083, 95% confidence interval [0.063, 0.104], p &lt; 0.0001,
+clustered bootstrap by call). Evaluation uses LiveKit's public eot-bench dataset; the production data is
+the in-domain validation set.</p>
+
+<h2>Dissertation and results</h2>
+<table>
+  <tr><td class="file"><a href="docs/thesis-draft.md">docs/thesis-draft.md</a></td><td class="desc">Dissertation draft: methodology, related work, experiments, results, discussion.</td></tr>
+  <tr><td class="file"><a href="docs/results.html">docs/results.html</a></td><td class="desc">Results report: fusion, calibration, cost-sensitive operating points, limitations.</td></tr>
+  <tr><td class="file"><a href="docs/reproduce.md">docs/reproduce.md</a></td><td class="desc">Step-by-step reproduction of every result.</td></tr>
+</table>
+
+<h2>Source code — evaluation and method</h2>
+<table>
+  <tr><td class="file"><a href="eou_detector/eval/eot_fusion_adapter.py">eot_fusion_adapter.py</a></td><td class="desc">Benchmark adapter fusing acoustic + lexical into an end-of-turn probability.</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/indist_fusion_camembert.py">indist_fusion_camembert.py</a></td><td class="desc">Main fusion experiment (CamemBERT embeddings), AUC 0.900.</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/indist_fusion.py">indist_fusion.py</a></td><td class="desc">Fusion with a TF-IDF lexical baseline (AUC 0.876).</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/calibration_study.py">calibration_study.py</a></td><td class="desc">Calibration analysis across the leaderboard (Expected Calibration Error).</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/decision_layer.py">decision_layer.py</a></td><td class="desc">Calibration plus cost-sensitive operating-point selection.</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/sequential_stopping.py">sequential_stopping.py</a></td><td class="desc">Time-aware threshold experiment (reported negative result).</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/gold_to_eotbench.py">gold_to_eotbench.py</a></td><td class="desc">Converts the production export into the benchmark schema for in-domain validation.</td></tr>
+</table>
+
+<h2>Source code — dataset and lexical model</h2>
+<table>
+  <tr><td class="file"><a href="eou_detector/dataset/build_lexical_dataset.py">build_lexical_dataset.py</a></td><td class="desc">Builds the fini/pas_fini lexical dataset from transcripts.</td></tr>
+  <tr><td class="file"><a href="eou_detector/dataset/train_camembert.py">train_camembert.py</a></td><td class="desc">Fine-tunes CamemBERT as the in-domain lexical model.</td></tr>
+  <tr><td class="file"><a href="eou_detector/dataset/baselines.py">baselines.py</a></td><td class="desc">Heuristic and TF-IDF lexical baselines.</td></tr>
+  <tr><td class="file"><a href="notebooks/camembert_eou_finetune.ipynb">camembert_eou_finetune.ipynb</a></td><td class="desc">CamemBERT fine-tuning notebook (Colab).</td></tr>
+</table>
+
+<h2>Source code — real-time pipeline</h2>
+<table>
+  <tr><td class="file"><a href="eou_detector/orchestrator.py">orchestrator.py</a></td><td class="desc">Async orchestrator: VAD to acoustic + lexical to fusion to endpoint.</td></tr>
+  <tr><td class="file"><a href="eou_detector/vad/silero_vad.py">vad/silero_vad.py</a></td><td class="desc">Silero voice-activity gate.</td></tr>
+  <tr><td class="file"><a href="eou_detector/eou/acoustic.py">eou/acoustic.py</a>, <a href="eou_detector/eou/lexical.py">lexical.py</a></td><td class="desc">Acoustic (Smart Turn) and lexical (CamemBERT + heuristic veto) branches.</td></tr>
+  <tr><td class="file"><a href="eou_detector/asr/azure_asr.py">asr/azure_asr.py</a></td><td class="desc">Azure Speech recognition with partial results.</td></tr>
+  <tr><td class="file"><a href="eou_detector/fusion/rules.py">fusion/rules.py</a>, <a href="eou_detector/fusion/logistic.py">logistic.py</a></td><td class="desc">Rule-based and learned logistic fusion.</td></tr>
+  <tr><td class="file"><a href="eou_detector/endpoint/controller.py">endpoint/controller.py</a></td><td class="desc">Dynamic-silence endpoint controller.</td></tr>
+  <tr><td class="file"><a href="demo.py">demo.py</a>, <a href="README.md">README.md</a>, <a href="requirements.txt">requirements.txt</a></td><td class="desc">Demo entry point, readme, dependencies.</td></tr>
+  <tr><td class="file"><a href="tests/">tests/</a>, <a href="scripts/">scripts/</a></td><td class="desc">Unit tests; production data-export and model-download scripts.</td></tr>
+</table>
+
+<h2>Design, planning and research</h2>
+<table>
+  <tr><td class="file"><a href="docs/superpowers/specs/2026-06-26-semantic-eou-detector-design.md">design spec</a></td><td class="desc">Design specification: architecture, interfaces, decisions.</td></tr>
+  <tr><td class="file"><a href="docs/superpowers/plans/2026-06-26-semantic-eou-detector.md">implementation plan</a></td><td class="desc">Task breakdown.</td></tr>
+  <tr><td class="file"><a href="docs/Project_Timeline_EOU_revised.docx">Project_Timeline_EOU_revised.docx</a></td><td class="desc">Project timeline and metrics tracker.</td></tr>
+  <tr><td class="file"><a href="docs/novelty-vs-sota.html">novelty-vs-sota.html</a></td><td class="desc">Positioning versus the 2026 state of the art.</td></tr>
+  <tr><td class="file"><a href="docs/architecture.html">architecture.html</a></td><td class="desc">Architecture and data-flow explainer.</td></tr>
+  <tr><td class="file"><a href="docs/prod-logging-ticket.html">prod-logging-ticket.html</a></td><td class="desc">Engineering ticket for the production data-capture instrumentation.</td></tr>
+</table>
+
+<h2>Note on data</h2>
+<div class="note">The corpus contains no patient data. The production calls (audio and transcripts) are personal
+medical data and are excluded for data-protection reasons; the capture pipeline is feature-flagged to
+internal test organisations. Included instead: the dataset-generation code and all evaluation on the
+public LiveKit eot-bench dataset (CC-BY-4.0). The eot-bench harness is a separate open-source repository
+referenced in <a href="docs/reproduce.md">reproduce.md</a>.</div>
+
+<footer>Corpus — Semantically-Aware End-of-Utterance Detection — Jean-Baptiste Azan</footer>
+
+</body>
+</html>
