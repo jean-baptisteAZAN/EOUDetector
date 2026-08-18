@@ -56,6 +56,7 @@ the in-domain validation set.</p>
   <tr><td class="file"><a href="eou_detector/eval/decision_layer.py">decision_layer.py</a></td><td class="desc">Calibration plus cost-sensitive operating-point selection.</td></tr>
   <tr><td class="file"><a href="eou_detector/eval/sequential_stopping.py">sequential_stopping.py</a></td><td class="desc">Time-aware threshold experiment (reported negative result).</td></tr>
   <tr><td class="file"><a href="eou_detector/eval/gold_to_eotbench.py">gold_to_eotbench.py</a></td><td class="desc">Converts the production export into the benchmark schema for in-domain validation.</td></tr>
+  <tr><td class="file"><a href="eval/harness.py">eval/harness.py</a>, <a href="eval/metrics.py">metrics.py</a></td><td class="desc">Local clip-based eval harness: accuracy, false cut / miss rate, median and p90 latency.</td></tr>
 </table>
 
 <h2>Source code — dataset and lexical model</h2>
@@ -74,7 +75,8 @@ the in-domain validation set.</p>
   <tr><td class="file"><a href="eou_detector/asr/azure_asr.py">asr/azure_asr.py</a></td><td class="desc">Azure Speech recognition with partial results.</td></tr>
   <tr><td class="file"><a href="eou_detector/fusion/rules.py">fusion/rules.py</a>, <a href="eou_detector/fusion/logistic.py">logistic.py</a></td><td class="desc">Rule-based and learned logistic fusion.</td></tr>
   <tr><td class="file"><a href="eou_detector/endpoint/controller.py">endpoint/controller.py</a></td><td class="desc">Dynamic-silence endpoint controller.</td></tr>
-  <tr><td class="file"><a href="demo.py">demo.py</a>, <a href="README.md">README.md</a>, <a href="requirements.txt">requirements.txt</a></td><td class="desc">Demo entry point, readme, dependencies.</td></tr>
+  <tr><td class="file"><a href="webdemo.py">webdemo.py</a>, <a href="web/index.html">web/index.html</a></td><td class="desc">Live browser demo: record from the mic and watch p_ac / p_lex / p_eou and ENDPOINT/WAIT at each pause (same EouSession core).</td></tr>
+  <tr><td class="file"><a href="demo.py">demo.py</a>, <a href="README.md">README.md</a>, <a href="requirements.txt">requirements.txt</a>, <a href="LICENSE">LICENSE</a></td><td class="desc">CLI demo entry point, readme, dependencies, licence.</td></tr>
   <tr><td class="file"><a href="tests/">tests/</a>, <a href="scripts/">scripts/</a></td><td class="desc">Unit tests; production data-export and model-download scripts.</td></tr>
 </table>
 
