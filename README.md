@@ -6,6 +6,11 @@ heuristic veto) on top of a Silero VAD gate, behind swappable interfaces. Built
 to integrate with the CareCallHouseMade NestJS stack (reuses its Azure Speech
 credentials and audio format).
 
+**Abbreviations.** EOU = End-of-Utterance · VAD = Voice Activity Detection ·
+ASR = Automatic Speech Recognition · STT = Speech-to-Text · PCM = Pulse-Code Modulation ·
+ONNX = Open Neural Network Exchange · POC = Proof of Concept · CLI = Command-Line Interface ·
+UI = User Interface · FR / fr-FR = French (language code).
+
 ## Install
 
 ```bash

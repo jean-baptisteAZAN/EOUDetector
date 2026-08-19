@@ -4,6 +4,11 @@ All experiments run through the LiveKit **eot-bench** harness on the public Fren
 subset (no gold data / no PHI required). Every lexical/fusion number is k-fold
 (split by call id, no leakage).
 
+**Abbreviations.** AUC = Area Under the ROC (Receiver Operating Characteristic) Curve ·
+ECE = Expected Calibration Error · TF-IDF = Term Frequency–Inverse Document Frequency ·
+k-fold = k-fold cross-validation · PHI = Protected Health Information · HF = Hugging Face ·
+JSONL = JSON Lines · CC-BY-4.0 = Creative Commons Attribution 4.0.
+
 ## Setup
 
 ```bash
@@ -20,7 +25,7 @@ pip install onnxruntime transformers torch soundfile "datasets>=3.2"
 export HF_TOKEN=hf_...        # eot-bench-data is CC-BY-4.0
 ```
 
-`eot-harness` is the CLI. Set `SS=eot-bench/output/livekit__eot-bench-data__validation__min_silence_100ms/fr`
+`eot-harness` is the command-line interface (CLI). Set `SS=eot-bench/output/livekit__eot-bench-data__validation__min_silence_100ms/fr`
 after the first run (the span-set directory).
 
 ## 1. Acoustic baseline (Smart Turn v3)

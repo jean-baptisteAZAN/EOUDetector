@@ -82,12 +82,13 @@ the in-domain validation set.</p>
 
 <h2>Design, planning and research</h2>
 <table>
-  <tr><td class="file"><a href="docs/superpowers/specs/2026-06-26-semantic-eou-detector-design.md">design spec</a></td><td class="desc">Design specification: architecture, interfaces, decisions.</td></tr>
-  <tr><td class="file"><a href="docs/superpowers/plans/2026-06-26-semantic-eou-detector.md">implementation plan</a></td><td class="desc">Task breakdown.</td></tr>
+  <tr><td class="file"><a href="docs/design-spec.md">design-spec.md</a></td><td class="desc">Design specification: architecture, interfaces, decisions (approved before implementation).</td></tr>
+  <tr><td class="file"><a href="docs/implementation-plan.md">implementation-plan.md</a></td><td class="desc">Test-driven implementation plan, task by task.</td></tr>
   <tr><td class="file"><a href="docs/Project_Timeline_EOU_revised.docx">Project_Timeline_EOU_revised.docx</a></td><td class="desc">Project timeline and metrics tracker.</td></tr>
-  <tr><td class="file"><a href="docs/novelty-vs-sota.html">novelty-vs-sota.html</a></td><td class="desc">Positioning versus the 2026 state of the art.</td></tr>
   <tr><td class="file"><a href="docs/architecture.html">architecture.html</a></td><td class="desc">Architecture and data-flow explainer.</td></tr>
+  <tr><td class="file"><a href="docs/novelty-vs-sota.html">novelty-vs-sota.html</a></td><td class="desc">Positioning versus the 2026 state of the art.</td></tr>
   <tr><td class="file"><a href="docs/prod-logging-ticket.html">prod-logging-ticket.html</a></td><td class="desc">Engineering ticket for the production data-capture instrumentation.</td></tr>
+  <tr><td class="file"><a href="docs/meeting-support.html">meeting-support.html</a></td><td class="desc">Supervisor meeting brief.</td></tr>
 </table>
 
 <h2>Note on data</h2>
@@ -96,6 +97,19 @@ medical data and are excluded for data-protection reasons; the capture pipeline 
 internal test organisations. Included instead: the dataset-generation code and all evaluation on the
 public LiveKit eot-bench dataset (CC-BY-4.0). The eot-bench harness is a separate open-source repository
 referenced in <a href="docs/reproduce.md">reproduce.md</a>.</div>
+
+<h2>Abbreviations</h2>
+<div class="note">
+<b>AI</b> Artificial Intelligence ·
+<b>ASR</b> Automatic Speech Recognition ·
+<b>AUC</b> Area Under the ROC (Receiver Operating Characteristic) Curve ·
+<b>CLI</b> Command-Line Interface ·
+<b>ECE</b> Expected Calibration Error ·
+<b>EOU</b> End-of-Utterance ·
+<b>TF-IDF</b> Term Frequency–Inverse Document Frequency ·
+<b>UI</b> User Interface ·
+<b>VAD</b> Voice Activity Detection
+</div>
 
 <footer>Corpus — Semantically-Aware End-of-Utterance Detection — Jean-Baptiste Azan</footer>
 

@@ -7,6 +7,18 @@
 
 ---
 
+## Abbreviations
+
+| | | | |
+|---|---|---|---|
+| **AI** Artificial Intelligence | **ASR** Automatic Speech Recognition | **AUC** Area Under the ROC Curve | **CC-BY-4.0** Creative Commons Attribution 4.0 |
+| **CI** Confidence Interval | **ECE** Expected Calibration Error | **EOT** End-of-Turn | **EOU** End-of-Utterance |
+| **F1** F1 score (harmonic mean of precision and recall) | **GDPR** General Data Protection Regulation | **k-fold** k-fold cross-validation | **LLM** Large Language Model |
+| **OOD** Out-of-Distribution | **ROC** Receiver Operating Characteristic | **SOTA** State of the Art | **STT** Speech-to-Text |
+| **TF-IDF** Term Frequency–Inverse Document Frequency | **VAD** Voice Activity Detection | **cut-in** false-cutoff rate (the model ends a turn while the caller is still speaking) | **λ** cost ratio C_cut / C_lat |
+
+---
+
 ## Abstract  `[EXPAND — write last]`
 One paragraph: problem (endpointing latency/interruption trade-off), approach
 (lightweight fusion of off-the-shelf acoustic + lexical, calibrated, cost-sensitive
@@ -44,7 +56,7 @@ calibration is a universal gap), and the production-domain validation.
 - **Pipeline.** Silero VAD gates the stream; at each micro-pause the recent audio is
   scored by Smart Turn v3 (`p_ac`) and the caller's partial transcript by a lexical
   model (`p_lex`); the two are fused into `p_eot` and a cost-sensitive rule decides
-  STOP/WAIT. `[EXPAND + architecture figure — see docs/architecture.html]`
+  STOP/WAIT. `[EXPAND + architecture figure]`
 - **Lexical model.** CamemBERT — (a) fine-tuned on historical transcripts (in-domain,
   §5.0); (b) frozen embeddings + logistic head for the benchmark (in-distribution).
 - **Fusion.** Learned logistic on `[p_ac, p_lex, p_ac·p_lex]`, fit per fold.
