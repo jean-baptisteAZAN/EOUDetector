@@ -1,4 +1,4 @@
-"""Lexical (semantic) end-of-utterance branch — pipe 2.
+"""Lexical (semantic) end-of-utterance branch (pipe 2).
 
 Homemade, French-first, rule-based completeness scorer over the latest ASR
 partial. Fully owned (no third-party model / no license constraint), deterministic,
@@ -6,7 +6,7 @@ sub-millisecond. It returns a graded probability that the utterance is COMPLETE
 (p_lex) plus an explicit reason, so the fusion gets a real positive signal, not
 only a veto.
 
-Design — two layers:
+Design, two layers:
   1. Strong-incomplete (veto): the caller is clearly mid-utterance. p_lex is
      pushed below the fusion veto band (< veto_lex). Covers the POC's three
      false-positive classes: spelling a name, dictating a number/date, trailing
@@ -21,6 +21,9 @@ LexicalEOU interface (this implementation is French-only by design for now).
 import abc
 import re
 from typing import Optional, Tuple
+
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from eou_detector.types import LexResult
 
@@ -193,10 +196,6 @@ class CamembertLexicalEOU(LexicalEOU):
     def __init__(self, model_dir: str = "models/camembert-eou",
                  veto_guard: bool = True, max_len: int = 64,
                  device: Optional[str] = None):
-        import torch
-        from transformers import (AutoModelForSequenceClassification,
-                                  AutoTokenizer)
-        self._torch = torch
         self._tok = AutoTokenizer.from_pretrained(model_dir)
         self._model = AutoModelForSequenceClassification.from_pretrained(model_dir)
         self._model.eval()
@@ -226,7 +225,7 @@ class CamembertLexicalEOU(LexicalEOU):
         enc = self._tok(raw, truncation=True, max_length=self._max_len,
                         return_tensors="pt")
         enc = {k: v.to(self._device) for k, v in enc.items()}
-        with self._torch.no_grad():
+        with torch.no_grad():
             logits = self._model(**enc).logits[0]
-            p = self._torch.softmax(logits, dim=-1)[self._pos].item()
+            p = torch.softmax(logits, dim=-1)[self._pos].item()
         return LexResult(float(p), False, "camembert")

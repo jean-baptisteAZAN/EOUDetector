@@ -3,7 +3,7 @@
 Trains on the fini/pas_fini dataset (built by build_lexical_dataset.py) and reports
 the same metrics as the classical baseline, so the numbers are directly comparable.
 
-Runs on CPU but is slow — use a GPU (Colab). ~20-40 min on a T4.
+Runs on CPU but is slow; use a GPU (Colab). ~20-40 min on a T4.
 
 Usage:
   python -m eou_detector.dataset.train_camembert --data data/lexical --out models/camembert-eou
@@ -14,6 +14,9 @@ import json
 import os
 
 import numpy as np
+from datasets import Dataset
+from transformers import (AutoTokenizer, AutoModelForSequenceClassification,
+                          TrainingArguments, Trainer)
 
 
 def load_jsonl(path):
@@ -36,10 +39,6 @@ def main():
     ap.add_argument("--batch", type=int, default=16)
     ap.add_argument("--max-len", type=int, default=64)
     args = ap.parse_args()
-
-    from datasets import Dataset
-    from transformers import (AutoTokenizer, AutoModelForSequenceClassification,
-                              TrainingArguments, Trainer)
 
     tr_x, tr_y = load_jsonl(os.path.join(args.data, "train.jsonl"))
     te_x, te_y = load_jsonl(os.path.join(args.data, "test.jsonl"))

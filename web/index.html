@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EOU — live demo</title>
+<title>EOU live demo</title>
 <style>
   :root{--audio:#e08a1e;--texte:#0f9d8f;--fusion:#5b54d6;--line:#e4e4e7;--ink:#1a1a1a;--mut:#666}
   *{box-sizing:border-box}
@@ -41,7 +41,7 @@
 </style>
 </head>
 <body>
-<h1>End-of-utterance detection — live demo</h1>
+<h1>End-of-utterance detection: live demo</h1>
 <p class="sub">Browser mic → VAD → Smart Turn (audio) + CamemBERT (text) → fusion → decision. Same core as the POC. Speech is French (fr-FR).</p>
 
 <div id="warn" class="warn"></div>
@@ -55,9 +55,9 @@
 <div class="transcript"><span id="tr" class="ph">The partial transcript will appear here as you speak…</span></div>
 
 <div class="bars">
-  <div class="bar"><span class="lab">audio</span><div class="track"><div id="f_ac" class="fill" style="background:var(--audio)"></div></div><span id="v_ac" class="val">—</span></div>
-  <div class="bar"><span class="lab">text</span><div class="track"><div id="f_lex" class="fill" style="background:var(--texte)"></div></div><span id="v_lex" class="val">—</span></div>
-  <div class="bar"><span class="lab">fusion</span><div class="track"><div id="f_eou" class="fill" style="background:var(--fusion)"></div></div><span id="v_eou" class="val">—</span></div>
+  <div class="bar"><span class="lab">audio</span><div class="track"><div id="f_ac" class="fill" style="background:var(--audio)"></div></div><span id="v_ac" class="val">-</span></div>
+  <div class="bar"><span class="lab">text</span><div class="track"><div id="f_lex" class="fill" style="background:var(--texte)"></div></div><span id="v_lex" class="val">-</span></div>
+  <div class="bar"><span class="lab">fusion</span><div class="track"><div id="f_eou" class="fill" style="background:var(--fusion)"></div></div><span id="v_eou" class="val">-</span></div>
 </div>
 
 <h2>Decisions (at each micro-pause)</h2>

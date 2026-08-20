@@ -13,16 +13,16 @@ import os
 
 import numpy as np
 import pandas as pd
+import torch
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold
 from sklearn.metrics import roc_auc_score
+from transformers import AutoTokenizer, AutoModel
 
 from .indist_fusion import build_text_df, per_span_ac
 
 
 def embed_texts(texts, model_id="almanach/camembert-base", batch=32, max_len=64):
-    import torch
-    from transformers import AutoTokenizer, AutoModel
     tok = AutoTokenizer.from_pretrained(model_id)
     model = AutoModel.from_pretrained(model_id).eval()
     out = []

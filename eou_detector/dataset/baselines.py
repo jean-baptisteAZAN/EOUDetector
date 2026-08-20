@@ -1,8 +1,8 @@
 """Semantic (lexical-only) baselines on the fini/pas_fini dataset.
 
 Two CPU baselines, runnable in seconds (no GPU):
-  1. FR heuristic veto  — rule-based floor (spelling / trailing connector / open number).
-  2. TF-IDF + LogReg    — classical ML baseline.
+  1. FR heuristic veto: rule-based floor (spelling / trailing connector / open number).
+  2. TF-IDF + LogReg: classical ML baseline.
 
 Metrics (endpoint = predict "fini"):
   accuracy, F1(fini),
@@ -16,6 +16,10 @@ Usage:
 import argparse
 import json
 import os
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
 
 from .build_lexical_dataset import tokens, _TRAILING, _NUMBERS
 
@@ -102,10 +106,6 @@ def main():
     show("FR heuristic veto (floor)", test, y_pred_h)
 
     # 2) TF-IDF + Logistic Regression
-    from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.linear_model import LogisticRegression
-    from sklearn.pipeline import Pipeline
-
     clf = Pipeline([
         ("tfidf", TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 5), min_df=2)),
         ("lr", LogisticRegression(max_iter=2000, C=4.0, class_weight="balanced")),

@@ -30,7 +30,7 @@ export AZURE_STT_REGION=...       # = prod AZURE_STT_REGION
 # or: source the prod .env directly
 ```
 
-Language is `fr-FR`, audio is 16 kHz / mono / 16-bit PCM — matching prod. The
+Language is `fr-FR`, audio is 16 kHz / mono / 16-bit PCM, matching prod. The
 POC's Azure ASR mirrors `azure-stt.service.ts` and additionally subscribes to the
 `recognizing` event to obtain real-time partials for the lexical branch (prod
 stays final-only and is untouched).
@@ -100,7 +100,7 @@ partial; only the acoustic ONNX runs on the decision path.
 
 `RuleFusion` applies a bilateral veto (lexical or acoustic strongly mid-turn →
 WAIT) and returns a probability `p_eou`. To switch to a learned model, drop in
-`LogisticFusion` (same `Fusion` interface) — no caller changes.
+`LogisticFusion` (same `Fusion` interface), no caller changes.
 
 ### Extension point: a new ASR
 

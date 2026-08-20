@@ -5,7 +5,7 @@ subset (no gold data / no PHI required). Every lexical/fusion number is k-fold
 (split by call id, no leakage).
 
 **Abbreviations.** AUC = Area Under the ROC (Receiver Operating Characteristic) Curve ·
-ECE = Expected Calibration Error · TF-IDF = Term Frequency–Inverse Document Frequency ·
+ECE = Expected Calibration Error · TF-IDF = Term Frequency-Inverse Document Frequency ·
 k-fold = k-fold cross-validation · PHI = Protected Health Information · HF = Hugging Face ·
 JSONL = JSON Lines · CC-BY-4.0 = Creative Commons Attribution 4.0.
 

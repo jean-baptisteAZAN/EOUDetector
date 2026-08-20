@@ -7,7 +7,7 @@
 hf_token*
 .hf_token
 
-# ─── Patient data / PHI — medical transcripts & call audio (GDPR: NEVER push) ───
+# ─── Patient data / PHI: medical transcripts & call audio (GDPR: NEVER push) ───
 data/
 datasets/
 raw/

@@ -18,6 +18,9 @@ Run (from the eot-bench repo, with this package importable):
 import os
 import re
 
+import torch
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
 
 def _last_user_text(messages):
     if not messages:
@@ -69,9 +72,6 @@ class CamembertLexical:
     name = "camembert"
 
     def __init__(self, path):
-        import torch
-        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-        self._torch = torch
         self.tok = AutoTokenizer.from_pretrained(path)
         self.model = AutoModelForSequenceClassification.from_pretrained(path).eval()
         # index of the "fini" label
@@ -79,13 +79,12 @@ class CamembertLexical:
         self.fini_idx = next((i for i, v in id2label.items() if str(v).lower() == "fini"), 1)
 
     def score(self, texts):
-        import numpy as np
         clean = [t if t else "" for t in texts]
         enc = self.tok(clean, return_tensors="pt", truncation=True,
                        max_length=64, padding=True)
-        with self._torch.no_grad():
+        with torch.no_grad():
             logits = self.model(**enc).logits
-        probs = self._torch.softmax(logits, dim=-1).cpu().numpy()
+        probs = torch.softmax(logits, dim=-1).cpu().numpy()
         p = probs[:, self.fini_idx]
         # neutral for empty text
         return [0.5 if not t else float(pi) for t, pi in zip(clean, p)]

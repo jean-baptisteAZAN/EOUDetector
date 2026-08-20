@@ -3,11 +3,28 @@ name = "eou-detector"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "datasets>=5.0.0",
-    "ipykernel>=7.3.0",
+    "numpy>=1.26",
+    "pandas>=2.0",
+    "scipy>=1.11",
     "scikit-learn>=1.9.0",
-    "silero-vad>=6.2.1",
+    "datasets>=5.0.0",
     "torch>=2.13.0",
+    "transformers>=4.40",
+    "onnxruntime>=1.17",
+    "silero-vad>=6.2.1",
+    "soundfile>=0.12",
+    "sounddevice>=0.4",
+    "azure-cognitiveservices-speech>=1.42",
+    "huggingface-hub>=0.23",
+    "python-dotenv>=1.0",
+    "aiohttp>=3.9",
+    "ipykernel>=7.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
 ]
 
 [tool.pytest.ini_options]

@@ -1,5 +1,6 @@
 import abc
 import asyncio
+from math import gcd
 from typing import AsyncIterator, Optional
 
 import numpy as np
@@ -11,7 +12,6 @@ def load_wav_mono_16k(path: str, target_sr: int = 16000) -> np.ndarray:
     data, sr = sf.read(path, dtype="int16", always_2d=True)
     mono = data.mean(axis=1).astype(np.int16)
     if sr != target_sr:
-        from math import gcd
         g = gcd(sr, target_sr)
         res = resample_poly(mono.astype(np.float32), target_sr // g, sr // g)
         mono = np.clip(np.round(res), -32768, 32767).astype(np.int16)

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>EOU — Meeting support</title>
+<title>EOU: Meeting support</title>
 <style>
   body{max-width:820px;margin:0 auto;padding:48px 24px 96px;
     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -29,7 +29,7 @@
 <header>
   <h1>Towards Semantically-Aware End-of-Utterance Detection</h1>
   <p class="meta">MSc · progress review</p>
-  <p>Knowing when a caller has finished — deciding it as a <b>cost</b>, learning it from a <b>real, auto-labelled</b> data source.</p>
+  <p>Knowing when a caller has finished: deciding it as a <b>cost</b>, learning it from a <b>real, auto-labelled</b> data source.</p>
   <ul>
     <li><a href="#sota">01 Novelty &amp; positioning</a></li>
     <li><a href="#gold">02 The gold dataset</a></li>
@@ -42,8 +42,8 @@
 
 <!-- 01 NOVELTY -->
 <section id="sota">
-  <h2>Novelty — honestly, in a crowded field</h2>
-  <p>The ingredients all exist now — including LiveKit's turn-detector + its <b>eot-bench</b> (a public latency-vs-false-cutoff Pareto benchmark). Owning that is the strength of the framing. Here's what <b>is</b>, and what <b>isn't</b>, the contribution.</p>
+  <h2>Novelty: honestly, in a crowded field</h2>
+  <p>The ingredients all exist now, including LiveKit's turn-detector + its <b>eot-bench</b> (a public latency-vs-false-cutoff Pareto benchmark). Owning that is the strength of the framing. Here's what <b>is</b>, and what <b>isn't</b>, the contribution.</p>
 
   <table>
     <thead><tr><th>System</th><th>Ac + lex fusion</th><th>Decision</th><th>Calibrated</th><th>Cost model</th></tr></thead>
@@ -57,19 +57,19 @@
 
   <div class="note">
     <p><strong>What is NOT the contribution (be honest)</strong></p>
-    <p><b>Fusion</b> (FastTurn, JAL-Turn), the <b>Pareto operating curve</b> (eot-bench), <b>"beating LiveKit"</b>, and <b>"better on French"</b> — all taken or incremental. Don't pitch these. The field moved this month; the honest move is to scope the contribution precisely.</p>
+    <p><b>Fusion</b> (FastTurn, JAL-Turn), the <b>Pareto operating curve</b> (eot-bench), <b>"beating LiveKit"</b>, and <b>"better on French"</b>: all taken or incremental. Don't pitch these. The field moved this month; the honest move is to scope the contribution precisely.</p>
   </div>
 
   <p><strong>Our contribution · three things</strong></p>
-  <p>Not a new SOTA method — an applied + principled + resource contribution:</p>
+  <p>Not a new SOTA method, an applied + principled + resource contribution:</p>
   <ul>
-    <li><b>Calibrated, cost-sensitive optimal stopping.</b> Others sweep a threshold and never calibrate. We derive the stop from an explicit interruption-vs-latency <em>cost</em> over a <em>calibrated</em> fused (acoustic + lexical) probability — a principled operating point instead of an empirical one.</li>
+    <li><b>Calibrated, cost-sensitive optimal stopping.</b> Others sweep a threshold and never calibrate. We derive the stop from an explicit interruption-vs-latency <em>cost</em> over a <em>calibrated</em> fused (acoustic + lexical) probability: a principled operating point instead of an empirical one.</li>
     <li><b>A French medical-telephony EOU benchmark, from real production calls.</b> eot-bench is generic/multilingual; ours exposes the <em>dictation failure modes</em> (spelling, numbers, dates) generic models miss. A resource + domain analysis.</li>
-    <li><b>Weak-supervision auto-labelling from production</b> (resume-after-pause) — a scalable way to build EOU datasets with no manual annotation.</li>
+    <li><b>Weak-supervision auto-labelling from production</b> (resume-after-pause): a scalable way to build EOU datasets with no manual annotation.</li>
   </ul>
 
   <div class="note">
-    <b>Evaluation — one harness, two datasets.</b> eot-bench (Apache-2.0 + CC-BY-4.0) = the standard, comparable, French subset runnable <b>now</b>; our gold FR-medical set = same schema, same Pareto metrics (latency vs false-cutoff). The LiveKit <em>model</em> is license-restricted → we cite their published numbers, we don't run their weights.
+    <b>Evaluation: one harness, two datasets.</b> eot-bench (Apache-2.0 + CC-BY-4.0) = the standard, comparable, French subset runnable <b>now</b>; our gold FR-medical set = same schema, same Pareto metrics (latency vs false-cutoff). The LiveKit <em>model</em> is license-restricted → we cite their published numbers, we don't run their weights.
   </div>
 </section>
 
@@ -77,20 +77,20 @@
 
 <!-- 02 GOLD DATASET -->
 <section id="gold">
-  <h2>The gold dataset — captured in prod</h2>
-  <p>Rather than synthetic data, we instrumented the production voice pipeline to log, per call, exactly the signals the model needs — <b>auto-labelled, at real volume, in real inference conditions</b>. Each field earns its place:</p>
+  <h2>The gold dataset: captured in prod</h2>
+  <p>Rather than synthetic data, we instrumented the production voice pipeline to log, per call, exactly the signals the model needs: <b>auto-labelled, at real volume, in real inference conditions</b>. Each field earns its place:</p>
 
   <ul>
-    <li><code>asr_partials</code> — the recognizing trajectory (<em>lexical</em>). The stream of interim ASR hypotheses (<code>bonjour → bonjour j'aimerais → …</code>). <b>Real incomplete→complete sequences</b> — every partial is a natural "not-done" example, the final a "done". Richer than synthetic truncation, and it matches what the model sees live.</li>
-    <li><code>caller_text</code> — caller-only, raw ASR (<em>lexical</em>). The patient's words only — no agent echo. Clean, unformatted, exactly the inference input.</li>
-    <li><code>audio_ref + timestamps</code> — recording + pause/decision/reply (<em>acoustic, decision</em>). The recording pointer + per-turn timing. Unlocks the <b>acoustic branch</b> (Smart Turn on the audio), the <b>true end-of-turn &amp; latency</b> (from the waveform), and <b>calibration</b>.</li>
-    <li><code>outcome</code> — resume-after-pause · was_interrupted (<em>labels</em>). Did the caller continue after the pause? Was the agent cut off? These raw signals <b>auto-derive the fini / pas_fini label + false-cut</b> — no manual annotation.</li>
-    <li><code>segmentation_timeout · interrupt counts</code> — current system behaviour (<em>baseline</em>). What the live VAD-timeout system decided — our <b>incumbent baseline</b> to beat.</li>
-    <li><code>hardcase_tag</code> — spelling / number / date (<em>eval</em>). Auto-tags the hard cases → <b>per-category hold-rate</b> (the exact failures we target).</li>
+    <li><code>asr_partials</code>: the recognizing trajectory (<em>lexical</em>). The stream of interim ASR hypotheses (<code>bonjour → bonjour j'aimerais → …</code>). <b>Real incomplete→complete sequences</b>: every partial is a natural "not-done" example, the final a "done". Richer than synthetic truncation, and it matches what the model sees live.</li>
+    <li><code>caller_text</code>: caller-only, raw ASR (<em>lexical</em>). The patient's words only: no agent echo. Clean, unformatted, exactly the inference input.</li>
+    <li><code>audio_ref + timestamps</code>: recording + pause/decision/reply (<em>acoustic, decision</em>). The recording pointer + per-turn timing. Unlocks the <b>acoustic branch</b> (Smart Turn on the audio), the <b>true end-of-turn &amp; latency</b> (from the waveform), and <b>calibration</b>.</li>
+    <li><code>outcome</code>: resume-after-pause · was_interrupted (<em>labels</em>). Did the caller continue after the pause? Was the agent cut off? These raw signals <b>auto-derive the fini / pas_fini label + false-cut</b>: no manual annotation.</li>
+    <li><code>segmentation_timeout · interrupt counts</code>: current system behaviour (<em>baseline</em>). What the live VAD-timeout system decided: our <b>incumbent baseline</b> to beat.</li>
+    <li><code>hardcase_tag</code>: spelling / number / date (<em>eval</em>). Auto-tags the hard cases → <b>per-category hold-rate</b> (the exact failures we target).</li>
   </ul>
 
   <div class="note">
-    <p><strong>Real capture — live test call, turn 0</strong></p>
+    <p><strong>Real capture: live test call, turn 0</strong></p>
     <p><code>"bonjour"</code> → <code>"bonjour j'aimerais"</code> → <code>"bonjour j'aimerais pr"</code> → <code>"bonjour j'aimerais prendre un rendez vous"</code> | ts, decision, audio_ref all captured.</p>
   </div>
 
@@ -101,26 +101,26 @@
 
 <!-- 03 ONE MODEL vs PIPELINES -->
 <section id="one">
-  <h2>One model that does everything — or separate pipelines?</h2>
+  <h2>One model that does everything, or separate pipelines?</h2>
   <p>A single end-to-end model that ingests audio+text and outputs the decision is tempting. But "specialised model" spans three levels, and the level matters.</p>
 
   <ul>
-    <li><b>LEVEL 1 · Late fusion</b> — Two off-the-shelf / fine-tuned models (Smart Turn + CamemBERT), fused by rule/logistic on their scores. <em>current · cheap · interpretable</em></li>
-    <li><b>LEVEL 2 · Learned joint head</b> — A small head trained on our labels over the two <b>frozen</b> encoders' embeddings. Only the head learns. <em>the experiment to run</em></li>
-    <li><b>LEVEL 3 · Full end-to-end joint</b> — Train both encoders jointly — this is exactly FastTurn / JAL-Turn. <em>future work, not now</em></li>
+    <li><b>LEVEL 1 · Late fusion</b>: Two off-the-shelf / fine-tuned models (Smart Turn + CamemBERT), fused by rule/logistic on their scores. <em>current · cheap · interpretable</em></li>
+    <li><b>LEVEL 2 · Learned joint head</b>: A small head trained on our labels over the two <b>frozen</b> encoders' embeddings. Only the head learns. <em>the experiment to run</em></li>
+    <li><b>LEVEL 3 · Full end-to-end joint</b>: Train both encoders jointly, this is exactly FastTurn / JAL-Turn. <em>future work, not now</em></li>
   </ul>
 
   <div class="note">
     <p><strong>Key insight</strong></p>
-    <p>Our novelty is in the <em>decision layer</em> (optimal stopping + calibration), <em>orthogonal to the representation</em>. Whatever produces the probability — late fusion, a joint head, or a full joint model — the calibrated cost-sensitive decision sits on top. A monolithic model doesn't <em>add</em> novelty; it just competes with the SOTA on their turf.</p>
+    <p>Our novelty is in the <em>decision layer</em> (optimal stopping + calibration), <em>orthogonal to the representation</em>. Whatever produces the probability (late fusion, a joint head, or a full joint model), the calibrated cost-sensitive decision sits on top. A monolithic model doesn't <em>add</em> novelty; it just competes with the SOTA on their turf.</p>
   </div>
 
   <ul>
-    <li><b>Level 3 = SOTA turf</b> — a from-scratch joint model re-does FastTurn/JAL-Turn with far less data → less novel, not more.</li>
-    <li><b>Data-hungry &amp; timeline risk</b> — end-to-end joint needs thousands of aligned examples + GPU; we have 4 weeks for methodology + eval.</li>
-    <li><b>Modular wins operationally</b> — each branch swappable &amp; independently improvable, interpretable, runs on CPU without an LLM (our efficiency angle).</li>
-    <li><b>Level 2 is the real test</b> — "does a specialised model beat late fusion?" as the learned-fusion ablation, feasible with limited data, without touching the novelty.</li>
-    <li><b>The data pipeline enables Level 3 later</b> — it accumulates exactly the aligned, labelled examples a future joint model would need.</li>
+    <li><b>Level 3 = SOTA turf</b>: a from-scratch joint model re-does FastTurn/JAL-Turn with far less data → less novel, not more.</li>
+    <li><b>Data-hungry &amp; timeline risk</b>: end-to-end joint needs thousands of aligned examples + GPU; we have 4 weeks for methodology + eval.</li>
+    <li><b>Modular wins operationally</b>: each branch swappable &amp; independently improvable, interpretable, runs on CPU without an LLM (our efficiency angle).</li>
+    <li><b>Level 2 is the real test</b>: "does a specialised model beat late fusion?" as the learned-fusion ablation, feasible with limited data, without touching the novelty.</li>
+    <li><b>The data pipeline enables Level 3 later</b>: it accumulates exactly the aligned, labelled examples a future joint model would need.</li>
   </ul>
 </section>
 
@@ -129,10 +129,10 @@
 <!-- 04 STATUS -->
 <section id="now">
   <h2>Where we are &amp; next</h2>
-  <p>Calendar: end of week 3. We invested in a <b>real auto-labelled data source</b> (the prod pipeline) instead of synthetic — a deliberate ~1-week trade that makes the evaluation far more credible. Everything else is de-risked and ready.</p>
+  <p>Calendar: end of week 3. We invested in a <b>real auto-labelled data source</b> (the prod pipeline) instead of synthetic: a deliberate ~1-week trade that makes the evaluation far more credible. Everything else is de-risked and ready.</p>
 
   <p><strong>First result · semantic baseline (text-only)</strong></p>
-  <p>Lexical <code>fini/pas_fini</code> dataset from <b>549 historical calls · 2 571 caller turns</b>; first baseline on held-out calls — no audio needed:</p>
+  <p>Lexical <code>fini/pas_fini</code> dataset from <b>549 historical calls · 2 571 caller turns</b>; first baseline on held-out calls, no audio needed:</p>
   <table>
     <thead><tr><th>Model</th><th>Accuracy</th><th>F1 (fini)</th><th>Cut-in ↓</th><th>Miss</th></tr></thead>
     <tbody>
@@ -144,24 +144,24 @@
   <p>Clean progression 63% → 81% → <b>89%</b> accuracy; the fine-tuned model cuts the interruption rate 65% → <b>12%</b>.</p>
 
   <div class="note">
-    <p><strong>Limitations · we likely overfit — read 89% as a signal, not the number</strong></p>
+    <p><strong>Limitations · we likely overfit: read 89% as a signal, not the number</strong></p>
     <ul>
-      <li><b>Train/val divergence</b> — training loss keeps falling (0.33 → 0.22) but validation loss bottoms at epoch 2 then rises (0.334 → 0.354): a mild overfit. Best-epoch is kept, but the margin is thin.</li>
-      <li><b>Length shortcut</b> — prefixes are systematically shorter than full turns, so the model can partly cheat on "short = not done" instead of learning semantics. Needs length-controlled negatives + eval.</li>
-      <li><b>Narrow data</b> — ~550 calls, single domain → the held-out score is in-distribution and optimistic; cross-domain / real conditions would drop it.</li>
-      <li><b>Weak, circular labels</b> — labels = where the current system ended the turn, so the model partly learns to predict <em>that system</em>, not ground-truth completeness.</li>
+      <li><b>Train/val divergence</b>: training loss keeps falling (0.33 → 0.22) but validation loss bottoms at epoch 2 then rises (0.334 → 0.354): a mild overfit. Best-epoch is kept, but the margin is thin.</li>
+      <li><b>Length shortcut</b>: prefixes are systematically shorter than full turns, so the model can partly cheat on "short = not done" instead of learning semantics. Needs length-controlled negatives + eval.</li>
+      <li><b>Narrow data</b>: ~550 calls, single domain → the held-out score is in-distribution and optimistic; cross-domain / real conditions would drop it.</li>
+      <li><b>Weak, circular labels</b>: labels = where the current system ended the turn, so the model partly learns to predict <em>that system</em>, not ground-truth completeness.</li>
     </ul>
-    <p>The truer, harder evaluation comes from the <b>gold audio labels</b> (accumulating) + regularization + harder negatives. We expect the real number to be lower — and that's fine: this is a first signal that the lexical signal is learnable.</p>
+    <p>The truer, harder evaluation comes from the <b>gold audio labels</b> (accumulating) + regularization + harder negatives. We expect the real number to be lower, and that's fine: this is a first signal that the lexical signal is learnable.</p>
   </div>
 
   <h3>Done</h3>
   <ul>
     <li><b>Novelty scoped honestly</b> (calibrated cost decision + FR-medical benchmark + weak-sup labelling)</li>
-    <li><b>eot-bench recon</b> — licences cleared (Apache/CC-BY), integration path + French subset</li>
+    <li><b>eot-bench recon</b>: licences cleared (Apache/CC-BY), integration path + French subset</li>
     <li><b>Prod data pipeline</b> shipped + validated end-to-end, GDPR-gated</li>
     <li><b>Export tooling</b> ready (psql → JSONL + audio)</li>
     <li><b>Lexical dataset</b> from 549 historical calls (2 571 turns)</li>
-    <li><b>Semantic model — CamemBERT fine-tuned: 89% F1, cut-in 12%</b></li>
+    <li><b>Semantic model, CamemBERT fine-tuned: 89% F1, cut-in 12%</b></li>
   </ul>
 
   <h3>Next (catch-up)</h3>

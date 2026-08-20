@@ -17,12 +17,12 @@ import os
 
 import numpy as np
 import pandas as pd
+from sklearn.isotonic import IsotonicRegression
 
 from .decision_layer import ece, per_span_scores
 
 
 def _calibrated_ece(sp, seed=0):
-    from sklearn.isotonic import IsotonicRegression
     ids = sp["id"].astype(str).unique()
     rng = np.random.default_rng(seed)
     rng.shuffle(ids)

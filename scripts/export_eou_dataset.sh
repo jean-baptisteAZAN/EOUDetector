@@ -5,7 +5,7 @@
 #
 # Run this AFTER the prod deployment, once calls have accumulated on the
 # EOU_DATASET_CAPTURE-enabled test org(s). The EOUDetector repo has NO psql
-# access — this script produces flat files that the Python tooling then ingests.
+# access. This script produces flat files that the Python tooling then ingests.
 #
 # One JSONL line per call: the EOU capture (slim meta + nested turns) joined to
 # receptionist_calls for the normalized meta we deliberately did NOT duplicate

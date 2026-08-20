@@ -4,6 +4,8 @@ import os
 from typing import Optional
 
 import numpy as np
+import onnxruntime as ort
+from transformers import WhisperFeatureExtractor
 
 # Preferred Smart Turn v3 ONNX variants, best accuracy first (see the model
 # card benchmarks: v3.2 > v3.1 > v3.0; *-cpu is the CPU-optimised export).
@@ -54,8 +56,6 @@ class SmartTurnV3(AcousticEOU):
 
     def __init__(self, model_path: str, sample_rate: int = 16000,
                  window_s: float = 8.0):
-        import onnxruntime as ort
-        from transformers import WhisperFeatureExtractor
         self._sess = ort.InferenceSession(
             model_path, providers=["CPUExecutionProvider"])
         self._in_name = self._sess.get_inputs()[0].name

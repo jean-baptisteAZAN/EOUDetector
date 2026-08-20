@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Ticket — Data for the Semantic-EOU dataset</title>
+<title>Ticket: Data for the Semantic-EOU dataset</title>
 <style>
   body{max-width:820px;margin:0 auto;padding:48px 24px 96px;
     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -36,47 +36,47 @@
 
 <h2>A. The master key: audio</h2>
 <p><b>Principle</b></p>
-<p>With the <b>stereo call recording</b> (caller + agent channels) plus the transcripts and call logs, we can <b>reconstruct almost the whole dataset offline</b> — caller-only audio, VAD segments, true end-of-turn, pauses, latency, and the fini/pas_fini labels.</p>
-<p>The only signal that can't be recovered retroactively is the live ASR-partials trajectory — and even that we regenerate for evaluation by replaying the caller audio through our own ASR. So new prod logging is nearly optional; <b>audio access is what unblocks the project</b>.</p>
+<p>With the <b>stereo call recording</b> (caller + agent channels) plus the transcripts and call logs, we can <b>reconstruct almost the whole dataset offline</b>: caller-only audio, VAD segments, true end-of-turn, pauses, latency, and the fini/pas_fini labels.</p>
+<p>The only signal that can't be recovered retroactively is the live ASR-partials trajectory, and even that we regenerate for evaluation by replaying the caller audio through our own ASR. So new prod logging is nearly optional; <b>audio access is what unblocks the project</b>.</p>
 
 <hr>
 
 <h2>B. What goes where</h2>
 <p>Three buckets. Bucket 1 is the eng work (persist housemade → psql + expose audio). Bucket 2 we do ourselves offline. Bucket 3 is the only genuinely new capture, and it isn't blocking.</p>
 
-<h3>1 · MIRROR — Already in housemade → store in psql</h3>
+<h3>1 · MIRROR: Already in housemade → store in psql</h3>
 <p class="meta">eng · persist what exists</p>
 <table>
   <tbody>
     <tr><td><code>transcript_turns</code></td><td>Role-tagged turns (user / bot). Already partly exported; keep per-turn, not concatenated.</td><td><b>Mongo</b> context.messagesHistory</td></tr>
     <tr><td><code>stt_final + ts</code></td><td>Per user turn: the STT final text and the millisecond timestamp it was emitted. Cleaner than the stored transcript on echo-contaminated calls.</td><td><b>callLogs</b> "STT: … - &lt;text&gt;"</td></tr>
-    <tr><td><code>bot_reply_ts</code></td><td>Timestamp the agent started replying (TTS events) — gives the current system's response latency.</td><td><b>callLogs</b> TTS lines</td></tr>
+    <tr><td><code>bot_reply_ts</code></td><td>Timestamp the agent started replying (TTS events): gives the current system's response latency.</td><td><b>callLogs</b> TTS lines</td></tr>
     <tr><td><code>audio_ref</code></td><td>Pointer to the stereo recording so we can fetch it. This is the unlock.</td><td><b>Azure Blob</b> ${uuid}.wav</td></tr>
     <tr><td><code>interruption_counts</code></td><td>aiInterrupted / humanInterrupter per call.</td><td><b>timeLogs</b> · "[Call End Stats]"</td></tr>
-    <tr><td><code>segmentation_timeout</code></td><td>The silence-timeout value actually used (e.g. 500 / 1700 ms) — the incumbent endpoint mechanism's parameter.</td><td><b>STT config</b> per call</td></tr>
+    <tr><td><code>segmentation_timeout</code></td><td>The silence-timeout value actually used (e.g. 500 / 1700 ms), the incumbent endpoint mechanism's parameter.</td><td><b>STT config</b> per call</td></tr>
     <tr><td><code>call_meta</code></td><td>uuid, callSid, from/to, direction, callDate, endedReason, motif.</td><td><b>callSchema</b> / analytics</td></tr>
   </tbody>
 </table>
 
-<h3>2 · DERIVE — Missing, but reconstructable offline (we do it)</h3>
+<h3>2 · DERIVE: Missing, but reconstructable offline (we do it)</h3>
 <p class="meta">no eng work</p>
 <table>
   <tbody>
     <tr><td><code>caller_audio</code></td><td>Caller-only channel, extracted from the stereo recording (customer track).</td><td><b>from</b> audio_ref</td></tr>
-    <tr><td><code>true_end_of_turn</code></td><td>The real instant the caller stopped — offline VAD / alignment on the caller channel. Ground truth for latency &amp; calibration.</td><td><b>from</b> caller_audio</td></tr>
-    <tr><td><code>endpoint_latency</code></td><td>bot_reply_ts − true_end_of_turn. The real latency of the current system.</td><td><b>from</b> audio + logs</td></tr>
+    <tr><td><code>true_end_of_turn</code></td><td>The real instant the caller stopped: offline VAD / alignment on the caller channel. Ground truth for latency &amp; calibration.</td><td><b>from</b> caller_audio</td></tr>
+    <tr><td><code>endpoint_latency</code></td><td>bot_reply_ts - true_end_of_turn. The real latency of the current system.</td><td><b>from</b> audio + logs</td></tr>
     <tr><td><code>label · fini / pas_fini</code></td><td>Resume-after-pause: did the caller continue after the pause? Derived from turn sequence + audio.</td><td><b>from</b> turns + audio</td></tr>
-    <tr><td><code>false_cut</code></td><td>Agent spoke then the caller kept going (overlap) — a labelled premature cut.</td><td><b>from</b> audio overlap</td></tr>
-    <tr><td><code>hardcase_tag</code></td><td>spelling / number / date / hesitation — regex on the user text.</td><td><b>from</b> stt_final</td></tr>
+    <tr><td><code>false_cut</code></td><td>Agent spoke then the caller kept going (overlap), a labelled premature cut.</td><td><b>from</b> audio overlap</td></tr>
+    <tr><td><code>hardcase_tag</code></td><td>spelling / number / date / hesitation: regex on the user text.</td><td><b>from</b> stt_final</td></tr>
   </tbody>
 </table>
 
-<h3>3 · ADD — Genuinely new capture — going forward, not blocking</h3>
+<h3>3 · ADD: Genuinely new capture, going forward, not blocking</h3>
 <p class="meta">optional for the POC</p>
 <table>
   <tbody>
     <tr><td><code>asr_partials_trace</code></td><td>The sequence of interim `recognizing` hypotheses with timestamps. Never captured (finals only). We regenerate it for eval by replaying audio through our own ASR, so it's only needed if we want the real prod partial cadence at scale.</td><td><b>new</b> recognizing handler</td></tr>
-    <tr><td><code>durable per-pause log</code></td><td>Structured per-micro-pause records in a store without the current 24 h expiry — for continuous data collection at scale.</td><td><b>new</b> durable store</td></tr>
+    <tr><td><code>durable per-pause log</code></td><td>Structured per-micro-pause records in a store without the current 24 h expiry, for continuous data collection at scale.</td><td><b>new</b> durable store</td></tr>
   </tbody>
 </table>
 
@@ -104,14 +104,14 @@
   <p><b>Audio access.</b> A way to fetch the stereo recording per uuid (a recording endpoint, or a Blob SAS/URL stored on the call). Everything in Bucket 2 depends on it.</p>
 </div>
 <div class="note" style="margin-top:14px">
-  <p><b>Deferred — not this ticket</b></p>
-  <p><b>Anonymisation / PHI</b> comes later: mirror the raw fields first to validate the dataset, then pseudonymise names/numbers + set retention. Bucket 3 (partials, durable per-pause store) is also deferred — not needed to build or evaluate the POC.</p>
+  <p><b>Deferred, not this ticket</b></p>
+  <p><b>Anonymisation / PHI</b> comes later: mirror the raw fields first to validate the dataset, then pseudonymise names/numbers + set retention. Bucket 3 (partials, durable per-pause store) is also deferred, not needed to build or evaluate the POC.</p>
 </div>
 <ul>
   <li><b>Audio reachable per uuid</b> (endpoint or Blob ref on the call record).</li>
   <li><b>Bucket 1 mirrored to psql</b>: per-turn stt_final + timestamps, bot_reply_ts, audio_ref, interruption counts, segmentation_timeout, call_meta.</li>
   <li><b>Joinable by uuid</b> with the existing transcript export.</li>
-  <li>Bucket 2 is on us — no eng action; Bucket 3 deferred.</li>
+  <li>Bucket 2 is on us, no eng action; Bucket 3 deferred.</li>
 </ul>
 
 <footer>

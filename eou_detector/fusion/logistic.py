@@ -8,7 +8,7 @@ class LogisticFusion(Fusion):
     """Drop-in replacement for RuleFusion once weights are learned. Same
     interface, same silence policy; only the p_eou model differs."""
 
-    def __init__(self, settings: Settings, weights: dict):
+    def __init__(self, settings: Settings, weights: dict[str, float]):
         self._s = settings
         self._w = weights
 

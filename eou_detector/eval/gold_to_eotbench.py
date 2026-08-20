@@ -1,7 +1,7 @@
 """Convert our production gold export -> eot-bench dataset schema.
 
 So the SAME harness (adapters, metrics, Pareto sweep) that runs on the public
-eot-bench-data also runs on our French-medical gold set — no new eval code.
+eot-bench-data also runs on our French-medical gold set, with no new eval code.
 
 Input  : eou_calls.jsonl (from scripts/export_eou_dataset.sh) + audio/<uuid>.wav
 Output : an eot-bench-format HuggingFace dataset (id, language, audio, silence_spans,
@@ -16,7 +16,7 @@ Label derivation from our raw signals (weak supervision, no manual annotation):
   the pause that actually ended the turn (agent replied, no resume)   = `eot`.
   Consecutive holds + their terminating eot form one eot-bench "turn".
 
-⚠️ UNTESTED until the first real gold export exists — validate field names + the
+UNTESTED until the first real gold export exists; validate field names and the
 turn-grouping against a real sample, and confirm the harness's local `--path`
 loader accepts the produced format (save_to_disk vs parquet vs push_to_hub).
 
@@ -29,6 +29,10 @@ Usage:
 import argparse
 import json
 import os
+
+import numpy as np
+import soundfile as sf
+from datasets import Dataset, Audio, Features, Value, Sequence
 
 MIN_SILENCE_S = 0.1   # eot-bench drops spans shorter than this
 
@@ -85,8 +89,6 @@ def messages_from(group):
 
 def load_caller_audio(wav_path):
     """Caller (customer) channel as mono float32 + sampling rate."""
-    import numpy as np
-    import soundfile as sf
     data, sr = sf.read(wav_path, dtype="float32", always_2d=True)
     caller = data[:, 0]          # customer channel = left (stereo customer+agent)
     return np.asarray(caller, dtype="float32"), int(sr)
@@ -127,10 +129,9 @@ def main():
     n_audio = sum(1 for r in rows if r["audio"] is not None)
     print(f"built {len(rows)} eot-bench turns ({n_audio} with audio) from {args.export}")
     if not rows:
-        print("no rows — check the export/audio paths and the turn signals")
+        print("no rows; check the export/audio paths and the turn signals")
         return
 
-    from datasets import Dataset, Audio, Features, Value, Sequence
     features = Features({
         "id": Value("string"),
         "language": Value("string"),

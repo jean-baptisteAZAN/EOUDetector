@@ -4,9 +4,9 @@ The eot-bench harness sweeps a policy and reports the Pareto frontier; it never
 calibrates and never *derives* the operating point from a cost. This module adds
 both, offline, from an existing model run:
 
-  A. CALIBRATION — fit isotonic on a held-out split, report ECE before/after.
+  A. CALIBRATION: fit isotonic on a held-out split, report ECE before/after.
      (None of the leaderboard models report calibration.)
-  B. COST-SENSITIVE OPERATING POINT — for a range of interruption/latency cost
+  B. COST-SENSITIVE OPERATING POINT: for a range of interruption/latency cost
      ratios, pick the min-cost point from the swept trade-off = the endpoint
      "dynamically" chosen by the cost, not a fixed magic threshold.
 
@@ -19,6 +19,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from sklearn.isotonic import IsotonicRegression
 
 
 def ece(probs, labels, n_bins=10):
@@ -51,7 +52,6 @@ def per_span_scores(pred_path, score_point=0.2):
 
 
 def calibrate_report(sp, seed=0):
-    from sklearn.isotonic import IsotonicRegression
     ids = sp["id"].astype(str).unique()
     rng = np.random.default_rng(seed)
     rng.shuffle(ids)
@@ -96,7 +96,7 @@ def main():
     pred = os.path.join(args.run, "predictions.parquet")
     trade = os.path.join(args.run, "metrics", "tradeoff.parquet")
 
-    print(f"=== A. Calibration (held-out) — {os.path.basename(args.run)} ===")
+    print(f"=== A. Calibration (held-out): {os.path.basename(args.run)} ===")
     sp = per_span_scores(pred)
     rep, _ = calibrate_report(sp)
     print(f"spans: train={rep['n_train_spans']}  test={rep['n_test_spans']}")

@@ -29,6 +29,8 @@ import re
 import sys
 from collections import Counter
 
+import pandas as pd
+
 # some transcript fields are large; set the field limit as high as the platform allows
 _limit = sys.maxsize
 while True:
@@ -109,7 +111,6 @@ def load_csv(path):
 
 
 def load_xlsx(path):
-    import pandas as pd
     df = pd.ExcelFile(path).parse(0)
     col = "transcript" if "transcript" in df.columns else df.columns[-1]
     for i, v in enumerate(df[col]):

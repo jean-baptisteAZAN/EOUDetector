@@ -13,6 +13,7 @@ import os
 
 import numpy as np
 import pandas as pd
+from datasets import load_dataset
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GroupKFold
 from sklearn.metrics import roc_auc_score
@@ -22,7 +23,6 @@ from .indist_fusion_camembert import embed_texts, oof
 
 
 def build_text_context_df(max_ctx_chars=240):
-    from datasets import load_dataset
     ds = load_dataset("livekit/eot-bench-data", "fr", split="validation").remove_columns(["audio"])
     rows = []
     for r in ds:

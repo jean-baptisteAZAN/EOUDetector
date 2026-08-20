@@ -234,7 +234,7 @@ def test_lang_override():
 - [ ] **Step 5: Run tests, verify they fail**
 
 Run: `pytest tests/test_types.py tests/test_config.py -v`
-Expected: FAIL — `ModuleNotFoundError: eou_detector.types`.
+Expected: FAIL, `ModuleNotFoundError: eou_detector.types`.
 
 - [ ] **Step 6: Implement `eou_detector/types.py`**
 
@@ -391,7 +391,7 @@ def test_overwrites_when_over_capacity():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_ring_buffer.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/audio/ring_buffer.py`**
 
@@ -452,7 +452,7 @@ git commit -m "feat: thread-safe rolling PCM ring buffer"
 
 ---
 
-### Task 3: AudioSource — WavStreamSource + MicSource
+### Task 3: AudioSource - WavStreamSource + MicSource
 
 **Files:**
 - Create: `eou_detector/audio/source.py`
@@ -464,10 +464,10 @@ git commit -m "feat: thread-safe rolling PCM ring buffer"
   - `AudioSource` ABC with `async def frames(self) -> AsyncIterator[bytes]` (each
     yielded item is `frame_samples*2` bytes of int16 PCM).
   - `WavStreamSource(path: str, sample_rate=16000, frame_samples=512,
-    realtime: bool=True)` — reads a wav, downmixes to mono, resamples to
+    realtime: bool=True)`: reads a wav, downmixes to mono, resamples to
     `sample_rate`, yields fixed-size frames; when `realtime=True`, paces with
     `asyncio.sleep(frame_samples/sample_rate)`; pads the final short frame.
-  - `MicSource(sample_rate=16000, frame_samples=512, device=None)` — sounddevice
+  - `MicSource(sample_rate=16000, frame_samples=512, device=None)`: sounddevice
     input stream feeding an `asyncio.Queue` from its callback thread.
   - Helper `load_wav_mono_16k(path, target_sr) -> np.ndarray[int16]` (exported for
     reuse by the eval harness).
@@ -511,7 +511,7 @@ async def test_frames_fixed_size_and_count(tmp_path):
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_wav_source.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/audio/source.py`**
 
@@ -588,7 +588,7 @@ class MicSource(AudioSource):
 - [ ] **Step 4: Run test, verify it passes**
 
 Run: `pytest tests/test_wav_source.py -v`
-Expected: PASS (2 tests). (MicSource is not unit-tested — it needs hardware.)
+Expected: PASS (2 tests). (MicSource is not unit-tested: it needs hardware.)
 
 - [ ] **Step 5: Commit**
 
@@ -599,7 +599,7 @@ git commit -m "feat: wav-stream and mic audio sources"
 
 ---
 
-### Task 4: VAD — Silero behind interface
+### Task 4: VAD - Silero behind interface
 
 **Files:**
 - Create: `eou_detector/vad/__init__.py` (empty), `eou_detector/vad/base.py`,
@@ -655,7 +655,7 @@ def test_silero_loads_and_scores_silence():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_vad.py::test_interface_threshold_behaviour -v`
-Expected: FAIL — `eou_detector.vad.base` missing.
+Expected: FAIL, `eou_detector.vad.base` missing.
 
 - [ ] **Step 3: Implement `eou_detector/vad/base.py`**
 
@@ -720,7 +720,7 @@ git commit -m "feat: Silero VAD behind swappable interface"
 
 ---
 
-### Task 5: ASR — interface, Azure (recognizing + recognized), scripted fixture
+### Task 5: ASR - interface, Azure (recognizing + recognized), scripted fixture
 
 **Files:**
 - Create: `eou_detector/asr/__init__.py` (empty), `eou_detector/asr/base.py`,
@@ -737,10 +737,10 @@ git commit -m "feat: Silero VAD behind swappable interface"
     - `def latest_partial(self) -> Partial` (snapshot; never blocks)
     - `async def stop(self) -> None`
   - `AzureSpeechASR(settings: Settings, phrase_list: list[str]|None=None,
-    segmentation_silence_ms: int=500)` — mirrors prod `azure-stt.service.ts`
+    segmentation_silence_ms: int=500)`: mirrors prod `azure-stt.service.ts`
     (PCM 16k/16/1 push stream, `fr-FR`, Detailed output, segmentation timeout),
     **plus** a `recognizing` handler updating `latest_partial`.
-  - `ScriptedASR(script: list[tuple[int, str]])` — deterministic fixture: each
+  - `ScriptedASR(script: list[tuple[int, str]])`: deterministic fixture: each
     `send_audio` advances a frame counter; `latest_partial` returns the text of
     the last script entry whose frame index `<=` counter. `final_at`/`is_final`
     handled by an optional 3rd tuple element.
@@ -774,7 +774,7 @@ def test_latest_partial_never_blocks_before_start():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_scripted_asr.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/asr/base.py`**
 
@@ -848,7 +848,7 @@ class ScriptedASR(ASR):
 Run: `pytest tests/test_scripted_asr.py -v`
 Expected: PASS (2 tests).
 
-- [ ] **Step 6: Write the Azure handler-logic test (no network — test the partial holder directly)**
+- [ ] **Step 6: Write the Azure handler-logic test (no network, test the partial holder directly)**
 
 `tests/test_azure_asr.py`:
 ```python
@@ -878,7 +878,7 @@ def test_start_without_credentials_raises():
 - [ ] **Step 7: Run test, verify it fails**
 
 Run: `pytest tests/test_azure_asr.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 8: Implement `eou_detector/asr/azure_asr.py`**
 
@@ -971,7 +971,7 @@ git commit -m "feat: ASR interface, Azure (recognizing+recognized), scripted fix
 
 ---
 
-### Task 6: Acoustic EOU — Smart Turn v3 (ONNX) + stub
+### Task 6: Acoustic EOU - Smart Turn v3 (ONNX) + stub
 
 **Files:**
 - Create: `eou_detector/eou/__init__.py` (empty), `eou_detector/eou/acoustic.py`
@@ -984,7 +984,7 @@ git commit -m "feat: ASR interface, Azure (recognizing+recognized), scripted fix
   - `AcousticEOU` ABC: `predict(self, pcm: np.ndarray) -> float` (int16 1-D in,
     `p_ac` in [0,1] out).
   - `StubAcousticEOU(value: float=0.5)` returning a constant (for tests/fallback).
-  - `SmartTurnV3(model_path: str, sample_rate=16000, window_s=8.0)` — onnxruntime
+  - `SmartTurnV3(model_path: str, sample_rate=16000, window_s=8.0)`: onnxruntime
     wrapper. Preprocess = mono float32, right-trim/left-pad to `window_s`. Input/
     output tensor names are discovered from the session (do not hard-code).
 
@@ -1051,7 +1051,7 @@ def test_smart_turn_runs_if_model_present():
 - [ ] **Step 3: Run test, verify it fails**
 
 Run: `pytest tests/test_acoustic.py::test_stub_returns_constant_in_range -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 4: Implement `eou_detector/eou/acoustic.py`**
 
@@ -1131,7 +1131,7 @@ git commit -m "feat: acoustic EOU (Smart Turn v3 ONNX) + stub"
 
 ---
 
-### Task 7: Lexical EOU — FR heuristic veto + turn-detector + composite
+### Task 7: Lexical EOU - FR heuristic veto + turn-detector + composite
 
 **Files:**
 - Create: `eou_detector/eou/lexical.py`
@@ -1141,12 +1141,12 @@ git commit -m "feat: acoustic EOU (Smart Turn v3 ONNX) + stub"
 - Consumes: `LexResult` type.
 - Produces:
   - `LexicalEOU` ABC: `predict(self, text: str) -> LexResult`.
-  - `FRHeuristicVeto()` with `check(self, text: str) -> tuple[bool, str]` — returns
+  - `FRHeuristicVeto()` with `check(self, text: str) -> tuple[bool, str]`: returns
     `(veto, reason)`; `veto=True` means "clearly mid-utterance" (spelling in
     progress, trailing connector/hesitation, open number/date). Also usable as a
     standalone `LexicalEOU` (`predict` maps veto→low `p_lex`).
-  - `TurnDetectorEOU(model_path, tokenizer_name)` — ONNX turn-detector → `p_lex`.
-  - `CompositeLexicalEOU(model: LexicalEOU|None, heuristic: FRHeuristicVeto)` —
+  - `TurnDetectorEOU(model_path, tokenizer_name)`: ONNX turn-detector → `p_lex`.
+  - `CompositeLexicalEOU(model: LexicalEOU|None, heuristic: FRHeuristicVeto)`:
     `p_lex` from the model (or 0.5 if no model); if heuristic vetoes, force
     `p_lex = min(p_lex, 0.1)` and `veto=True`.
 
@@ -1199,7 +1199,7 @@ def test_composite_model_score_passthrough_when_no_veto():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_lexical.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/eou/lexical.py`**
 
@@ -1325,7 +1325,7 @@ git commit -m "feat: lexical EOU (FR heuristic veto + turn-detector + composite)
 
 ---
 
-### Task 8: Fusion — RuleFusion (bilateral veto) + LogisticFusion swap
+### Task 8: Fusion - RuleFusion (bilateral veto) + LogisticFusion swap
 
 **Files:**
 - Create: `eou_detector/fusion/__init__.py` (empty), `eou_detector/fusion/base.py`,
@@ -1336,9 +1336,9 @@ git commit -m "feat: lexical EOU (FR heuristic veto + turn-detector + composite)
 - Consumes: `Settings`, `FusionInput`, `FusionResult`.
 - Produces:
   - `Fusion` ABC: `fuse(self, x: FusionInput) -> FusionResult`.
-  - `RuleFusion(settings: Settings)` — bilateral veto; always returns `p_eou` +
+  - `RuleFusion(settings: Settings)`: bilateral veto; always returns `p_eou` +
     decision + `required_silence_ms` + reason.
-  - `LogisticFusion(settings, weights: dict)` — same interface, `p_eou` from a
+  - `LogisticFusion(settings, weights: dict)`: same interface, `p_eou` from a
     logistic on `[p_ac, p_lex, p_ac*p_lex, silence_ms_norm]`; reuses the same
     silence-policy mapping as `RuleFusion` (shared helper `required_silence`).
 
@@ -1398,7 +1398,7 @@ def test_logistic_same_interface():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_fusion.py -v`
-Expected: FAIL — modules missing.
+Expected: FAIL, modules missing.
 
 - [ ] **Step 3: Implement `eou_detector/fusion/base.py`**
 
@@ -1510,7 +1510,7 @@ git commit -m "feat: rule-based bilateral-veto fusion + logistic swap"
 
 ---
 
-### Task 9: EndpointController — dynamic silence policy over time
+### Task 9: EndpointController - dynamic silence policy over time
 
 **Files:**
 - Create: `eou_detector/endpoint/__init__.py` (empty),
@@ -1570,7 +1570,7 @@ def test_catch_all_forces_endpoint_on_low_confidence():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_endpoint.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/endpoint/controller.py`**
 
@@ -1612,7 +1612,7 @@ git commit -m "feat: dynamic-silence endpoint controller with max catch-all"
 
 ---
 
-### Task 10: Orchestrator — asyncio pipeline wiring it all
+### Task 10: Orchestrator - asyncio pipeline wiring it all
 
 **Files:**
 - Create: `eou_detector/orchestrator.py`
@@ -1624,7 +1624,7 @@ git commit -m "feat: dynamic-silence endpoint controller with max catch-all"
 - Produces:
   - `Orchestrator(settings, source, vad, asr, acoustic, lexical, fusion,
     endpoint, on_decision: Callable[[Decision], None])`.
-  - `async def run(self) -> None` — consumes frames; gates via VAD; on a
+  - `async def run(self) -> None`: consumes frames; gates via VAD; on a
     speech→silence pause sustained `min_silence_ms`, evaluates acoustic+lexical,
     fuses, applies the endpoint policy, and calls `on_decision` for every
     evaluation; emits a final `ENDPOINT` decision then resets per turn.
@@ -1709,7 +1709,7 @@ def test_spelling_partial_is_held_by_veto():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_orchestrator.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eou_detector/orchestrator.py`**
 
@@ -1833,7 +1833,7 @@ git commit -m "feat: asyncio orchestrator wiring VAD/ASR/EOU/fusion/endpoint"
 
 ---
 
-### Task 11: demo.py — real-time mic/wav runner with live logging
+### Task 11: demo.py - real-time mic/wav runner with live logging
 
 **Files:**
 - Create: `demo.py`
@@ -1872,7 +1872,7 @@ def test_format_decision_contains_fields():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_demo_smoke.py -v`
-Expected: FAIL — `demo` module / `format_decision` missing.
+Expected: FAIL, `demo` module / `format_decision` missing.
 
 - [ ] **Step 3: Implement `demo.py`**
 
@@ -1971,7 +1971,7 @@ git commit -m "feat: real-time mic/wav demo with live decision logging"
 
 ---
 
-### Task 12: Eval harness — labelled clips → accuracy / FP / FN / latency
+### Task 12: Eval harness - labelled clips → accuracy / FP / FN / latency
 
 **Files:**
 - Create: `eval/__init__.py` (empty), `eval/metrics.py`, `eval/harness.py`
@@ -1984,17 +1984,17 @@ git commit -m "feat: real-time mic/wav demo with live decision logging"
   - `eval/metrics.py`:
     - `ClipResult(label: str, predicted_finished: bool, latency_ms: float|None)`
       dataclass.
-    - `evaluate_clip(decisions: list[Decision], settings) -> tuple[bool, float|None]`
-      — `predicted_finished` = an `ENDPOINT` fired **before** the max-silence
+    - `evaluate_clip(decisions: list[Decision], settings) -> tuple[bool, float|None]`:
+      `predicted_finished` = an `ENDPOINT` fired **before** the max-silence
       catch-all (i.e. a genuine semantic decision); `latency_ms` = time from
       silence onset to that ENDPOINT (the decision's `silence_ms`). Returns
       `(False, None)` if only the catch-all fired.
-    - `summarize(results: list[ClipResult]) -> dict` — `accuracy`,
+    - `summarize(results: list[ClipResult]) -> dict`: `accuracy`,
       `false_positives` (label `pas_fini` predicted finished),
       `false_negatives` (label `fini` not predicted finished),
       `median_latency_ms`, `p90_latency_ms`, `n`.
   - `eval/harness.py`: `python -m eval.harness [--asr scripted|azure]
-    [--acoustic stub|smart_turn]` — walks `clips/{fini,pas_fini}`, replays each
+    [--acoustic stub|smart_turn]`, walks `clips/{fini,pas_fini}`, replays each
     wav (non-realtime) through the orchestrator, prints the summary table.
 
 - [ ] **Step 1: Write the failing test**
@@ -2043,7 +2043,7 @@ def test_summarize_counts_fp_fn_and_latency():
 - [ ] **Step 2: Run test, verify it fails**
 
 Run: `pytest tests/test_metrics.py -v`
-Expected: FAIL — module missing.
+Expected: FAIL, module missing.
 
 - [ ] **Step 3: Implement `eval/metrics.py`**
 
@@ -2192,7 +2192,7 @@ Expected: prints per-clip lines + a SUMMARY block.
 
 ```bash
 git add eval/ tests/test_metrics.py
-git commit -m "feat: eval harness — accuracy, FP/FN, latency over labelled clips"
+git commit -m "feat: eval harness - accuracy, FP/FN, latency over labelled clips"
 ```
 
 ---
@@ -2238,7 +2238,7 @@ export AZURE_STT_REGION=...       # = prod AZURE_STT_REGION
 # or: source the prod .env directly
 ```
 
-Language is `fr-FR`, audio is 16 kHz / mono / 16-bit PCM — matching prod. The
+Language is `fr-FR`, audio is 16 kHz / mono / 16-bit PCM, matching prod. The
 POC's Azure ASR mirrors `azure-stt.service.ts` and additionally subscribes to the
 `recognizing` event to obtain real-time partials for the lexical branch (prod
 stays final-only and is untouched).
@@ -2288,7 +2288,7 @@ partial; only the acoustic ONNX runs on the decision path.
 
 `RuleFusion` applies a bilateral veto (lexical or acoustic strongly mid-turn →
 WAIT) and returns a probability `p_eou`. To switch to a learned model, drop in
-`LogisticFusion` (same `Fusion` interface) — no caller changes.
+`LogisticFusion` (same `Fusion` interface), no caller changes.
 
 ### Extension point: a new ASR
 
@@ -2307,14 +2307,14 @@ high/mid, short/med/long/max silence). Defaults are POC starting points.
 - [ ] **Step 2: Run the full test suite**
 
 Run: `pytest -v`
-Expected: PASS — all unit tests green; integration tests (Silero, Smart Turn,
+Expected: PASS, all unit tests green; integration tests (Silero, Smart Turn,
 Azure) skip cleanly when models/creds/hardware are absent.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add README.md
-git commit -m "docs: README — quickstart, Azure config, extension points"
+git commit -m "docs: README - quickstart, Azure config, extension points"
 ```
 
 ---
@@ -2326,7 +2326,7 @@ git commit -m "docs: README — quickstart, Azure config, extension points"
   with `recognizing` partials reusing prod creds (T5), mic + wav stream input
   (T3), never-block-on-lexical (T10 snapshot read), demo (T11), eval harness
   (T12), README (T13). All §-sections of the design map to a task.
-- **Latency constraint:** enforced in T10 — only `acoustic.predict` is awaited
+- **Latency constraint:** enforced in T10, only `acoustic.predict` is awaited
   (in an executor); lexical is a plain `latest_partial()` read.
 - **Decoupling:** every module is an ABC with at least one alternate impl
   (Stub/Scripted/Logistic) proving swappability.
@@ -2334,6 +2334,6 @@ git commit -m "docs: README — quickstart, Azure config, extension points"
   `Partial` field names are identical across T1 definitions and all consumers.
 - **Known follow-ups for the implementer:** confirm Smart Turn v3 ONNX I/O names
   + preprocessing against the model card (T6 note); optionally wire a real
-  turn-detector model into `TurnDetectorEOU` (T7) — heuristic-only is the
+  turn-detector model into `TurnDetectorEOU` (T7): heuristic-only is the
   default and passes all tests.
 ```

@@ -4,7 +4,7 @@ from typing import Mapping, Optional
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()  # load .env into os.environ if present
+    load_dotenv()
 except Exception:
     pass
 

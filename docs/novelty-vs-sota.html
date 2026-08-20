@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Novelty vs State of the Art — Semantically-Aware EOU</title>
+<title>Novelty vs State of the Art: Semantically-Aware EOU</title>
 <style>
   body{max-width:820px;margin:0 auto;padding:48px 24px 96px;
     font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -29,7 +29,7 @@
 <header>
   <p class="meta">MSc · state-of-the-art positioning</p>
   <h1>Novelty vs the State of the Art.</h1>
-  <p>Fusing acoustic and lexical cues for turn detection is a crowded 2026 area. The mechanism isn't the contribution — the <em>decision</em> is.</p>
+  <p>Fusing acoustic and lexical cues for turn detection is a crowded 2026 area. The mechanism isn't the contribution: the <em>decision</em> is.</p>
   <p>companion: <a href="architecture.html">architecture &amp; flows →</a></p>
 </header>
 
@@ -39,7 +39,7 @@
 <section id="thesis">
   <p class="meta">01</p>
   <h2>The unclaimed conjunction</h2>
-  <p>Across five systems (2024–2026), the two pillars of our approach each appear <em>separately</em> — but never together, and <b>no system reports any calibration diagnostic</b>.</p>
+  <p>Across five systems (2024-2026), the two pillars of our approach each appear <em>separately</em>, but never together, and <b>no system reports any calibration diagnostic</b>.</p>
   <div class="note">
     <p><strong>Contribution · one line</strong></p>
     <p>A streaming EOU detector that fuses acoustic + lexical into a calibrated completion probability, and decides via a cost-sensitive optimal-stopping rule.</p>
@@ -79,7 +79,7 @@
       <tr>
         <td>Ours</td>
         <td>✓ Smart Turn + CamemBERT</td><td>optimal-stopping on cost</td>
-        <td>✓ ECE</td><td>✓ explicit cost model</td><td>fr, streaming</td><td>—</td>
+        <td>✓ ECE</td><td>✓ explicit cost model</td><td>fr, streaming</td><td>-</td>
       </tr>
     </tbody>
   </table>
@@ -92,9 +92,9 @@
   <h2>What we add, vs whom</h2>
   <ul>
     <li><strong>vs FastTurn / JAL-Turn</strong><br>They fuse acoustic + lexical, but decide by argmax / τ=0.5 on uncalibrated scores. Calibration + an optimal-stopping decision.</li>
-    <li><strong>vs Endpoint Anticipation</strong><br>The only cost-aware system — but acoustic-only, uncalibrated, per-horizon threshold. Lexical fusion + calibration + sequential optimal stopping with an explicit cost.</li>
+    <li><strong>vs Endpoint Anticipation</strong><br>The only cost-aware system, but acoustic-only, uncalibrated, per-horizon threshold. Lexical fusion + calibration + sequential optimal stopping with an explicit cost.</li>
     <li><strong>vs French terminality</strong><br>French + fusion, but offline classification of a pre-segmented chunk. Streaming real-time endpointing + calibration + cost.</li>
-    <li><strong>vs the field</strong><br>Survey: 72% of works don't compare to prior; ⅓ use no public corpus; nobody calibrates. A calibrated, comparable evaluation — a contribution in itself.</li>
+    <li><strong>vs the field</strong><br>Survey: 72% of works don't compare to prior; ⅓ use no public corpus; nobody calibrates. A calibrated, comparable evaluation: a contribution in itself.</li>
   </ul>
 </section>
 
@@ -105,8 +105,8 @@
   <table>
     <thead><tr><th>Metric</th><th>Definition</th><th>Role</th></tr></thead>
     <tbody>
-      <tr><td>Cut-in rate</td><td>FP / (FP+TN) — non-endpoints wrongly triggered (interruptions)</td><td>primary error ↓</td></tr>
-      <tr><td>Miss rate</td><td>FN / (TP+FN) — real turn-ends missed → added latency</td><td>error ↓</td></tr>
+      <tr><td>Cut-in rate</td><td>FP / (FP+TN): non-endpoints wrongly triggered (interruptions)</td><td>primary error ↓</td></tr>
+      <tr><td>Miss rate</td><td>FN / (TP+FN): real turn-ends missed → added latency</td><td>error ↓</td></tr>
       <tr><td>F1 (shift)</td><td>precision/recall harmonic mean on end-of-turn</td><td>quality</td></tr>
       <tr><td>Endpoint latency</td><td>ms from true end-of-turn to trigger; median + p90</td><td>speed ↓</td></tr>
       <tr><td>Operating curve</td><td>latency vs cut-in, swept over the cost ratio</td><td>headline (Pareto)</td></tr>
@@ -122,9 +122,9 @@
   <p class="meta">05</p>
   <h2>Baselines (reproducible on one GPU)</h2>
   <ul>
-    <li><strong>VAP — field-standard hold/shift</strong><br><code>github.com/ErikEkstedt/VAP</code><br>The natural first baseline; small, pretrained.</li>
-    <li><strong>Endpoint Anticipation — the cost/latency competitor</strong><br><code>github.com/bloodraven66/EndpointAnticipation · + Full-Duplex-Bench</code><br>The system to beat on the cost/latency framing.</li>
-    <li><strong>French termClassif — French fusion reference</strong><br><code>github.com/ina-foss/termClassif</code><br>Code + data; offline, French.</li>
+    <li><strong>VAP: field-standard hold/shift</strong><br><code>github.com/ErikEkstedt/VAP</code><br>The natural first baseline; small, pretrained.</li>
+    <li><strong>Endpoint Anticipation: the cost/latency competitor</strong><br><code>github.com/bloodraven66/EndpointAnticipation · + Full-Duplex-Bench</code><br>The system to beat on the cost/latency framing.</li>
+    <li><strong>French termClassif: French fusion reference</strong><br><code>github.com/ina-foss/termClassif</code><br>Code + data; offline, French.</li>
     <li><strong>Own ablations</strong><br><code>acoustic-only · lexical-only · fusion+fixed-threshold · VAD+timeout</code><br>Fusion+fixed-threshold isolates the optimal-stopping gain; VAD+timeout is the incumbent.</li>
     <li><strong>Benchmarks / data</strong><br><code>FastTurn test set · Easy-Turn / smart-turn STurn-v3 (HF) · TurnGPT</code><br>Released turn-labelled sets + a text-only EOU-probability baseline.</li>
   </ul>
@@ -139,14 +139,14 @@
     <li>Plot latency-vs-cut-in for every baseline + ours; show Pareto domination.</li>
     <li>Reliability diagram + ECE, ours vs baselines (they report none).</li>
     <li>Per-category hold-rate on hard cases (spelling / number / date / hesitation).</li>
-    <li>Report CPU ms/decision + params — efficiency vs LLM-based SOTA.</li>
+    <li>Report CPU ms/decision + params: efficiency vs LLM-based SOTA.</li>
   </ol>
   <div class="note">
     <p><strong>Say this plainly in the meeting</strong></p>
     <ul>
-      <li><b>Endpoint Anticipation is close</b> — it is genuinely cost-aware. Our edge is <b>lexical fusion + calibration + true sequential optimal stopping</b>, not "cost-awareness" alone.</li>
-      <li>FastTurn / JAL-Turn / EPA are <b>2026 pre-prints</b> — numbers may shift; cite as very recent.</li>
-      <li>Everything downstream needs the <b>labelled audio with t_end</b> — latency, the operating curve, and calibration all derive from it. Data is the gating dependency.</li>
+      <li><b>Endpoint Anticipation is close</b>: it is genuinely cost-aware. Our edge is <b>lexical fusion + calibration + true sequential optimal stopping</b>, not "cost-awareness" alone.</li>
+      <li>FastTurn / JAL-Turn / EPA are <b>2026 pre-prints</b>: numbers may shift; cite as very recent.</li>
+      <li>Everything downstream needs the <b>labelled audio with t_end</b>: latency, the operating curve, and calibration all derive from it. Data is the gating dependency.</li>
     </ul>
   </div>
 </section>

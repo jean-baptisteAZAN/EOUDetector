@@ -1,4 +1,4 @@
-# Semantic End-of-Utterance (EOU) Detector — POC Design
+# Semantic End-of-Utterance (EOU) Detector: POC Design
 
 **Date:** 2026-06-26
 **Status:** Approved (design), pre-implementation
@@ -28,7 +28,7 @@ The POC targets clean integration with the production NestJS system at
 |---|---|---|
 | ASR | Azure Speech SDK, `fr-FR`, PCM **16kHz/16-bit/mono** push-stream | Same SDK/format/lang, reuse creds |
 | ASR creds (env) | `AZURE_STT_API_KEY`, `AZURE_STT_REGION` | **Reuse same env vars** (`source` prod `.env`) |
-| ASR events | **`recognized` (final) only** — no interim today | POC **adds `recognizing`** handler for real-time partials (non-invasive; prod unchanged) |
+| ASR events | **`recognized` (final) only**, no interim today | POC **adds `recognizing`** handler for real-time partials (non-invasive; prod unchanged) |
 | Endpoint today | Azure `Speech_SegmentationSilenceTimeoutMs` (500ms default, 1700ms for `+33939240743`) + orchestrator frame-count (`SPEECH_FRAMES_THRESHOLD=5`) | Semantic layer augments this; dynamic timeout mirrors `updateSilenceTimeoutMs()` pattern |
 | VAD | Separate **WebSocket microservice** (`ws://HOST:PORT/vad` → `{callSid,isSpeech}`) | POC runs **Silero in-process** behind a `VAD` interface; WS-adapter is the documented swap |
 | STT interface | `ISttService` (`createSttConnection / sendAudio / stopSttConnection / updateSilenceTimeoutMs`) | Python `ASR` interface mirrors this conceptually |
@@ -136,7 +136,7 @@ class Fusion:
 2. Silero per-frame → speech/silence. On a **speech→silence edge** sustained for
    `MIN_SILENCE_MS` (~200 ms) → fire **evaluation** (the "micro-pause" trigger).
 3. **Acoustic**: `SmartTurnV3.predict(recent_window)` → `p_ac` (in executor,
-   ~25–80 ms).
+   ~25-80 ms).
 4. **Lexical**: read `asr.latest_partial()` (atomic snapshot, **never awaits the
    ASR**) → `LexicalEOU.predict(text)` → `p_lex` (+ veto flag).
 5. **Fusion**: `RuleFusion.fuse(FusionInput{...})` → `FusionResult`.
@@ -193,21 +193,21 @@ fixed.
 
 ## 6. Latency Guarantee
 
-The only compute on the decision path is the **acoustic ONNX** call (~25–80 ms).
+The only compute on the decision path is the **acoustic ONNX** call (~25-80 ms).
 Lexical is a pointer read of the newest partial. If acoustic overruns its
 budget, fuse **lexical-only** (or last `p_ac`) and proceed. **The decision never
-blocks on ASR lag** — it always uses the freshest partial available, even if
+blocks on ASR lag**: it always uses the freshest partial available, even if
 slightly stale. This satisfies the hard real-time constraint.
 
 ## 7. Deliverables
 
-1. **`demo.py`** — takes a stream (`--mic` or `--wav FILE`) and logs in real time:
+1. **`demo.py`**: takes a stream (`--mic` or `--wav FILE`) and logs in real time:
    `t  p_ac  p_lex  p_eou  decision  required_silence_ms  latency_ms  reason`.
-2. **`eval/harness.py`** — points at `clips/{fini,pas_fini}/*.wav`, replays each
+2. **`eval/harness.py`**: points at `clips/{fini,pas_fini}/*.wav`, replays each
    as a stream, outputs **accuracy, false-positive / false-negative counts,
    median (and p90) decision latency**. Optional `--record` to cache Azure
    partials for offline re-runs.
-3. **`README.md`** — quickstart, Azure config (reuse prod creds via env / source
+3. **`README.md`**: quickstart, Azure config (reuse prod creds via env / source
    prod `.env`), and the **extension point for a new ASR** (implement `ASR`).
 
 ## 8. Configuration (env)
@@ -226,7 +226,7 @@ slightly stale. This satisfies the hard real-time constraint.
   `WavStreamSource` pacing; `RingBuffer` thread-safety.
 - **Integration**: `WavStreamSource` → full orchestrator with a **fake/recorded
   ASR partial track** so the fusion + endpoint path is testable without network.
-- **Eval**: labelled clip harness (§7.2) is the acceptance metric — target:
+- **Eval**: labelled clip harness (§7.2) is the acceptance metric, target:
   eliminate the three FP classes (spelling / chunked numbers / thinking pauses)
   without raising false-negative cut latency on genuinely-finished turns.
 
@@ -239,8 +239,8 @@ WS-adapter documented as the swap).
 ## 11. Open Risks
 
 - Turn-detector model French quality on **isolated partial utterances** (vs
-  multi-turn chat context it was trained on) — mitigated by the FR heuristic veto.
-- Smart Turn v3 window length / preprocessing must match the model card — verify
+  multi-turn chat context it was trained on), mitigated by the FR heuristic veto.
+- Smart Turn v3 window length / preprocessing must match the model card: verify
   on download.
-- Azure partial (`recognizing`) cadence/stability for `fr-FR` — measure during
+- Azure partial (`recognizing`) cadence/stability for `fr-FR`: measure during
   build; `latest_partial` staleness is by-design tolerated.
