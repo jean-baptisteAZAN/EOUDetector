@@ -32,7 +32,7 @@ import os
 
 import numpy as np
 import soundfile as sf
-from datasets import Dataset, Audio, Features, Value, Sequence
+from datasets import Dataset, Audio, Features, Value, List
 
 MIN_SILENCE_S = 0.1   # eot-bench drops spans shorter than this
 
@@ -108,11 +108,14 @@ def build_rows(export_path, audio_dir):
             spans = silence_spans(group)
             if not spans:
                 continue
+            dur = max((sp["end"] for sp in spans), default=0.0)
             rows.append({
                 "id": f"{uuid}__{gi}",
                 "language": "fr",
                 "audio": audio,                 # None if the wav is missing
+                "duration": float(dur),
                 "silence_spans": spans,          # last = eot, earlier = hold
+                "words": [],                     # word-level timings not exported
                 "messages": messages_from(group),
             })
     return rows
@@ -132,12 +135,16 @@ def main():
         print("no rows; check the export/audio paths and the turn signals")
         return
 
+    # Match the real livekit/eot-bench-data schema exactly (List of structs,
+    # float64, plus duration and words) so the harness loads it identically.
     features = Features({
         "id": Value("string"),
+        "audio": Audio(sampling_rate=16000),
         "language": Value("string"),
-        "audio": Audio(),
-        "silence_spans": Sequence({"start": Value("float32"), "end": Value("float32")}),
-        "messages": Sequence({"role": Value("string"), "content": Value("string")}),
+        "duration": Value("float64"),
+        "silence_spans": List({"start": Value("float64"), "end": Value("float64")}),
+        "words": List({"start": Value("float64"), "end": Value("float64"), "word": Value("string")}),
+        "messages": List({"role": Value("string"), "content": Value("string")}),
     })
     # datasets.Audio expects paths or {array, sampling_rate}; keep as-is
     ds = Dataset.from_list(rows, features=features)

@@ -44,14 +44,15 @@ the in-domain validation set.</p>
 <table>
   <tr><td class="file"><a href="docs/thesis-draft.md">docs/thesis-draft.md</a></td><td class="desc">Dissertation draft: methodology, related work, experiments, results, discussion.</td></tr>
   <tr><td class="file"><a href="docs/results.html">docs/results.html</a></td><td class="desc">Results report: fusion, calibration, cost-sensitive operating points, limitations.</td></tr>
+  <tr><td class="file"><a href="docs/how-it-works.html">docs/how-it-works.html</a></td><td class="desc">Plain-language visual overview: the problem and what the system adds, no technical background needed.</td></tr>
   <tr><td class="file"><a href="docs/reproduce.md">docs/reproduce.md</a></td><td class="desc">Step-by-step reproduction of every result.</td></tr>
 </table>
 
 <h2>Source code: evaluation and method</h2>
 <table>
   <tr><td class="file"><a href="eou_detector/eval/eot_fusion_adapter.py">eot_fusion_adapter.py</a></td><td class="desc">Benchmark adapter fusing acoustic + lexical into an end-of-turn probability.</td></tr>
-  <tr><td class="file"><a href="eou_detector/eval/indist_fusion_camembert.py">indist_fusion_camembert.py</a></td><td class="desc">Main fusion experiment (CamemBERT embeddings), AUC 0.900.</td></tr>
-  <tr><td class="file"><a href="eou_detector/eval/indist_fusion.py">indist_fusion.py</a></td><td class="desc">Fusion with a TF-IDF lexical baseline (AUC 0.876).</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/indist_fusion_camembert.py">indist_fusion_camembert.py</a></td><td class="desc">Main fusion experiment (CamemBERT embeddings), AUC 0.897.</td></tr>
+  <tr><td class="file"><a href="eou_detector/eval/indist_fusion.py">indist_fusion.py</a></td><td class="desc">Fusion with a TF-IDF lexical baseline (AUC 0.872).</td></tr>
   <tr><td class="file"><a href="eou_detector/eval/calibration_study.py">calibration_study.py</a></td><td class="desc">Calibration analysis across the leaderboard (Expected Calibration Error).</td></tr>
   <tr><td class="file"><a href="eou_detector/eval/decision_layer.py">decision_layer.py</a></td><td class="desc">Calibration plus cost-sensitive operating-point selection.</td></tr>
   <tr><td class="file"><a href="eou_detector/eval/sequential_stopping.py">sequential_stopping.py</a></td><td class="desc">Time-aware threshold experiment (reported negative result).</td></tr>
@@ -78,6 +79,11 @@ the in-domain validation set.</p>
   <tr><td class="file"><a href="webdemo.py">webdemo.py</a>, <a href="web/index.html">web/index.html</a></td><td class="desc">Live browser demo: record from the mic and watch p_ac / p_lex / p_eou and ENDPOINT/WAIT at each pause (same EouSession core).</td></tr>
   <tr><td class="file"><a href="demo.py">demo.py</a>, <a href="README.md">README.md</a>, <a href="requirements.txt">requirements.txt</a>, <a href="LICENSE">LICENSE</a></td><td class="desc">CLI demo entry point, readme, dependencies, licence.</td></tr>
   <tr><td class="file"><a href="tests/">tests/</a>, <a href="scripts/">scripts/</a></td><td class="desc">Unit tests; production data-export and model-download scripts.</td></tr>
+</table>
+
+<h2>Demonstration (software in action)</h2>
+<table>
+  <tr><td class="file"><a href="docs/demo-video.mp4">demo-video.mp4</a></td><td class="desc">Screen recording of the live web demo: speaking French into the microphone while the acoustic, text and fusion probabilities and the ENDPOINT/WAIT decisions update in real time.</td></tr>
 </table>
 
 <h2>Design, planning and research</h2>

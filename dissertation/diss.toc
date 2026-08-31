@@ -1,0 +1,45 @@
+\contentsline {chapter}{\numberline {1}Introduction}{9}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Aims and objectives}{10}{section.1.1}%
+\contentsline {chapter}{\numberline {2}Background and Related Work}{11}{chapter.2}%
+\contentsline {section}{\numberline {2.1}The turn problem inside a conversation between two humans}{11}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Tools and technologies}{12}{section.2.2}%
+\contentsline {section}{\numberline {2.3}Calibration and cost-sensitive decision}{13}{section.2.3}%
+\contentsline {section}{\numberline {2.4}Related work on end-of-turn detection}{14}{section.2.4}%
+\contentsline {section}{\numberline {2.5}The gap addressed}{16}{section.2.5}%
+\contentsline {chapter}{\numberline {3}Design and Trade-Off Analysis}{17}{chapter.3}%
+\contentsline {section}{\numberline {3.1}The central trade-off: latency against interruption}{17}{section.3.1}%
+\contentsline {section}{\numberline {3.2}Which data trains, and which data validates}{17}{section.3.2}%
+\contentsline {section}{\numberline {3.3}Late fusion rather than a jointly trained model}{18}{section.3.3}%
+\contentsline {section}{\numberline {3.4}The lexical model: frozen embeddings rather than fine-tuning}{18}{section.3.4}%
+\contentsline {section}{\numberline {3.5}A decision that never blocks on the transcript}{19}{section.3.5}%
+\contentsline {section}{\numberline {3.6}The form of the fusion}{19}{section.3.6}%
+\contentsline {section}{\numberline {3.7}Calibrating before deciding}{20}{section.3.7}%
+\contentsline {section}{\numberline {3.8}Deciding from a cost rather than a fixed timeout}{20}{section.3.8}%
+\contentsline {chapter}{\numberline {4}System Architecture and Implementation}{21}{chapter.4}%
+\contentsline {section}{\numberline {4.1}A modular architecture behind interfaces}{21}{section.4.1}%
+\contentsline {section}{\numberline {4.2}The real-time path}{21}{section.4.2}%
+\contentsline {section}{\numberline {4.3}The two branches and the recogniser}{23}{section.4.3}%
+\contentsline {section}{\numberline {4.4}Fusion and the endpoint controller}{23}{section.4.4}%
+\contentsline {section}{\numberline {4.5}Demonstrations and evaluation tooling}{24}{section.4.5}%
+\contentsline {section}{\numberline {4.6}Production instrumentation}{24}{section.4.6}%
+\contentsline {section}{\numberline {4.7}Testing and verification}{25}{section.4.7}%
+\contentsline {chapter}{\numberline {5}Results and Evaluation}{26}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Evaluation protocol}{26}{section.5.1}%
+\contentsline {section}{\numberline {5.2}Fusion against the acoustic baseline}{26}{section.5.2}%
+\contentsline {section}{\numberline {5.3}Where the gain comes from}{28}{section.5.3}%
+\contentsline {section}{\numberline {5.4}Calibration}{29}{section.5.4}%
+\contentsline {section}{\numberline {5.5}The cost-derived operating point}{31}{section.5.5}%
+\contentsline {section}{\numberline {5.6}Negative results}{32}{section.5.6}%
+\contentsline {section}{\numberline {5.7}In-domain validation}{32}{section.5.7}%
+\contentsline {chapter}{\numberline {6}Conclusions and Future Work}{34}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Conclusions}{34}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Evaluation against the objectives}{35}{section.6.2}%
+\contentsline {section}{\numberline {6.3}Future work}{36}{section.6.3}%
+\contentsline {chapter}{\numberline {A}Ethics and Data Handling}{37}{appendix.A}%
+\contentsline {section}{\numberline {A.1}Context and partnership}{37}{section.A.1}%
+\contentsline {section}{\numberline {A.2}Data used}{37}{section.A.2}%
+\contentsline {section}{\numberline {A.3}Legal basis}{38}{section.A.3}%
+\contentsline {section}{\numberline {A.4}Pseudonymisation, not anonymisation}{38}{section.A.4}%
+\contentsline {section}{\numberline {A.5}Reduced human exposure}{38}{section.A.5}%
+\contentsline {section}{\numberline {A.6}Storage, access and the corpus}{38}{section.A.6}%
+\contentsline {section}{\numberline {A.7}Risks and mitigations}{39}{section.A.7}%

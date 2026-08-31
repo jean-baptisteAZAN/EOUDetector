@@ -1,0 +1,203 @@
+\chapter{System Architecture and Implementation}
+\label{ch:implementation}
+
+\section{A modular architecture behind interfaces}
+\label{sec:architecture}
+
+The system is a Python package organised into modules, each behind an abstract interface,
+so that a component can be replaced without touching the rest
+(Figure~\ref{fig:architecture}). There is an audio source
+(\texttt{AudioSource}), a voice activity detector (\texttt{VAD}), a speech recogniser
+(\texttt{ASR}), the two end-of-turn branches (\texttt{AcousticEOU} and
+\texttt{LexicalEOU}), the fusion (\texttt{Fusion}) and the endpoint controller. This
+follows directly from the late-fusion choice of Section~\ref{sec:latefusion}: the
+recogniser or the detector can be exchanged, a client to an existing microservice in place
+of the in-process model, without the decision logic changing at all.
+
+The decision core is isolated from transport in a per-call session,
+\texttt{EouSession}. The session takes raw 16\,kHz mono audio and the latest partial
+transcript, and emits a decision at each micro-pause. It is driven by an \texttt{Orchestrator}, which owns an audio source and a recogniser for
+the demonstrations and the evaluation harness, and by the WebSocket service, which drives a
+session directly.
+Both reach the same code, so there is one decision path and not two.
+
+The session carries an explicit statefulness contract, which matters in production:
+the heavy models may be shared across concurrent calls, but the VAD holds state and must be
+instantiated per session.
+
+\section{The real-time path}
+\label{sec:realtime}
+
+The audio source emits frames of 512 samples at 16\,kHz, that is 32\,ms. In production the
+transport does not respect that framing, since telephony delivers 20\,ms frames, so the
+session accepts a chunk of arbitrary length and re-frames it internally to the fixed size
+the VAD expects. Each frame is written to a ring buffer holding the last eight seconds of
+signal, passed to the recogniser, and labelled speech or silence by the VAD. When a
+speech-to-silence transition lasts beyond 200\,ms, an evaluation is triggered. That is the
+micro-pause at which the system decides to end the turn or to wait, and an internal latch
+guarantees it fires at most once per turn.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+  font=\small,
+  box/.style={draw=black!60, rounded corners=1.5pt, align=center,
+              minimum height=9mm, inner xsep=2.5mm, inner ysep=1.5mm},
+  fl/.style={-{Stealth[length=2mm]}, draw=black!60},
+  sn/.style={-{Stealth[length=2mm]}, draw=black!60, dashed}]
+
+\node[box] (src)  at (0,0)      {Audio source\\\footnotesize 512 samples / 32\,ms};
+\node[box] (asr)  at (0,2.0)    {ASR (Azure)\\\footnotesize interim hypotheses};
+\node[box] (ring) at (0,-2.0)   {Ring buffer\\\footnotesize last 8\,s};
+\node[box] (vad)  at (4.3,0)    {VAD\\\footnotesize speech / silence};
+\node[box] (gate) at (8.2,0)    {Micro-pause\\\footnotesize silence $>$ 200\,ms};
+\node[box] (ac)   at (12.6,1.6) {Acoustic branch\\\footnotesize Smart Turn v3};
+\node[box] (lex)  at (12.6,-1.6){Lexical branch\\\footnotesize CamemBERT};
+\node[box] (fus)  at (16.9,0)   {Fusion\\\footnotesize \texttt{RuleFusion}};
+\node[box] (ep)   at (20.9,0)   {Endpoint\\\footnotesize controller};
+\node      (out)  at (24.2,0)   {\textbf{END} / \textbf{WAIT}};
+
+\draw[fl] (src) -- (vad);
+\draw[fl] (src) -- (asr);
+\draw[fl] (src) -- (ring);
+\draw[fl] (vad) -- (gate);
+\draw[fl] (gate) |- (ac);
+\draw[fl] (gate) |- (lex);
+\draw[fl] (ring) -| (ac);
+\draw[sn] (asr)  -| (lex) node[midway, above, font=\footnotesize] {snapshot, never awaited};
+\draw[fl] (ac) -| (fus);
+\draw[fl] (lex) -| (fus);
+\draw[fl] (fus) -- (ep);
+\draw[fl] (ep) -- (out);
+
+\begin{scope}[on background layer]
+\node[draw=black!35, dashed, rounded corners=2pt, fit=(ac)(lex),
+      inner sep=3.5mm, label={[font=\footnotesize, black!55]below:%
+      concurrent, in an executor}] {};
+\end{scope}
+\end{tikzpicture}}
+\caption[Pipeline architecture]{The decision pipeline. Every frame feeds the ring buffer,
+the recogniser and the VAD. A speech-to-silence transition beyond 200\,ms triggers an
+evaluation, in which the two branches run concurrently off the event loop. The lexical branch reads the latest partial transcript as a snapshot, so the decision never waits on
+the recogniser; both model calls are awaited, and the added latency is the slower of the
+two. The fusion shown is \texttt{RuleFusion}, the variant the system runs; the learned
+form of Equation~\ref{eq:fusion} substitutes behind the same interface but is evaluated
+offline only.}
+\label{fig:architecture}
+\end{figure}
+
+The session keeps two clocks. Silence duration is
+measured on an audio-sample clock, advanced by the frame duration, so a given recording
+always produces the same timing regardless of how fast the machine runs. Wall-clock time is
+used for one thing only: measuring how long the models took. A system timing silence by wall clock would behave differently on a loaded machine and on an
+idle one, and a replayed clip would not reproduce its own earlier result. This does not
+affect Chapter~\ref{ch:results}, whose figures come from stored predictions; it matters for
+the live pipeline and the clip-replay harness.
+
+At the moment of evaluation the acoustic and lexical branches are computed concurrently,
+off the event loop in an executor, so that incoming frames continue to be processed. The partial transcript is read as a local snapshot and never awaited. That is the
+non-blocking property of Section~\ref{sec:nonblocking} in concrete terms: the recogniser is
+off the critical path. The two model calls themselves are both awaited, so the added latency
+is $\max(\text{acoustic}, \text{lexical})$ and not their sum, and no timeout guards the
+lexical future.
+
+\section{The two branches and the recogniser}
+\label{sec:branches}
+
+The acoustic branch applies Smart Turn v3 (version 3.2, CPU ONNX export) to the last eight
+seconds of the ring buffer and returns a probability that the turn has ended. The lexical
+branch applies CamemBERT to the latest partial and returns a completeness probability. The
+two variants of Section~\ref{sec:frozen} sit behind the same interface, frozen embeddings
+with a classifier for the benchmark and the fine-tuned model for the domain and the live
+demonstration. A French heuristic guard (\texttt{FrenchSemanticEOU}) complements the model
+on the hard cases, detecting a spelling sequence still in progress, digits, and function
+words in final position.
+
+Transcription reuses the production Azure service, with the same language and audio format.
+The one non-invasive addition is that it subscribes to the interim hypotheses as well as
+the final results, and those feed the lexical branch. Production itself is unchanged.
+
+\section{Fusion and the endpoint controller}
+\label{sec:fusionimpl}
+
+\texttt{RuleFusion}, one of the two implementations behind the \texttt{Fusion} interface,
+applies a bilateral veto: if either signal falls below 0.25, that is, if either branch clearly reads
+mid-turn, the system waits. If both exceed 0.85 it endpoints immediately. Otherwise it
+averages the two and hands the result on. \texttt{LogisticFusion} substitutes for it without the
+calling code changing. It implements Equation~\ref{eq:fusion} with one addition: a fifth
+term on the elapsed silence, normalised by the maximum-silence limit. The benchmark
+experiments of Chapter~\ref{ch:results} use the four-parameter form of
+Equation~\ref{eq:fusion} without that term, so that the reported gain is attributable to
+the two probability signals alone and not to timing information the acoustic baseline never
+receives.
+
+One boundary should be drawn here. The learned fusion and the cost rule were staged from
+the outset, with the rule-based fusion as the committed deliverable, and neither reached the
+running path: \texttt{LogisticFusion} is instantiated nowhere outside a unit test, and no
+cost ratio appears anywhere in the runtime package. 
+
+The data strategy of Section~\ref{sec:datastrategy} then fitted both the fusion and the calibrator on generic
+French, and Section~\ref{sec:fusionresults} measures what a component fitted on the wrong
+domain costs. What the running system demonstrates is the pipeline, its real-time and
+non-blocking behaviour, and the capture that produced the in-domain set; the decision layer
+of Chapter~\ref{ch:results} is established offline on stored predictions, and carrying it
+across is deliberately not claimed here.
+
+The endpoint controller then converts confidence into a duration. Rather than a single
+threshold it maps confidence onto how much trailing silence is demanded: 200\,ms above
+0.85, 600\,ms above 0.5, 1200\,ms below. Confidence therefore buys speed, and a hesitant
+score is made to wait longer rather than being refused outright.
+
+Above all of that sits a hard limit at 2000\,ms, which deliberately overrides the veto. A
+caller who genuinely stopped mid-sentence, and whose text will never look complete, would
+otherwise be held indefinitely by the lexical branch. This is the one place where the design accepts a wrong cut over an unbounded wait. The
+reasoning is about failure modes: an interruption is recoverable in conversation, silence
+from the agent is not.
+
+\section{Demonstrations and evaluation tooling}
+\label{sec:tooling}
+
+Two demonstrations drive the same core. One runs at the command line, from the microphone or
+a wav file replayed as a stream; the other runs in the browser. Both print, at each
+decision, the acoustic, lexical and fused probabilities, the decision taken, the observed
+silence and the compute latency.
+
+Evaluation rests on two tools: a local harness that replays labelled clips and computes
+accuracy, false positives, false negatives and latency, and an adapter that plugs the fusion
+into the eot-bench protocol so it can be compared with other systems on identical metrics.
+
+The in-domain scoring path did not survive that route, and the reason cost me a day: the
+harness reads audio through the Hugging Face \texttt{Audio} feature, which now requires
+\texttt{torchcodec}, which does not load against \texttt{ffmpeg}~8. Rather than pin the
+toolchain backwards, a standalone scorer reads the caller wav files with \texttt{soundfile}
+and scores each pause with the same models and fold splitting. It produces the figures of
+Section~\ref{sec:gold}.
+
+\section{Production instrumentation}
+\label{sec:instrumentation}
+
+To build the in-domain set, the production system was instrumented. Capture is gated behind
+an organisation-level feature flag. When active, the system records at each micro-pause the
+caller-side text only, the trajectory of the recogniser's interim hypotheses, timestamps, a
+reference to the audio, and resume or interruption flags. Labels come from weak supervision
+with no manual annotation: a pause followed by the caller resuming is a hold, a pause
+followed by the agent replying without a resume is an end of turn.
+
+The resulting set is 709 calls placed on a single production organisation, of which roughly
+four in five are genuine inbound calls and the rest calls made by internal testers to the
+same line. Of those, 636 contribute at least one scored decision pause.
+Names, first names and ages are masked in the retained transcripts, and the data stays
+within Tennor's infrastructure. Because caller audio is retained and linked to a call identifier, it remains
+personal data and is treated as such throughout. Appendix~\ref{app:ethics} sets out the
+governance in full.
+
+\section{Testing and verification}
+\label{sec:testing}
+
+The system is covered by 45 automated tests, exercising the VAD, the ring buffer, the fusion
+and endpoint logic, the lexical rules, the types and the metrics. Integration tests that
+need heavy models, credentials or audio hardware skip themselves when those are absent, so
+the suite runs anywhere. Every result reported in Chapter~\ref{ch:results} has a
+documented command that reproduces it, listed in \texttt{reproduce.md} in the submitted
+code corpus.

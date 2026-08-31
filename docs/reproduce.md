@@ -52,16 +52,18 @@ eot-harness compute-metrics --predictions $SS/indist_fusion_camembert/prediction
   --output-dir $SS/indist_fusion_camembert/metrics
 eot-harness compare-models $SS        # leaderboard incl. our fusion
 ```
-→ fusion AUC 0.900 (beats Soniox 0.888 on AUC). `indist_fusion.py` is the TF-IDF
-variant (0.876).
+→ fusion AUC 0.897 (per-span, score point 0.2), up from Smart Turn's 0.814. On the same
+metric it is above LiveKit v1-mini (0.884) and below Deepgram (0.915) and LiveKit v1 (0.937);
+streaming STT adapters (Soniox, AssemblyAI, OpenAI) are not comparable on this metric.
+`indist_fusion.py` is the TF-IDF variant (0.872).
 
 ## 3. Calibration study (all models)
 
 ```bash
 python -m eou_detector.eval.calibration_study --span-set $SS --ref smart_turn_audio_adapter__<hash>
 ```
-→ ECE (raw vs calibrated) for every model in the span-set (10/10 miscalibrated) +
-the calibrated cost-derived threshold vs the swept oracle.
+→ ECE (raw vs calibrated) for every model in the span-set (8/8 external models miscalibrated,
+13/14 overall) + the calibrated cost-derived threshold vs the swept oracle.
 
 ## 4. Decision layer (calibration + cost-sensitive operating point)
 

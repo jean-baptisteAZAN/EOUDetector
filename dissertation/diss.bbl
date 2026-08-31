@@ -1,0 +1,115 @@
+\begin{thebibliography}{21}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Elkan(2001)}]{elkan2001cost}
+Elkan, C. (2001). The foundations of cost-sensitive learning. In
+  \textit{Proceedings of the 17th International Joint Conference on Artificial
+  Intelligence (IJCAI)}.
+
+\bibitem[{Fu et~al.(2026)}]{x2turn2026}
+Fu, K. et~al. (2026). {X2-Turn}: Frame-synchronous dual-head modeling for joint
+  streaming {ASR} and turn state prediction. arXiv:2608.10878,
+  \url{https://arxiv.org/abs/2608.10878}.
+
+\bibitem[{Guo et~al.(2017)}]{guo2017calibration}
+Guo, C. et~al. (2017). On calibration of modern neural networks. In
+  \textit{Proceedings of the 34th International Conference on Machine Learning
+  (ICML)}.
+
+\bibitem[{Li et~al.(2025)}]{easyturn2025}
+Li, G. et~al. (2025). {Easy Turn}: Integrating acoustic and linguistic
+  modalities for robust turn-taking in full-duplex spoken dialogue systems.
+  arXiv:2509.23938, \url{https://arxiv.org/abs/2509.23938}.
+
+\bibitem[{{LiveKit}(2026)}]{eotbench}
+{LiveKit} (2026). {eot-bench}: an end-of-turn detection benchmark and dataset.
+  Software and dataset, Apache-2.0, \url{https://github.com/livekit/eot-bench};
+  dataset \url{https://huggingface.co/datasets/livekit/eot-bench-data},
+  CC-BY-4.0, 14 languages. Accessed 31 August 2026.
+
+\bibitem[{Martin et~al.(2020)}]{martin2020camembert}
+Martin, L. et~al. (2020). {CamemBERT}: a tasty {French} language model. In
+  \textit{Proceedings of the 58th Annual Meeting of the Association for
+  Computational Linguistics (ACL)}.
+
+\bibitem[{Naeini, Cooper and Hauskrecht(2015)}]{naeini2015ece}
+Naeini, M.~P., Cooper, G.~F. and Hauskrecht, M. (2015). Obtaining well
+  calibrated probabilities using bayesian binning. In \textit{Proceedings of
+  the 29th AAAI Conference on Artificial Intelligence}.
+
+\bibitem[{Niculescu-Mizil and Caruana(2005)}]{niculescu2005predicting}
+Niculescu-Mizil, A. and Caruana, R. (2005). Predicting good probabilities with
+  supervised learning. In \textit{Proceedings of the 22nd International
+  Conference on Machine Learning (ICML)}.
+
+\bibitem[{{Pipecat AI}(2026)}]{smartturn_v3}
+{Pipecat AI} (2026). {Smart Turn v3}: open-source end-of-turn detection model.
+  Model card, \url{https://huggingface.co/pipecat-ai/smart-turn-v3}, version
+  3.2, CPU ONNX export. Accessed 31 August 2026.
+
+\bibitem[{Radford et~al.(2023)}]{radford2023whisper}
+Radford, A. et~al. (2023). Robust speech recognition via large-scale weak
+  supervision. In \textit{Proceedings of the 40th International Conference on
+  Machine Learning (ICML)}.
+
+\bibitem[{Ratner et~al.(2017)}]{ratner2017snorkel}
+Ratner, A. et~al. (2017). {Snorkel}: Rapid training data creation with weak
+  supervision. \textit{Proceedings of the VLDB Endowment}, 11(3).
+
+\bibitem[{Sacks, Schegloff and Jefferson(1974)}]{sacks1974turntaking}
+Sacks, H., Schegloff, E.~A. and Jefferson, G. (1974). A simplest systematics
+  for the organization of turn-taking for conversation. \textit{Language},
+  50(4).
+
+\bibitem[{{Silero Team}(2024)}]{silero_vad}
+{Silero Team} (2024). {Silero VAD}: pre-trained enterprise-grade voice activity
+  detector. Software, \url{https://github.com/snakers4/silero-vad}, accessed 31
+  August 2026.
+
+\bibitem[{Udupa et~al.(2026)}]{udupa2026anticipation}
+Udupa, S. et~al. (2026). Endpoint anticipation for low-latency spoken dialogue.
+  arXiv:2606.13450, \url{https://arxiv.org/abs/2606.13450}.
+
+\bibitem[{Uro et~al.(2024)}]{uro2024perceptive}
+Uro, R. et~al. (2024). \'evaluation perceptive de l'anticipation de la prise de
+  parole lors d'interactions dialogiques en fran\c{c}ais. In M.~Balaguer,
+  N.~Bendahman, L.-M. Ho-dac, J.~Mauclair, J.~G~Moreno and J.~Pinquier, eds.,
+  \textit{Actes des 35\`emes Journ\'ees d'\'Etudes sur la Parole}, Toulouse,
+  France: ATALA and AFPC,
+  \url{https://aclanthology.org/2024.jeptalnrecital-jep.40/}.
+
+\bibitem[{Wald(1945)}]{wald1945sequential}
+Wald, A. (1945). Sequential tests of statistical hypotheses. \textit{The Annals
+  of Mathematical Statistics}, 16(2).
+
+\bibitem[{Wang et~al.(2026)}]{fastturn2026}
+Wang, C. et~al. (2026). {FastTurn}: Unifying acoustic and streaming semantic
+  cues for low-latency and robust turn detection. arXiv:2604.01897,
+  \url{https://arxiv.org/abs/2604.01897}.
+
+\bibitem[{Wu et~al.(2025)}]{phoenixvad2025}
+Wu, W. et~al. (2025). {Phoenix-VAD}: Streaming semantic endpoint detection for
+  full-duplex speech interaction. arXiv:2509.20410,
+  \url{https://arxiv.org/abs/2509.20410}.
+
+\bibitem[{Yang et~al.(2026)}]{jalturn2026}
+Yang, G. et~al. (2026). {JAL-Turn}: Joint acoustic-linguistic modeling for
+  real-time and robust turn-taking detection in full-duplex spoken dialogue
+  systems. arXiv:2603.26515, \url{https://arxiv.org/abs/2603.26515}.
+
+\bibitem[{Zadrozny and Elkan(2002)}]{zadrozny2002isotonic}
+Zadrozny, B. and Elkan, C. (2002). Transforming classifier scores into accurate
+  multiclass probability estimates. In \textit{Proceedings of the 8th ACM
+  SIGKDD International Conference on Knowledge Discovery and Data Mining
+  (KDD)}.
+
+\bibitem[{Zink et~al.(2024)}]{zink2024predictive}
+Zink, O. et~al. (2024). Predictive speech recognition and end-of-utterance
+  detection towards spoken dialog systems. arXiv:2409.19990,
+  \url{https://arxiv.org/abs/2409.19990}. Reviewed for the Early Deliverable,
+  June 2026.
+
+\end{thebibliography}

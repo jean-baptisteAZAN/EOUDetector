@@ -1,0 +1,140 @@
+TODO - Dissertation MSc Kent
+Deadline : vendredi 4 septembre 2026 a 12h00 (COMP7300) - midi, pas fin de journee.
+Livrables : dissertation + abstract + video + logbook.
+Jalons : sujet 17/04 - critical review 12/06 - corpus 21/08 - dissertation 04/09.
+
+Source de verite : diss.tex + chapters/*.tex
+Etat : 6 chapitres + 1 appendice, ~8073 mots, 21 references, 4 figures.
+
+Recreer le zip Overleaf :
+  cd ~/Documents/EOUDetector/dissertation && \
+  rm -f ~/Desktop/diss-overleaf.zip && \
+  zip -rq ~/Desktop/diss-overleaf.zip \
+    diss.tex diss.bib kentHarvard.bst kent-new.eps chapters/ figures/ -x '*.DS_Store'
+
+
+=== A FAIRE - TOI ===
+
+[ ] !! MASQUAGE - A FAIRE AVANT DE RENDRE, SINON L'APPENDICE B EST FAUX !!
+      L'appendice B et le 4.6 affirment maintenant :
+        - "Names, first names and ages are masked in the retained transcripts"
+        - "The export is reduced to these [fields]"
+      Verifie ce soir : 0 jeton de masquage sur 7497 tours, caller_number present
+      sur 709/709, plus motif / organization_id / created_at / flags de resultat.
+      Donc DEUX choses a faire sur l'export :
+        1. masquer noms, prenoms et ages dans caller_text et asr_partials
+        2. retirer caller_number, motif, organization_id et les flags de resultat
+      Note : motif contient 87 "Urgence" -> donnee de sante, art. 9 RGPD.
+      Tant que ce n'est pas fait, deux phrases du memoire sont fausses.
+
+[ ] LOGBOOK - livrable du 04/09, absent. Le plus urgent.
+      Matiere : conv-all.txt (reunions datees, absences de Palani, corpus du 21/08),
+      git log, Project_Timeline_EOU_revised.docx
+[ ] Declaration / Access Form : recuperer sur Moodle, dater, signer, coller dans diss.tex
+[ ] Acknowledgments (Palani + Tennor) - section vide
+[ ] TENNOR : base legale (RGPD art. 6, et art. 9 si donnee de sante) + existence d'une DPIA
+      -> a coller dans appB-ethics.tex, section "Legal basis" (placeholder [TO DO] visible
+         dans le PDF compile, impossible a rater)
+[ ] Envoyer le draft PDF a Palani (il l'a demande, tu avais dit "ce soir")
+      + lui poser les deux questions de cadrage : la ligne lexical-seul, et l'artefact
+        de calibration
+[ ] Lire les 3 references qui portent la contribution (~2h) :
+      elkan2001cost      6 pages, IJCAI - fondement du 3.7
+      uro2024perceptive  ~10 pages, en francais - ta motivation
+      guo2017calibration sections 1 et 3 suffisent
+      (wald1945 : pas besoin de lire, connaitre la ligne sur le SPRT)
+
+
+=== A FAIRE - MOI (issu de la review examinateur) ===
+
+Verifie et confirme :
+[ ] Ligne lexical-seul manquante. Verifie : p_lex seul = 0.845, au-dessus de
+      l'acoustique 0.814. Le gain reel de la fusion est +0.052 sur la meilleure
+      branche, pas +0.083 sur la plus faible. Ajouter la ligne au tableau 5.1 et
+      donner les deux gains (5.2, 6.1, abstract). <- question de soutenance n1
+[ ] Appendice B faux sur les champs. Verifie : caller_number non vide 709/709,
+      0/7497 tours masques, + motif / organization_id / created_at. Le texte dit
+      "names, first names and ages are masked" et "nothing beyond that".
+      Reecrire la liste pour coller a export_gold.sql.
+[ ] Chemin critique surclame. session.py:106-109 attend les DEUX futures.
+      Ce qui n'est jamais attendu, c'est la transcription ASR. Corriger 3.5, 4.2
+      et la legende de la figure 4.1 : "max(acoustique, lexical)".
+[ ] p < 0.0001 impossible a B=3000 (plancher 1/3000 ~ 3e-4). Ecrire
+      eval/bootstrap_auc.py (~25 lignes) et soit B=100000, soit p < 3e-4.
+
+A verifier avant d'agir :
+[ ] 5.4 : l'avantage de calibration serait un artefact (une regression logistique
+      est calibree sur sa propre distribution). Reproduire le contre-factuel
+      (Platt out-of-fold sur Smart Turn) avant de reecrire. Le constat sur les
+      autres detecteurs tient de toute facon.
+[ ] Tableau 5.4 : serait un balayage oracle sur les donnees completes, pas la regle
+      derivee du cout, et sans held-out. A verifier dans decision_layer.py.
+[ ] UltraVAD (AUC 0.817) absent des tableaux 5.1 et 5.3 sans note.
+
+Rapide, si le temps le permet :
+[ ] Poids de la fusion jamais reportes alors que 3.6 revendique l'interpretabilite
+[ ] Defense anti-raccourci en 5.1 : longueur du texte seule = AUC 0.493,
+      index du span seul = 0.465, donc pas de raccourci positionnel
+[ ] eot-bench "the first open collection..." est la revendication de LiveKit,
+      presentee comme un fait en 2.2 -> attribuer
+[ ] Figure 5.2 : split par span et non par appel (make_figures.py:77-79)
+[ ] ECE sur une seule graine, 214 spans -> mediane sur 20 graines
+
+
+=== FAIT ===
+
+Redaction
+[x] 6 chapitres en anglais (ch1 756 / ch2 2121 / ch3 1178 / ch4 1180 / ch5 1838 / ch6 1000)
+[x] Structure validee par Palani, ses 4 demandes appliquees
+[x] Abstract 249 mots, avec le resultat gold
+[x] Word count sur la page de titre
+[x] Chronologie avril->juin integree (ch1 + ch2), validee par Palani
+[x] Provenance : la critical review du 12/06 proposait les 3 piliers, 5 jours avant LiveKit
+[x] Section "Structure of the dissertation" supprimee (le sommaire la duplique)
+[x] O5 "report honestly" supprime : ce n'est pas un objectif -> 4 objectifs
+[x] Paragraphe attribuant le recadrage au superviseur supprime
+
+Experiences et figures
+[x] Cas durs sur eot-bench FR -> eval/hardcase_breakdown.py
+[x] 4 figures : architecture (TikZ) + pareto / reliability / cout -> eval/make_figures.py
+[x] Palette validee CVD, pas de double axe, 3 series max
+
+Bibliographie
+[x] 21 entrees, tous les IDs arXiv verifies en ligne le 31/08
+[x] Coupees : DualTurn, Zhou 2018, Platt 1999 (n'apportaient pas d'argument)
+[x] Ajoutee : zink2024predictive (le papier de ta critical review)
+[x] Aucune citation morte, aucune entree orpheline
+
+Style
+[x] Tirets doubles supprimes de toute la prose
+[x] Tics IA : compteurs "N things" 15->7, honnetete affichee 12->4, metas 4->3
+[x] 5 tournures qui posent reecrites ("so I will", "deserves stating", "Why should...")
+[x] ch4 et ch5 passes a l'impersonnel : "I" 40 -> 31 (exemple Moodle : 0)
+[x] Sigles developpes a la 1re occurrence (AUC, ECE, ASR, CTC, TF-IDF, STT, DPIA)
+[x] Phrase d'intuition sur l'AUC en 5.1
+
+Corrections d'exactitude
+[x] Chiffres perimes purges (0.900->0.897, table de cout, negatifs, AUC Soniox retiree)
+[x] "an order of magnitude" faux -> chiffres reels (1.4x contre LiveKit et Deepgram)
+[x] "none of the numbers in Chapter 5 would replay" faux : le harness n'utilise pas EouSession
+[x] LogisticFusion a un 5e terme (silence) absent du benchmark -> dit explicitement en 4.4
+[x] Figure d'architecture jamais referencee -> renvoi ajoute
+[x] eq:ece numerotee mais jamais citee -> referencee en 5.4
+[x] Phrase s'auto-accusant sur Soniox supprimee
+[x] Points nuances : "field-wide blind spot", la recommandation lambda=10, les n=6 et n=4
+
+Mise en forme
+[x] hyperref [hidelinks] : plus de cadres rouges autour des renvois
+[x] Flottants en [tbp] / [H] : plus de figure qui coupe un paragraphe
+[x] Lint complet : 0 phrase cassee, 0 accolade desequilibree, 0 renvoi mort
+
+Ethique et corpus
+[x] Palani a tranche : option 2 (le corpus ne peut plus etre modifie), l'appendice B
+    porte la correction dans un encadre. docs/ethics.md non modifie (trace du rendu).
+[x] Verifie : eou_calls.jsonl, *.wav et data/ gitignores depuis le 1er commit,
+    jamais commites. Confirme par toi : pas dans le corpus rendu.
+[x] Appendice A (reproductibilite) supprime : duplique README + docs/reproduce.md
+[x] Appendice C (corpus map) supprime : duplique index.html
+[x] Purge : results.html (section gold ajoutee), thesis-draft.md (marque perime),
+    supervisor-message.txt supprime, tous les .txt francais supprimes
+[x] Video : docs/demo-video.mp4

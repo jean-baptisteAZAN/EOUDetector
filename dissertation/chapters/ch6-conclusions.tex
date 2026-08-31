@@ -1,0 +1,94 @@
+\chapter{Conclusions and Future Work}
+\label{ch:conclusions}
+
+\section{Conclusions}
+
+This project asked a simple question: does adding a semantic signal to an acoustic one, and
+then deriving a cost-sensitive decision from the result, improve end-of-turn detection for a
+French medical voice agent? On a clean public benchmark the answer is yes. Fusion raises the
+AUC from 0.814, for the acoustic model alone, to 0.897, a statistically significant gain of 0.083, and neither base model is fine-tuned in that
+pipeline. A medically fine-tuned lexical model exists and serves the in-domain path and the
+live demonstration, but it is not what produces this number.
+
+What the project learned is worth as much as what it built. Fusion only helps when the
+lexical model is in distribution: applied to generic French, a medically tuned model
+degrades the decision below the baseline it was meant to improve. Calibration goes
+unreported, though a calibrated probability is the precondition for deciding from a stated
+cost rather than an arbitrary timer: every external detector evaluated here is miscalibrated
+on this data and none publishes any measurement of it. And the off-the-shelf pipeline does
+not transfer to production, for reasons Section~\ref{sec:gold} sets out and O4 returns to.
+
+There is one more finding I did not expect, and it cuts against the framing of the project.
+Section~\ref{sec:hardcase} shows the fusion gaining least on precisely the cases the work
+exists for, and shows that generic French barely contains those cases at all. The motivating
+problem is real, but the public benchmark cannot measure it, and the lexical signal is
+weakest exactly where I argued it would be strongest.
+
+This dissertation contributes a calibration-first, cost-aware method for composing existing
+models, tested in a real setting, and it measures where that method stops working.
+
+\section{Evaluation against the objectives}
+
+\textbf{O1}, a modular real-time pipeline whose decision never blocks on the transcript, is
+met: the package is in place, covered by 45 automated tests, and demonstrated end to end
+from the command line and in the browser.
+
+\textbf{O2}, fusing off-the-shelf acoustic and lexical models and testing whether this beats
+the acoustic model alone, is met (Section~\ref{sec:fusionresults}).
+
+\textbf{O3}, calibrating the probability and deciding from a cost, is met as analysis and
+not as a property of the running system. Calibration was measured across the whole
+leaderboard, and the operating point is derived from the cost ratio rather than from a fixed
+delay, but that derivation lives in the evaluation: the shipped controller still maps
+confidence onto a hand-set silence ladder.
+
+\textbf{O4}, instrumenting production and validating in domain, was carried out, and its
+result is negative. The capture and the gold pipeline work, with 709 calls captured and 636 scored, and a validated
+converter, but the validation showed that the off-the-shelf pipeline does not transfer: the
+acoustic branch is at chance on 8\,kHz audio and the lexical branch plateaus near 0.60 on
+weak labels. The objective was delivered as engineering and as measurement; the hypothesis
+it was built to test was not confirmed.
+
+Several limitations bound what has been shown. On generic French the method plateaus around
+0.897, and passing that needs larger models, which is outside the contribution. The system
+trails the commercial streaming services on latency, because it waits for a micro-pause
+while they commit as the text arrives. The in-domain labels are weak, and the French
+benchmark subset is small at roughly a thousand silences.
+
+There are things I would do differently. I would instrument production in the first week rather
+than the seventh, so that a properly annotated in-domain set existed in time instead of a
+weakly supervised one. I would check the audio bandwidth of the target deployment before choosing an acoustic
+model. The 16\,kHz-to-8\,kHz gap surfaced at validation, which is far too late for it to
+surface.
+And I would run the per-case breakdown early: had I known in week three that the public
+benchmark contains six spelling cases, I would have known from the start that it could not
+test the thing the project was for.
+
+The three pillars of this work were set out before implementation began, in the critical
+review described in Chapter~\ref{ch:intro}, and two of them survived intact. The third
+bent: I evaluate at the micro-pause rather than continuously as speech arrives, which is
+exactly the latency gap of Section~\ref{sec:fusionresults} and the first item of future
+work below. Being overtaken mid-project was the other thing that shaped the contribution. Narrowing the
+claim to calibration and cost, instead of competing on fusion itself, was, I still think,
+the right response.
+
+\section{Future work}
+
+The first direction is latency, which is what stands between this system and deployment. It
+decides at the micro-pause, which is why it trails services that commit as the text arrives.
+Two levers exist: a streaming lexical model that scores word by word and can decide before
+the pause, and the stability of the recogniser's interim hypotheses, how quickly the
+transcript stops changing, as an early cue. That second signal is only observable in the
+partial-hypothesis trajectories captured in production, and cannot be tested on the public
+benchmark, which supplies final words only.
+
+The second answers the in-domain result directly: adapt the acoustic model to the 8\,kHz
+telephone band, by retraining or by starting from a natively narrowband model, to remove the
+saturation, and hand-annotate a few hundred pauses to obtain clean end-of-turn labels and a
+trustworthy in-domain measurement, which weak supervision cannot provide.
+
+The third is a sequential optimal-stopping formulation. The current rule applies a myopic
+threshold to a calibrated probability. At high cost ratios the swept oracle turns
+conservative through timing rather than through the threshold, and a myopic rule cannot
+match that. A multi-step cost model, in the tradition of \citet{wald1945sequential}, would
+track the oracle across every cost regime.

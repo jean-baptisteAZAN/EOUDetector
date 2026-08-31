@@ -1,0 +1,161 @@
+\chapter{Design and Trade-Off Analysis}
+\label{ch:approach}
+
+\section{The central trade-off: latency against interruption}
+\label{sec:tradeoff}
+
+Every decision in this chapter serves the trade-off introduced in
+Chapter~\ref{ch:background}, which I state formally here. At each micro-pause, ending the
+turn too early cuts the patient off, an interruption of cost $C_{\mathrm{cut}}$, while
+waiting too long delays the reply, latency of cost $C_{\mathrm{lat}}$. Improving one
+degrades the other, and no setting escapes both. Designing the system therefore comes down to deciding, at every instant, which side of that
+trade-off to sit on, and deciding it for a stated reason. Each section below sets out one decision and the
+trade-off it resolves.
+
+\section{Which data trains, and which data validates}
+\label{sec:datastrategy}
+
+The project started from the assumption that Tennor's production transcripts would be the
+training data and that the evaluation would be built around them. I reversed that in late
+July, and because the reversal shaped everything downstream it belongs here rather than in
+the implementation chapter.
+
+Licensing forced it, and so did the labels. The eot-bench harness is Apache-2.0 and its
+dataset CC-BY-4.0, both usable for research and derivative work; the production data is
+personal data that cannot leave Tennor's infrastructure at all
+(Appendix~\ref{app:ethics}), so anything built on it alone would be a result nobody else
+could check. The two also differ in what they can support: the benchmark carries
+human-verified turn boundaries, while the production set is labelled by weak supervision,
+from whether the caller resumed speaking, which is cheap and scalable but noisy by
+construction.
+
+So I inverted the roles. The public benchmark carries the headline experiments (fusion,
+calibration, cost), and the production data becomes an in-domain validation set, asked
+only the narrower question of whether the method transfers.
+
+The cost of that inversion is real and worth naming. The headline result is obtained on
+generic French rather than on medical French, so the domain that motivates the project is
+not the domain the main claim is measured on. And a weakly labelled validation set can only
+return a weak answer, which is precisely what Chapter~\ref{ch:results} reports. What it
+buys is that every headline number in this dissertation can be reproduced by anyone with a
+Hugging Face token, and none of them rests on data that nobody outside Tennor can see.
+
+\section{Late fusion rather than a jointly trained model}
+\label{sec:latefusion}
+
+The first modelling decision was how to combine the acoustic and the lexical signal. One
+option is a single model trained jointly on audio and text. It can be more accurate,
+because it learns the interactions between the two modalities, but it is heavier to run, it
+demands aligned joint training data, and it locks both signals inside one box that cannot
+be replaced piecemeal. The alternative, and the one I took, is late fusion: each signal
+comes from an independent off-the-shelf model, and only their combination is learned.
+
+I may lose some accuracy that way. What I gain is modularity, since each component can be
+swapped on its own, along with speed and simplicity, which matches the constraint the
+project set itself of composing existing models without retraining them.
+
+\section{The lexical model: frozen embeddings rather than fine-tuning}
+\label{sec:frozen}
+
+The lexical signal can be obtained in two ways. CamemBERT can be fine-tuned on Tennor
+medical French, which produces a \emph{medical-fitted} model closely adapted to that domain
+but out of distribution on generic French, where it degrades the decision rather than
+improving it. Section~\ref{sec:fusionresults} measures this. Or CamemBERT can be left frozen and used purely as a
+feature extractor, with a small classifier on top, which generalises better and cannot
+overfit the way a fine-tuned encoder can.
+
+The two are named for the data they were fitted on in the chapters that follow:
+\emph{benchmark-fitted} is the frozen encoder under a head fitted on the benchmark, and
+\emph{medical-fitted} is the encoder fine-tuned on medical French. I kept both, for
+different paths. The frozen encoder with a head fitted on the benchmark,
+\emph{benchmark-fitted} in the tables of Chapter~\ref{ch:results}, serves the benchmark
+evaluation. The medical-fitted model serves the in-domain path and the live demonstration,
+where medical French is what it will actually see.
+
+\section{A decision that never blocks on the transcript}
+\label{sec:nonblocking}
+
+One constraint governs the whole pipeline: the decision has to stay fast, while streaming
+transcription can and does fall behind. I could wait for the most complete transcript available, paying added latency and risking a
+stall, or read whatever partial transcript exists at the instant of the decision, as a
+snapshot, accepting that it may lag the audio.
+
+I took the second. The decision never waits on the recogniser: the transcript is read as
+whatever snapshot exists at that instant. The two model calls are issued concurrently and
+both are awaited, so the added latency is the slower of the two rather than their sum. Added latency is bounded by construction,
+and the price is a text that is sometimes slightly incomplete. That is acceptable, because the
+acoustic signal is always available and the fusion degrades gracefully when the lexical
+branch has little to say. This is the design answer to the ASR dependency set out in
+Section~\ref{sec:related}.
+
+\section{The form of the fusion}
+\label{sec:fusionform}
+
+The two probabilities are combined by logistic regression on $p_{\mathrm{ac}}$,
+$p_{\mathrm{lex}}$ and their product. With weights $w_0 \dots w_3$,
+\begin{equation}
+z = w_0 + w_1 p_{\mathrm{ac}} + w_2 p_{\mathrm{lex}} + w_3\, p_{\mathrm{ac}} p_{\mathrm{lex}},
+\qquad
+p_{\mathrm{raw}} = \sigma(z) = \frac{1}{1 + e^{-z}} .
+\label{eq:fusion}
+\end{equation}
+The interaction term lets the model capture the case where both signals agree, which a
+weighted sum cannot represent. 
+
+I preferred logistic regression to richer combinations because it is light, its weights stay interpretable, so one can read off which of the
+two signals carries more of the decision, and its output is a probability that can then
+be calibrated. The fusion itself is small enough not to memorise a dataset of roughly a thousand spans,
+though the lexical head above it is not: a logistic layer on 768-dimensional frozen
+embeddings carries 769 parameters against some eight hundred training rows per fold, which
+is why every lexical and fusion figure in Chapter~\ref{ch:results} is reported
+out-of-fold. The weights are fitted by cross-validation with folds split by
+call, so that no call appears in both training and test.
+
+\section{Calibrating before deciding}
+\label{sec:calibdesign}
+
+A structural decision is to treat the probability the system produces as a quantity that
+must be calibrated before it is used. The reason is direct. The final decision compares
+that probability against a threshold derived from a cost, and the comparison only means
+anything if the probability corresponds to a real frequency. As Section~\ref{sec:calibration-lit}
+sets out, a poorly calibrated model can rank cases correctly and still be systematically
+overconfident, which distorts any threshold placed on it.
+
+Calibration is done by isotonic regression, fitting a monotonic $g$ on a held-out split to
+minimise $\sum_i (g(p_i) - y_i)^2$. Because $g$ is monotonic it leaves the ordering of
+predictions untouched, so the AUC does not move, and only the probability values are corrected. Quality is measured by the expected calibration error,
+\begin{equation}
+\mathrm{ECE} = \sum_{b} \frac{n_b}{N} \, \bigl| \mathrm{acc}_b - \mathrm{conf}_b \bigr| ,
+\label{eq:ece}
+\end{equation}
+the weighted average gap, across probability bins, between the confidence claimed and the
+accuracy observed. The cost of the approach is that it consumes held-out data and can
+overfit on small sets, which I limit with a held-out split rather than reusing the fitting
+data.
+
+\section{Deciding from a cost rather than a fixed timeout}
+\label{sec:costdesign}
+
+The last decision is the stopping rule. The existing system stops after a fixed silence,
+500\,ms say: simple, but arbitrary, and identical in every situation. Instead I choose the
+operating point from the trade-off of Section~\ref{sec:tradeoff}. Given the cost ratio
+\begin{equation}
+\lambda = \frac{C_{\mathrm{cut}}}{C_{\mathrm{lat}}} ,
+\qquad
+\text{choose the policy minimising}
+\quad
+\lambda \cdot (\text{cut-in rate}) + (\text{latency}) .
+\label{eq:cost}
+\end{equation}
+
+
+The units are easily lost. The cut-in rate is a fraction and the latency is in seconds, so
+$\lambda$ is itself measured in seconds: $\lambda = 10$ says one interruption costs as much
+as ten seconds of extra waiting, not that it is ten times worse than a delay. 
+
+The operating point is then a consequence of a stated preference rather than a number fixed in advance.
+Equation~\ref{eq:cost} is the only form of the rule used here: the policy minimising the
+combined cost is selected directly, with no closed-form threshold derived from $\lambda$. A richer variant would fold the elapsed silence into the probability and
+decide sequentially, in the spirit of \citet{wald1945sequential}. I built it and it did not
+improve on the swept frontier (Section~\ref{sec:negative}), so the calibrated myopic rule
+stands, and the full sequential formulation is left to Chapter~\ref{ch:conclusions}.

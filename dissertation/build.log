@@ -1,0 +1,326 @@
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026) (preloaded format=pdflatex)
+ \write18 enabled.
+entering extended mode
+(./diss.tex
+LaTeX2e <2025-11-01>
+L3 programming layer <2026-01-19>
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/base/report.cls
+Document Class: report 2025/01/22 v1.4n Standard LaTeX document class
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/base/size12.clo))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/base/fontenc.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/url/url.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics/graphicx.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics/keyval.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics/graphics.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics/trig.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics-cfg/graphics.cfg)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics-def/pdftex.def)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/natbib/natbib.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/tools/multicol.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/booktabs/booktabs.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsmath/amsmath.sty
+For additional information on amsmath, use the `?' option.
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsmath/amstext.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsmath/amsgen.sty))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsmath/amsbsy.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/amsmath/amsopn.sty))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/float/float.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/frontendlayer/tikz.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/basiclayer/pgf.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/utilities/pgfrcs.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfutil-comm
+on.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfutil-late
+x.def)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfrcs.code.
+tex (/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/pgf.revision.tex))
+) (/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/basiclayer/pgfcore.sty
+ (/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/systemlayer/pgfsys.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgfsys.cod
+e.tex
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code
+.tex
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfkeyslibra
+ryfiltered.code.tex))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgf.cfg)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-pdf
+tex.def
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgfsys-com
+mon-pdf.def)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgfsyssoft
+path.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/systemlayer/pgfsysprot
+ocol.code.tex))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/xcolor/xcolor.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics-cfg/color.cfg)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/graphics/mathcolor.ltx))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcore.cod
+e.tex
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathutil.code.
+tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathparser.cod
+e.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+basic.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+trigonometric.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+random.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+comparison.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+base.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+round.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+misc.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfunctions.
+integerarithmetics.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathcalc.code.
+tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmathfloat.code
+.tex))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfint.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepoin
+ts.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepath
+construct.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepath
+usage.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorescop
+es.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoregrap
+hicstate.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretran
+sformations.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorequic
+k.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreobje
+cts.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepath
+processing.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorearro
+ws.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreshad
+e.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreimag
+e.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoreexte
+rnal.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorelaye
+rs.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcoretran
+sparency.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorepatt
+erns.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/basiclayer/pgfcorerdf.
+code.tex)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/modules/pgfmoduleshape
+s.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/modules/pgfmoduleplot.
+code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-ve
+rsion-0-65.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/compatibility/pgfcomp-ve
+rsion-1-18.sty))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/utilities/pgffor.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/utilities/pgfkeys.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgfkeys.code
+.tex)) (/usr/local/texlive/2026basic/texmf-dist/tex/latex/pgf/math/pgfmath.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/math/pgfmath.code.tex)
+)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/utilities/pgffor.code.
+tex))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/frontendlayer/tikz/tik
+z.code.tex
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/libraries/pgflibrarypl
+othandlers.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/modules/pgfmodulematri
+x.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/frontendlayer/tikz/lib
+raries/tikzlibrarytopaths.code.tex)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/libraries/pgflibraryar
+rows.meta.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/frontendlayer/tikz/lib
+raries/tikzlibrarypositioning.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/frontendlayer/tikz/lib
+raries/tikzlibraryfit.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pgf/frontendlayer/tikz/lib
+raries/tikzlibrarybackgrounds.code.tex)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/hyperref/hyperref.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/iftex/iftex.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/kvsetkeys/kvsetkeys.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/kvdefinekeys/kvdefinekeys.
+sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pdfescape/pdfescape.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/pdftexcmds/pdftexcmds.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/infwarerr/infwarerr.sty)))
+ (/usr/local/texlive/2026basic/texmf-dist/tex/latex/hycolor/hycolor.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/hyperref/nameref.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/refcount/refcount.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/gettitlestring/gettitlestr
+ing.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/kvoptions/kvoptions.sty)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/etoolbox/etoolbox.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/stringenc/stringenc.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/hyperref/pd1enc.def)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/intcalc/intcalc.sty)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/hyperref/puenc.def)
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/bitset/bitset.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty)
+)) (/usr/local/texlive/2026basic/texmf-dist/tex/latex/hyperref/hpdftex.def
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/rerunfilecheck/rerunfilechec
+k.sty
+(/usr/local/texlive/2026basic/texmf-dist/tex/generic/uniquecounter/uniquecounte
+r.sty)))
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/l3backend/l3backend-pdftex.d
+ef) (./diss.aux)
+(/usr/local/texlive/2026basic/texmf-dist/tex/context/base/mkii/supp-pdf.mkii
+[Loading MPS to PDF converter (version 2006.09.02).]
+)
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.s
+ty
+(/usr/local/texlive/2026basic/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
+)) (./diss.out) (./diss.out) [1{/usr/local/texlive/2026basic/texmf-var/fonts/ma
+p/pdftex/updmap/pdftex.map} <./kent-new-eps-converted-to.pdf>] [2] [3] [4]
+(./diss.toc [5]) [6] (./diss.lof) [7] (./diss.lot) [8]
+(./chapters/ch1-introduction.tex
+Chapter 1.
+[9]
+Overfull \hbox (2.13586pt too wide) in paragraph at lines 61--63
+[]\T1/cmr/bx/n/12 O1. \T1/cmr/m/n/12 Build a mod-u-lar, real-time end-point-ing
+ pipeline (VAD, acous-tic branch,
+) [10] (./chapters/ch2-background.tex
+Chapter 2.
+[11] [12] [13]
+Overfull \hbox (4.1957pt too wide) in paragraph at lines 137--147
+\T1/cmr/m/n/12 uni-fies stream-ing con-nec-tion-ist tem-po-ral clas-si-fi-ca-ti
+on (CTC) de-cod-ing with acous-
+[14]
+Underfull \hbox (badness 10000) in paragraph at lines 191--191
+[]\T1/cmr/m/n/10 Easy Turn
+
+Underfull \hbox (badness 10000) in paragraph at lines 191--191
+[]\T1/cmr/m/n/10 argmax over 4
+
+Underfull \hbox (badness 10000) in paragraph at lines 192--192
+[]\T1/cmr/m/n/10 Phoenix-VAD
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]\T1/cmr/m/n/10 JAL-Turn
+
+Underfull \hbox (badness 10000) in paragraph at lines 193--193
+[]\T1/cmr/m/n/10 head only,
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[]\T1/cmr/m/n/10 FastTurn
+
+Underfull \hbox (badness 10000) in paragraph at lines 194--194
+[]\T1/cmr/m/n/10 acoustic +
+
+Underfull \hbox (badness 10000) in paragraph at lines 195--195
+[]\T1/cmr/m/n/10 X2-Turn
+
+Underfull \hbox (badness 10000) in paragraph at lines 195--195
+[]\T1/cmr/m/n/10 shared ASR
+
+Underfull \hbox (badness 2229) in paragraph at lines 196--196
+[]\T1/cmr/m/n/10 Endpoint an-
+
+Underfull \hbox (badness 10000) in paragraph at lines 196--196
+[]\T1/cmr/m/n/10 per-horizon
+
+Underfull \hbox (badness 10000) in paragraph at lines 196--197
+[]\T1/cmr/m/n/10 anticipation
+
+Underfull \hbox (badness 10000) in paragraph at lines 197--197
+[]\T1/cmr/m/n/10 LiveKit v1
+
+Underfull \hbox (badness 10000) in paragraph at lines 197--198
+[]\T1/cmr/m/n/10 14-language
+
+Underfull \hbox (badness 5847) in paragraph at lines 199--199
+[]\T1/cmr/bx/n/10 frozen bases\T1/cmr/m/n/10 ;
+
+Underfull \hbox (badness 4291) in paragraph at lines 199--199
+\T1/cmr/m/n/10 lin-ear head +
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--199
+[]\T1/cmr/bx/n/10 cost-derived,
+
+Underfull \hbox (badness 10000) in paragraph at lines 199--200
+[]\T1/cmr/m/n/10 French bench-
+[15]) [16] (./chapters/ch3-design.tex
+Chapter 3.
+[17]
+Overfull \hbox (0.53476pt too wide) in paragraph at lines 43--43
+[]\T1/cmr/bx/n/17.28 Late fu-sion rather than a jointly trained model 
+[18] [19]) [20] (./chapters/ch4-implementation.tex
+Chapter 4.
+[21] [22] [23] [24]) [25] (./chapters/ch5-results.tex
+Chapter 5.
+
+Overfull \hbox (2.69603pt too wide) in paragraph at lines 39--56
+ [][] 
+[26] [27] [28 <./figures/fig_pareto.pdf>] [29] [30] [31]
+Overfull \hbox (0.43315pt too wide) in paragraph at lines 280--287
+\T1/cmr/m/n/12 than thresh-old the acous-tic prob-a-bil-ity di-rectly, this var
+i-ant re-fits $\OML/cmm/m/it/12 g\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 p[]; d; p[]d
+; d[]\OT1/cmr/m/n/12 )$
+[32]) [33] (./chapters/ch6-conclusions.tex
+Chapter 6.
+[34] [35]) [36] (./chapters/appB-ethics.tex
+Appendix A.
+[37]
+Underfull \hbox (badness 4621) in paragraph at lines 81--82
+[]\T1/cmr/m/n/10.95 Names, first names and ages masked in
+
+Underfull \hbox (badness 3612) in paragraph at lines 81--82
+\T1/cmr/m/n/10.95 data through-out rather than de-scribed as
+[38]) [39] (./diss.bbl
+Underfull \hbox (badness 2790) in paragraph at lines 28--32
+[]$\T1/cmss/m/n/12 https : / / huggingface . co / datasets / livekit / eot-[]be
+nch-[]data$[]\T1/cmr/m/n/12 , CC-BY-4.0, 14 lan-
+[40]) [41] (./diss.aux) )
+(see the transcript file for additional information) </Users/jean-baptisteazan/
+Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1200.600pk>
+ </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/
+jknappen/ec/ectt1095.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic
+/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1095.600pk> </Users/jean-baptisteaza
+n/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1095.600p
+k> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfou
+r/jknappen/ec/ectt1000.600pk> </Users/jean-baptisteazan/Library/texlive/2026bas
+ic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/jean-baptistea
+zan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.60
+0pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljf
+our/jknappen/ec/ecbx1000.600pk> </Users/jean-baptisteazan/Library/texlive/2026b
+asic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.600pk> </Users/jean-baptist
+eazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.
+600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/l
+jfour/jknappen/ec/tcrm1200.600pk> </Users/jean-baptisteazan/Library/texlive/202
+6basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk> </Users/jean-bapti
+steazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx120
+0.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk
+/ljfour/jknappen/ec/ecbx2488.600pk> </Users/jean-baptisteazan/Library/texlive/2
+026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/jean-bap
+tisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1
+728.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/
+pk/ljfour/jknappen/ec/ecrm1728.600pk> </Users/jean-baptisteazan/Library/texlive
+/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm2074.600pk> </Users/jean-b
+aptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecr
+m2488.600pk></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfont
+s/cm/cmex10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/ams
+fonts/cm/cmmi10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public
+/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/pu
+blic/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1
+/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/ty
+pe1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/
+type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fo
+nts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on diss.pdf (41 pages, 406143 bytes).
+Transcript written on diss.log.

@@ -1,0 +1,230 @@
+\chapter{Background and Related Work}
+\label{ch:background}
+
+\section{The turn problem inside a conversation between two humans}
+\label{sec:turntaking}
+
+Turn-taking is the way two speakers alternate in holding the floor. For a machine, the
+difficulty is to decide, at every short pause in the exchange, whether to start speaking
+because the turn has ended, or to keep waiting because the other party has not finished.
+That decision rests on a trade-off that Section~\ref{sec:tradeoff} states formally, and no
+setting escapes both of its errors. 
+
+In most dialogue systems the decision is taken from
+silence alone: the system waits for a pause of fixed length and then treats the turn as
+over. The organisation of turn-taking has been studied since \citet{sacks1974turntaking},
+and the rule is simple and fast, but it conflates two very different situations, a
+genuine end of turn and a pause in the middle of an utterance, because both present
+themselves as silence. In medical telephony this confusion is both frequent and costly: a
+patient spelling a name or dictating a number produces silences that are not ends of turn.
+
+These are precisely the cases on which models that listen only to sound fail. 
+
+Having no access to the meaning of the words, they cannot separate a finished sentence from a
+spelling sequence or a number still in progress. A perceptual study on French shows that the two channels are not interchangeable
+\citep{uro2024perceptive}. Inter-pause units drawn from the REPERE corpus were annotated
+for terminality and presented to participants either as audio or as text, with the end of
+the unit truncated by up to three prosodic words; participants then judged whether the floor
+could be taken. The audio condition allowed a turn end to be anticipated at least three
+words before it arrived, the text condition considerably less.
+
+That result ranks the two channels, and ranks them in favour of audio, which is the baseline
+this project sets out to improve. What it establishes is separability: the same boundary
+judged from sound and from words produces different judgements. Whether the difference
+combines into something better than either channel alone is an empirical question, and
+Section~\ref{sec:fusionresults} answers it.
+
+\section{Tools and technologies}
+\label{sec:tools}
+
+The system reuses several existing components, described briefly here.
+
+Voice activity detection is handled by Silero VAD \citep{silero_vad}, an open-source
+package with no accompanying academic publication, which labels each short audio frame as
+speech or silence. It is the entry point of the pipeline: it triggers an evaluation at
+every transition from speech to silence.
+
+The acoustic end-of-turn estimate comes from Smart Turn v3, a model released by Pipecat
+and Daily \citep{smartturn_v3}, likewise without an academic publication and documented
+only by its model card and a technical blog post. It uses the encoder layers of Whisper
+Tiny \citep{radford2023whisper} with a single linear classification head on top, for
+roughly eight million parameters. From the recent audio it produces a probability that the
+turn has ended, without reading any text. This project uses version 3.2 in its CPU export.
+Versions 3.1 and 3.2 improved the handling of short utterances and robustness to noise,
+and the exact version is stated because the reported figures depend on it.
+
+The lexical estimate comes from CamemBERT \citep{martin2020camembert}, a French
+BERT-style language model applied to the partial transcript. Unlike the acoustic signal,
+it judges completeness from the meaning of the words. Continuous transcription is provided
+by a commercial speech recognition service (Azure), which emits partial hypotheses as
+speech unfolds.
+
+Evaluation relies on eot-bench \citep{eotbench}, which its authors describe as the first
+open collection of genuine human-to-agent turns with aligned audio and textual context,
+covering fourteen languages of which French is one. Rather than fixing a single threshold,
+the harness sweeps the policy jointly over threshold, action delay and timeout and reports
+the frontier between latency and cut-ins. It is an industrial artefact rather than a
+peer-reviewed publication, released under Apache-2.0 in June 2026 alongside the LiveKit Turn
+Detector v1, three weeks before implementation began here.
+
+One caveat qualifies Chapter~\ref{ch:results}. Its authors omit scalar ranking metrics such
+as the area under the receiver operating characteristic curve (AUC) from their comparison
+reports, treating them as diagnostic only. This dissertation reports per-span AUC as its
+headline figure because the question here is whether a lexical signal improves the
+underlying \emph{score}, which a policy sweep conflates with the timing applied on top of
+it. Both views are reported throughout.
+
+\section{Calibration and cost-sensitive decision}
+\label{sec:calibration-lit}
+
+Neither of the two bodies of method underpinning the decision layer is specific to
+turn-taking.
+
+The first is probability calibration. A classifier is calibrated when, among the cases it
+assigns a probability of $0.8$, roughly eight in ten are positive. Modern neural networks
+are systematically miscalibrated and typically overconfident;
+\citet{guo2017calibration} attribute this to model capacity and to training choices such as
+batch normalisation, and show that accuracy and calibration can move in opposite directions.
+Calibration is therefore not implied by good discrimination: a model can rank correctly, and
+so obtain a high AUC, while the values it emits are meaningless as frequencies. 
+
+The standard remedies are post-hoc and monotonic. Platt scaling fits a sigmoid; isotonic regression
+\citep{zadrozny2002isotonic} fits an arbitrary non-decreasing step function, more flexible
+but hungrier for held-out data \citep{niculescu2005predicting}. Being monotonic, neither
+changes the ranking, and so neither changes the AUC: they correct the values, not the
+ordering. Calibration quality is measured by the expected calibration error, or ECE
+\citep{naeini2015ece,guo2017calibration}, defined in Section~\ref{sec:calibdesign}.
+
+The second is cost-sensitive decision making. Once a probability is trustworthy, where to
+act is not a free parameter but a consequence of the relative cost of the two errors:
+\citet{elkan2001cost} shows that under an asymmetric loss the operating point follows from
+the cost ratio rather than being set by hand. The rule used here decides on the evidence
+available at one instant. The richer alternative lets observations accumulate and weighs
+acting now against paying to observe more; the canonical formulation is Wald's sequential
+probability ratio test \citep{wald1945sequential}, which Chapter~\ref{ch:conclusions}
+returns to as future work.
+
+A third strand is relevant to the in-domain dataset rather than the decision. Weak
+supervision replaces manual annotation with cheap, noisy labelling heuristics, an approach
+systematised by \citet{ratner2017snorkel}. It buys
+scale and, in a clinical setting, avoids a person having to listen to call content, at the
+cost of label noise that bounds the signal any model can recover from the data. That bound explains the in-domain result of Section~\ref{sec:gold}.
+
+\section{Related work on end-of-turn detection}
+\label{sec:related}
+
+Work on end-of-turn detection can be grouped by the signals it uses.
+
+\emph{Purely acoustic} approaches decide from sound, prosody and silence, without reading
+the words. They are fast and independent of transcription, but blind to meaning, and so
+cut off utterances that are grammatically incomplete. Smart Turn, the baseline of this
+project, belongs to this family. A more elaborate member is
+\citet{zink2024predictive}, which trains a Conformer to transcribe before an utterance
+finishes and reads the decoder's cross-attention at the end-of-sentence token to locate the
+endpoint, so no separate language model is needed. It is evaluated offline on pre-segmented
+utterances, however, and never inside a running dialogue system, so it is not shown that the
+timing it saves survives streaming constraints. That gap shaped the present design.
+
+\emph{Purely lexical} approaches read the transcribed text and judge whether the utterance
+is complete. They supply the meaning the acoustic signal lacks, but they inherit a dependency that shapes
+both the design of Chapter~\ref{ch:approach} and the failure reported in
+Section~\ref{sec:gold}. A lexical branch is only as good as the transcript it reads, and a
+streaming transcript is late, unstable and imperfect: partials arrive behind the audio, are
+revised as context arrives, and degrade on narrowband telephone speech. Waiting for a stable
+transcript buys accuracy with the latency endpointing is trying to save; reading whatever is
+available reads a text that may be wrong. Neither horn is free.
+
+\emph{Joint} approaches process audio and text together. FastTurn \citep{fastturn2026} unifies streaming connectionist temporal classification (CTC)
+decoding with acoustic features so that a
+decision can be taken early from partial observations while semantic cues are preserved.
+It performs well but is heavy and presupposes joint training of its components. JAL-Turn
+\citep{jalturn2026} combines pre-trained acoustic representations with linguistic features
+through a lightweight joint model built on a frozen automatic speech recognition (ASR)
+encoder, so that it runs in
+parallel with recognition and adds no latency. Unlike FastTurn it does not require the two
+modalities to be retrained together, and its labels are extracted automatically from
+large-scale dialogue corpora. 
+
+X2-Turn \citep{x2turn2026} goes further, placing a frame-synchronous turn state head
+alongside the ASR head on shared streaming features. Phoenix-VAD \citep{phoenixvad2025}
+takes the opposite route to the one adopted here, putting a large language model inside the
+endpoint decision itself.
+
+On the benchmarking side, the LiveKit detector and test set provide the policy-sweep
+evaluation framework this project adopts. Other work remains purely acoustic: endpoint
+anticipation \citep{udupa2026anticipation} bypasses ASR to predict a turn ending in
+advance, up to roughly 2.5 seconds ahead, so that the rest of the pipeline can be started
+sooner. Its object is not the choice of a decision threshold but early prediction, and the
+cost it seeks to reduce is the speculative computation wasted when the pipeline is
+launched too early and then abandoned.
+
+The closest neighbour is Easy Turn \citep{easyturn2025}, an open-source modular detector
+that also integrates acoustic and linguistic information and also positions itself against
+Smart Turn. 
+
+Beyond that the two diverge on every axis that matters. Easy Turn trains: its
+model is fitted on a purpose-built 1{,}145-hour corpus and predicts one of four dialogue
+states, from which a decision is taken by argmax. The present work trains no base model,
+fitting only a linear head on frozen embeddings and a four-parameter fusion above it, and
+emits a scalar probability rather than a class. 
+
+Easy Turn reports accuracy on its own test set; this work reports on a third-party benchmark in a language subset it did not choose.
+And neither Easy Turn nor any system reviewed here reports whether its probability is
+calibrated, or connects its operating point to a stated cost. Fusion is done in both; what
+differs is that the output is treated as a probability to be validated before a threshold
+placed on it can mean anything.
+
+Table~\ref{tab:related} summarises the comparison.
+
+\begin{table}[H]
+\centering
+\caption[Recent turn-taking systems compared]{Representative recent end-of-turn detection
+systems and where this work sits. ``Calib.'' records whether the system reports any
+measurement or correction of the calibration of its own output probability.}
+\label{tab:related}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{2.2cm}p{2.4cm}p{2.5cm}p{2.8cm}p{1.0cm}p{2.5cm}@{}}
+\toprule
+System & Signals & Training & Decision rule & Calib. & Evaluation \\
+\midrule
+Easy Turn (2025) & acoustic + linguistic & trained, 1{,}145\,h & argmax over 4 states & no & own test set \\
+Phoenix-VAD (2025) & LLM over text & LLM fine-tuned & LLM in the loop & no & own test set \\
+JAL-Turn (2026) & acoustic + linguistic & head only, frozen ASR & fixed threshold & no & multilingual \\
+FastTurn (2026) & acoustic + CTC & joint training & early, on partials & no & own test set \\
+X2-Turn (2026) & shared ASR features & joint, dual-head & per-frame state & no & own test set \\
+Endpoint antic. (2026) & acoustic only & trained & per-horizon threshold & no & anticipation only \\
+LiveKit v1 (2026) & text (+ VAD) & trained detector & swept policy & no & 14-language benchmark \\
+\midrule
+\textbf{This work} & acoustic + lexical & \textbf{frozen bases}; linear head + fusion & \textbf{cost-derived, on a calibrated probability} & \textbf{yes} & French benchmark + medical domain \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The fusion mechanism itself, combining an acoustic signal with a lexical one, and the
+latency-versus-cut-in framing are not new, and this project claims to have invented
+neither. The field is moving fast enough that every one
+of the seven systems in Table~\ref{tab:related} was published in the eleven months to
+August 2026, and the most recent of them appeared three weeks before this chapter was
+written.
+
+\section{The gap addressed}
+\label{sec:gap}
+
+Three gaps emerge from this review. Almost all of the work above appeared after this
+project was scoped (Chapter~\ref{ch:intro}), so these are the gaps that remain \emph{after}
+that shift, not the ones the project was originally scoped against.
+
+First, none of the systems reviewed reports an explicit
+calibration of its probability, neither an expected calibration error nor any
+recalibration, and none relates its decision threshold to a cost of interruption against
+latency: eot-bench sweeps thresholds and some vendors expose confidence scores, but the
+probability itself is neither measured nor corrected, so a chosen threshold has no precise
+meaning. 
+
+Second, Table~\ref{tab:related} shows the field moving steadily towards larger jointly
+trained systems. The opposite end of the design space, where frozen components are merely
+composed, is little studied.
+Third, the French medical telephony domain, where semantically incomplete utterances
+(spelling, digits, dates) are both frequent and consequential, is not addressed. These
+are the three gaps this dissertation sets out to close.

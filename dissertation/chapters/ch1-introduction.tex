@@ -1,0 +1,77 @@
+\chapter{Introduction}
+\label{ch:intro}
+
+The rise of large language models (LLMs) has brought with it the voice agent: a system that can
+hold a conversation and answer a request, including in demanding fields such as
+healthcare. This is the setting for the present project, which was carried out at Tennor,
+a company that builds voice agents for healthcare, able to identify patients, answer their
+requests, and interact with the software used across the medical sector.
+
+These agents share a design flaw. Because they are built to respond as quickly as
+possible, they tend to cut the caller off when a sentence is delivered in several pieces,
+for example a spelled-out detail, a telephone number given in blocks, or a pause for
+thought. 
+
+A person handles these pauses easily, from the meaning of the words and the
+speaker's intonation. A machine that listens only for silence does not. The central
+problem of this dissertation is therefore the following: how can the system tell that a
+caller has not finished speaking, so that it does not interrupt them, lose information,
+and degrade their experience? The decision has to be made in real time after every
+silence, and it rests on an uncomfortable trade-off: ending the turn too early talks over
+the caller, while waiting too long makes the exchange feel slow.
+
+The title of this dissertation says end-of-utterance; the literature and the benchmark used
+here say end-of-turn. They name the same event, the moment a speaker has finished and the
+floor is free, and the two are used interchangeably below.
+
+The existing system already separates speech from silence with a voice activity detector
+(VAD) and ends the turn after a fixed timeout. It listens to the sound, but not to the
+meaning. My idea is to add a semantic signal: a language model reads
+the partial transcript and estimates whether the words form a complete utterance. This
+signal is fused with the acoustic one into a single probability, that probability is
+calibrated, and a stop-or-wait decision is then derived, in the offline evaluation, from an explicit
+cost: the price of an interruption set against that of a delay, rather than a simple timer.
+
+Fusing an acoustic signal with a lexical one is not, in itself, new. The contribution of
+this project is narrower: a composition of off-the-shelf models, with no joint training and
+no large language model in the decision loop; a probability that is validated before it is
+trusted; and a decision derived from an explicit cost. The whole
+study is grounded in a real case of French medical telephony, with an in-domain dataset
+gathered by instrumenting the production system.
+
+How that claim came to be scoped so narrowly is part of the work. When I chose this project
+and had it approved, in April 2026, systems fusing an acoustic and a lexical signal existed,
+as Chapter~\ref{ch:background} sets out, but none I could find treated its output as a
+probability to be calibrated or derived its endpoint from a stated cost. 
+
+The critical review I submitted on 12 June, of a predictive-endpointing paper \citep{zink2024predictive}, ended
+by proposing the three things that became this dissertation: the fusion, the calibrated
+cost-sensitive decision, and the design that never waits on the transcript. Five days later
+LiveKit released a turn detector and an open benchmark that overlapped with the original
+angle. Rather than reproduce it, I narrowed the claim to the two things the released systems
+still do not do. Their benchmark is also the one this dissertation evaluates on.
+
+On a public French benchmark the fusion raises the per-span AUC from 0.814 to
+0.897, a statistically significant gain obtained without fine-tuning either base model.
+In domain, however, the same off-the-shelf pipeline does not transfer, and understanding
+why turns out to be the more instructive result of the two.
+
+\section{Aims and objectives}
+\label{sec:objectives}
+
+I set the project four objectives.
+
+\begin{itemize}
+\item \textbf{O1.} Build a modular, real-time endpointing pipeline (VAD, acoustic branch,
+lexical branch, fusion, decision) whose decision never waits on the transcript.
+
+\item \textbf{O2.} Fuse an off-the-shelf acoustic detector and a French language model, and
+test whether the fusion beats the acoustic model alone on a public benchmark.
+
+\item \textbf{O3.} Calibrate the fused score and choose the operating point from an
+explicit cost (interruption against latency) rather than a fixed timeout.
+
+\item \textbf{O4.} Instrument the production agent to build a weakly labelled in-domain
+evaluation set, and validate the method in domain.
+
+\end{itemize}

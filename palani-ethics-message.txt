@@ -1,0 +1,32 @@
+Hi Palani, quick question about the ethics appendix before I write it up.
+
+The in-domain set is 709 calls captured from the live agent. Roughly 80% are
+genuine inbound calls and about 20% are calls placed by internal testers, but all
+of them on production organisations - capture was feature-flag gated at
+organisation level. Names, first names and ages are masked at capture, everything
+stays on Tennor's infrastructure, and none of it is in the submitted corpus.
+
+The problem: the ethics statement I submitted with the corpus on 21 August
+describes the capture as limited to internal test organisations. That is narrower
+than what actually happened.
+
+Three options as I see them:
+
+1. Describe it accurately in the dissertation appendix - production traffic,
+   pseudonymised rather than anonymised (the caller audio is retained and linked
+   to a call id, so it stays personal data under GDPR, with Tennor as controller)
+   - and flag the correction to the statement I already submitted.
+
+2. Same correction, but only in the dissertation, leaving the submitted corpus as
+   it stands.
+
+3. Drop the in-domain validation from the dissertation altogether. I would rather
+   not: it removes my objective to instrument the technic in production env, and the in-domain result is my main negative finding (the
+   acoustic model saturates on 8 kHz telephony, and weak supervision caps the
+   lexical signal at around 0.60). The gold-dataset-pipeline codebase is also already visible in
+   the corpus I submitted.
+
+I am leaning towards 1. Does that sound right to you, and how would you want the
+correction flagged?
+
+Thanks!

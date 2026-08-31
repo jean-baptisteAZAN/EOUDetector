@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Comment ça marche : ajouter du sens à la détection de fin de parole</title>
+<style>
+  :root{
+    --ink:#1a1a1a; --mut:#5b6472; --line:#e4e4e7;
+    --audio:#e08a1e; --words:#0f9d8f; --bad:#c8322b; --good:#2f9e5f;
+    --card:#fafafa;
+  }
+  *{box-sizing:border-box}
+  body{max-width:880px;margin:0 auto;padding:44px 22px 90px;background:#fff;color:var(--ink);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;}
+  h1{font-size:23px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em}
+  .sub{color:var(--mut);font-size:15px;margin:0 0 30px}
+  h2{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);margin:34px 0 12px}
+  p{margin:0 0 12px}
+  .panel{border:1px solid var(--line);border-radius:14px;padding:20px 22px;background:var(--card)}
+
+  .quote{font-size:22px;font-weight:600;line-height:1.4}
+  .quote .said{color:var(--ink)}
+  .quote .pause{color:var(--mut);font-weight:500;font-size:16px}
+  svg{display:block;max-width:100%}
+  .wavewrap{margin-top:14px}
+  .caption{font-size:13px;color:var(--mut);margin-top:6px}
+
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .sig{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:#fff}
+  .sig .head{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px}
+  .ic{width:30px;height:30px;flex:0 0 30px;border-radius:8px;display:grid;place-items:center}
+  .sig.audio .ic{background:rgba(224,138,30,.14)}
+  .sig.words .ic{background:rgba(15,157,143,.14)}
+  .sig p{font-size:14px;color:var(--mut);margin:10px 0 14px}
+  .verdict{display:inline-block;font-weight:700;font-size:13px;padding:5px 12px;border-radius:20px}
+  .verdict.done{background:rgba(224,138,30,.16);color:#a9670f}
+  .verdict.notdone{background:rgba(15,157,143,.16);color:#0b7a6f}
+
+  .ba{border:1px solid var(--line);border-radius:14px;padding:16px 20px;margin-top:12px;display:grid;grid-template-columns:120px 1fr;gap:16px;align-items:center}
+  .ba .tag{font-weight:700;font-size:13px;text-transform:uppercase;letter-spacing:.05em}
+  .ba.before{border-left:4px solid var(--bad)} .ba.before .tag{color:var(--bad)}
+  .ba.after{border-left:4px solid var(--good)} .ba.after .tag{color:var(--good)}
+  .ba .body{font-size:15px}
+  .ba .body b{color:var(--ink)}
+  .ba .body .agent{color:var(--mut)}
+
+  .calc{display:grid;gap:14px}
+  .step{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+  .step .t{display:flex;align-items:center;gap:10px;font-weight:700;font-size:15px;margin-bottom:8px}
+  .step .t .n{width:26px;height:26px;flex:0 0 26px;border-radius:50%;background:var(--ink);color:#fff;font-size:13px;display:grid;place-items:center}
+  .step p{font-size:14px;color:var(--mut);margin:0 0 10px}
+  .vals{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+  .chip{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;padding:4px 10px;border-radius:8px;background:#eef1f4;font-weight:600}
+  .chip.audio{background:rgba(224,138,30,.16);color:#a9670f}
+  .chip.words{background:rgba(15,157,143,.16);color:#0b7a6f}
+  .chip.out{background:rgba(91,84,214,.14);color:#4b45b8}
+  .formula{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:#f4f4f5;border:1px solid var(--line);
+    border-radius:8px;padding:12px 14px;overflow-x:auto;line-height:1.7;color:#24303a;white-space:pre}
+  .formula .cm{color:#8a8f98}
+
+  ol.add{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;gap:12px}
+  ol.add li{counter-increment:s;display:grid;grid-template-columns:34px 1fr;gap:14px;align-items:start;
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  ol.add li::before{content:counter(s);width:34px;height:34px;border-radius:50%;background:var(--ink);color:#fff;
+    font-weight:700;display:grid;place-items:center}
+  ol.add b{display:block;margin-bottom:2px}
+  ol.add span{color:var(--mut);font-size:14px}
+  /* program flow */
+  .flow{display:grid;gap:8px;justify-items:center}
+  .node{border:1px solid var(--line);border-radius:10px;padding:11px 16px;background:#fff;text-align:center;max-width:560px;width:100%}
+  .node b{font-size:14px}
+  .node small{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+  .node.big{background:var(--card);font-weight:700}
+  .node.dec{border:1px solid var(--good);background:rgba(47,158,95,.06)}
+  .arrow{color:#b0b6bf;font-size:20px;line-height:.8}
+  .lanes{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:100%;max-width:640px}
+  .lane{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:#fff}
+  .lane.audio{border-top:3px solid var(--audio)} .lane.words{border-top:3px solid var(--words)}
+  .lane .lh{font-weight:700;font-size:13px;margin-bottom:8px}
+  .lane.audio .lh{color:#a9670f} .lane.words .lh{color:#0b7a6f}
+  .lane .ln{font-size:13px;color:var(--mut);margin:5px 0}
+  .lane .out{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;font-size:13px;margin-top:8px;display:inline-block}
+  .lane.audio .out{color:#a9670f} .lane.words .out{color:#0b7a6f}
+  .flownote{font-size:13px;color:var(--mut);max-width:620px;text-align:center;margin:6px auto 0}
+  .foot{margin-top:30px;color:#9aa0aa;font-size:13px;border-top:1px solid var(--line);padding-top:14px}
+  @media(max-width:640px){ .two{grid-template-columns:1fr} .ba{grid-template-columns:1fr;gap:6px} .lanes{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+
+<h1>Comment ça marche : apprendre à un agent téléphonique à savoir quand vous avez vraiment fini de parler</h1>
+<p class="sub">Un agent téléphonique médical automatisé doit décider, en temps réel, si l'appelant a fini sa phrase ou fait juste une pause. Trop tôt, il coupe la parole au patient. Trop tard, la conversation traîne.</p>
+
+<h2>Le moment</h2>
+<div class="panel">
+  <div class="quote"><span class="said">« Mon numéro, c'est zéro six... »</span> <span class="pause">( l'appelant s'arrête pour se rappeler la suite )</span></div>
+  <div class="wavewrap">
+    <svg viewBox="0 0 820 90" width="820" height="90" role="img" aria-label="onde sonore qui devient plate pendant la pause">
+      <polyline fill="none" stroke="#e08a1e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"
+        points="0,45 20,30 30,60 45,20 60,68 75,28 90,62 105,25 120,70 135,32 150,58 165,22 180,66 195,30 210,60 225,26 240,64 255,34 270,55 285,40 300,52 315,44 330,48"/>
+      <polyline fill="none" stroke="#c8c8cc" stroke-width="3" stroke-dasharray="2 6" stroke-linecap="round"
+        points="330,46 470,46"/>
+      <text x="368" y="30" font-size="13" fill="#8a8f98" font-family="sans-serif">silence</text>
+      <polyline fill="none" stroke="#e08a1e" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" opacity=".35"
+        points="470,45 490,30 505,62 520,24 535,66 550,30 565,60 580,26 595,64 610,34 625,56 640,28 655,62 670,32 685,58 700,26 715,64 730,36 745,54 760,42 775,50 790,44 805,47"/>
+      <text x="545" y="30" font-size="13" fill="#c9a06a" font-family="sans-serif">« ...douze, trente-quatre »</text>
+    </svg>
+    <div class="caption">L'appelant se tait une seconde, puis reprendrait avec la suite du numéro.</div>
+  </div>
+</div>
+
+<h2>Deux façons de juger cette pause</h2>
+<div class="two">
+  <div class="sig audio">
+    <div class="head"><span class="ic">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a9670f" stroke-width="2" stroke-linecap="round"><path d="M3 10v4M7 6v12M11 3v18M15 7v10M19 10v4"/></svg>
+    </span>Le son seul</div>
+    <p>N'écoute que l'audio. Il entend un silence, donc il suppose que l'appelant s'est arrêté.</p>
+    <span class="verdict done">Semble fini</span>
+  </div>
+  <div class="sig words">
+    <div class="head"><span class="ic">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0b7a6f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16M4 10h16M4 15h10"/></svg>
+    </span>Les mots (ce qu'on ajoute)</div>
+    <p>Lit les mots prononcés. « Mon numéro, c'est zéro six » est clairement le début d'un numéro, pas une phrase complète.</p>
+    <span class="verdict notdone">Pas encore fini</span>
+  </div>
+</div>
+
+<h2>Le flux du programme</h2>
+<div class="flow">
+  <div class="node big">Audio de l'appel<small>16 kHz, mono, en continu</small></div>
+  <div class="arrow">&#8595;</div>
+  <div class="node">Détecteur de voix (VAD Silero)<small>sépare parole et silence ; à chaque micro-pause, il déclenche une évaluation</small></div>
+  <div class="arrow">&#8595;</div>
+  <div class="flownote">La même entrée part dans deux pipelines en parallèle :</div>
+  <div class="lanes">
+    <div class="lane audio">
+      <div class="lh">Pipeline 1 : acoustique</div>
+      <div class="ln">1. Garde les dernières secondes d'audio (tampon)</div>
+      <div class="ln">2. Smart Turn v3 (modèle ONNX, local)</div>
+      <div class="ln">3. Juge si le son ressemble à une fin de tour</div>
+      <div class="out">&#8594; p_son</div>
+    </div>
+    <div class="lane words">
+      <div class="lh">Pipeline 2 : lexical (le sens)</div>
+      <div class="ln">1. Transcription partielle en direct (ASR Azure)</div>
+      <div class="ln">2. CamemBERT + règles françaises (épellation, chiffres, mots-outils)</div>
+      <div class="ln">3. Juge si les mots forment une phrase complète</div>
+      <div class="out">&#8594; p_mots</div>
+    </div>
+  </div>
+  <div class="arrow">&#8595;</div>
+  <div class="node">Fusion<small>régression logistique sur p_son et p_mots &#8594; p_brut</small></div>
+  <div class="arrow">&#8595;</div>
+  <div class="node">Calibration<small>régression isotone : rend la probabilité honnête &#8594; p</small></div>
+  <div class="arrow">&#8595;</div>
+  <div class="node dec">Décision par le coût<small>seuil fixé par lambda : si p &#8805; seuil &#8594; FIN, sinon ATTENDRE</small></div>
+</div>
+<p class="flownote">Point clé : la décision <b>ne bloque jamais</b> sur le pipeline lexical. Le texte est lu en instantané (le dernier disponible) ; seul le pipeline acoustique est sur le chemin critique, donc la réponse reste rapide même si la transcription prend du retard.</p>
+
+<h2>Ce qui se passe ensuite</h2>
+<div class="ba before">
+  <div class="tag">Avant</div>
+  <div class="body">Seul le son est utilisé. Après le silence, l'agent décide que l'appelant a fini et lui <b>coupe la parole</b> : <span class="agent">« Comment puis-je vous aider ? »</span> alors qu'il était au milieu de son numéro. Frustrant, et le numéro est perdu.</div>
+</div>
+<div class="ba after">
+  <div class="tag">Notre système</div>
+  <div class="body">Les mots disent « pas fini », donc le système <b>attend</b>. L'appelant continue <b>« ...douze, trente-quatre »</b> et n'est jamais coupé. Le numéro complet est capturé.</div>
+</div>
+
+<h2>Sous le capot : le calcul</h2>
+<p>Suivez le même exemple, « Mon numéro, c'est zéro six... », à travers les quatre étapes. Chaque boîte montre les valeurs de cet exemple et la formule exacte en dessous.</p>
+<p class="flownote" style="text-align:left;max-width:none;margin:0 0 12px">Les nombres ci-dessous sont un <b>exemple pour ce moment précis</b>. En réalité p_son et p_mots sont recalculés à chaque micro-pause et <b>bougent selon l'audio et les mots reçus</b> : deux secondes plus tard, sur « ...douze, trente-quatre. », p_mots remonterait et la décision passerait à FIN.</p>
+<div class="calc">
+
+  <div class="step">
+    <div class="t"><span class="n">1</span> Chaque signal devient une probabilité</div>
+    <p>Les deux modèles sortent un nombre entre 0 (parle encore) et 1 (a fini). Le son entend un silence et est plutôt sûr ; les mots savent qu'un numéro n'est pas terminé.</p>
+    <div class="vals"><span class="chip audio">p_son = 0.92</span><span class="chip words">p_mots = 0.08</span></div>
+    <div class="formula"><span class="cm"># p_son : modèle Smart Turn sur l'audio récent</span>
+<span class="cm"># p_mots : modèle CamemBERT sur les mots prononcés jusqu'ici</span>
+p_son, p_mots  dans  [0, 1]</div>
+  </div>
+
+  <div class="step">
+    <div class="t"><span class="n">2</span> Combiner les deux (fusion)</div>
+    <p>Une petite formule, dont les poids ont été appris sur des données, les mélange. Comme la complétude est dans les mots, un p_mots bas tire le résultat vers le bas même si le son disait « fini ».</p>
+    <div class="vals"><span class="chip audio">0.92</span><span class="chip words">0.08</span><span class="chip out">p_brut = 0.15</span></div>
+    <div class="formula">z       = w0 + w1*p_son + w2*p_mots + w3*(p_son * p_mots)
+p_brut  = 1 / (1 + e^(-z))              <span class="cm"># sigmoïde, donne 0..1</span>
+<span class="cm"># w0..w3 appris par régression logistique, validés en croisé</span></div>
+  </div>
+
+  <div class="step">
+    <div class="t"><span class="n">3</span> Rendre la confiance honnête (calibration)</div>
+    <p>Le nombre brut est ré-étalonné pour qu'il veuille dire ce qu'il annonce (quand il dit 80 %, il a raison environ 80 % du temps). La correction ne fait que monter, donc elle ne change jamais le classement, seulement la valeur.</p>
+    <div class="vals"><span class="chip out">p_brut = 0.15</span><span class="chip out">p = 0.12</span></div>
+    <div class="formula">p = g(p_brut)         <span class="cm"># g = régression isotone (monotone)</span>
+g   ajustée pour minimiser   somme_i ( g(p_i) - y_i )^2
+<span class="cm"># qualité mesurée par l'ECE (plus bas = mieux) :</span>
+ECE = somme sur les bacs  (part) * | taux_reel - taux_annonce |</div>
+  </div>
+
+  <div class="step">
+    <div class="t"><span class="n">4</span> Décider, avec le coût</div>
+    <p>Vous fixez à quel point couper la parole est pire qu'attendre (le nombre lambda). Ça fixe un seuil. Le tour ne se termine que si la probabilité honnête le dépasse.</p>
+    <div class="vals"><span class="chip">lambda = 10</span><span class="chip">seuil = 0.70</span><span class="chip out">p = 0.12</span><span class="chip words">-&gt; ATTENDRE</span></div>
+    <div class="formula">seuil     = la valeur qui minimise   lambda * (taux de coupure) + (latence)
+décision  = FIN      si  p &gt;= seuil
+            ATTENDRE  sinon
+<span class="cm"># exemple : lambda=10 -&gt; seuil=0.70 ; p=0.12 &lt; 0.70  -&gt; ATTENDRE (ne pas couper)</span></div>
+  </div>
+
+</div>
+
+<h2>Ce qu'on apporte, en trois idées</h2>
+<ol class="add">
+  <li><div><b>Il lit le sens, pas juste le silence.</b><span>Un silence ne veut pas dire « fini ». Le système vérifie si les mots forment vraiment une pensée complète.</span></div></li>
+  <li><div><b>Il sait à quel point il est vraiment sûr.</b><span>Sa confiance est honnête : quand il dit « 80 % fini », il a raison environ 80 % du temps. Ça lui permet de choisir sensément au lieu de deviner.</span></div></li>
+  <li><div><b>Il pèse le coût d'une erreur.</b><span>Vous lui dites à quel point couper la parole est pire qu'attendre un instant. Il en déduit combien de temps attendre, au lieu d'un minuteur fixe.</span></div></li>
+</ol>
+
+<p class="foot">Détection de fin de parole sémantiquement consciente. Le signal « son » et le signal « mots » sont combinés ; les autres pages du corpus donnent le détail technique et les résultats mesurés.</p>
+
+</body>
+</html>

@@ -1,0 +1,363 @@
+Here's the timeline: Project_Timeline_EOU_revised.docx
+Project_Timeline_EOU_revised.docx
+ 
+Sorry JB. It is taking longer than expected. What I will do is send you some comments later and we can speak on Monday?
+ 
+No problem Palani, let's reschedule on Monday
+ 
+Hello JB, generally, the plan is good, a lot of things planned weekly, with deliverables. Just two concerns:
+Datasets, mainly 4k transcripts? Have you acquired the audio datasets? What is the real dataset? 
+Novelty, significance over existing methods? What is the issue that you are trying to address? While implementing a framework of techniques is good for UG level, at MSc, the expectation is that you go deeper. It is necessary to develop loads of techniques but what is more important is to develop something novel is that is better in some sense (accuracy, speed etc) as compared to a baseline/existing model. 
+
+
+When we speak, you can go through the plan and explain/justify the approaches that you are using. 
+
+ 
+Do you have time tomorrow (Monday) morning, say around 11 am? Alternatively please suggest another time.  We could possibly fix a day/time for weekly meetings (i.e. most weeks, some weeks, we can just do messages as I will be away). 
+ 
+Hello Palani, 11am is perfect for me
+ 
+Wonderful, will call here in a minute. 
+ 
+Hi Palani, quick recap from last week:
+ 
+- I ran some tests on the dataset and tried a few labelling strategies to figure out which kind of data best suits the semantic part.
+
+
+- I worked on the novelty side (positioning vs the state of the art). I forgot to send you the revised timeline, I'll get it over to you today.
+
+
+- I also started on the baselines, collecting as many metrics as I can so we'll have a clear baseline-vs-contribution comparison.
+ 
+Happy to meet today if you'd like, though to be honest I don't have a huge amount to show just yet. 
+ 
+Oh okay then JB. Thanks for the update. We can speak next week. In the meantime, send the plan/details when you have it completed.
+ 
+here is the revised plan: Project_Timeline_EOU_revised 1.docx
+Project_Timeline_EOU_revised 1.docx
+ 
+JB, can you give me access?
+ 
+i invited you, is it ok now ?
+ 
+Yeah, I can view now
+ 
+I gave a glance JB. Generally it is good, adapted from your earlier version to include the three baseline measures,  which should be ready this week.  The plan has only four weeks to develop the methodology and evaluation, so you will need to work quickly. 
+ 
+We can meet next week Monday and speak, I will be away for about two weeks after that but please update weekly progress via Teams. During updates, it will be helpful to include some brief reports (not extensive, just outputs, obtained results - it will help me to understand the progress, also easier for you to write the report later). 
+ 
+Hey Palani, are we doing the meeting today? 
+ 
+Oopsie. Stuck in traffic. Can we meet a bit later in afternoon? 
+ 
+im available only after 6pm this afternoon, otherwise tomorrow morning ? 
+ 
+I think 12 noon might be okay ....would you be available? 
+ 
+Otherwise we can speak later today as I am travelling tomorrow 
+ 
+Worst case, we can speak earlier around 10 am tomorrow. Sorry about this. 
+ 
+Back now. But we can speak later today or tomorrow, please just let me know. 
+ 
+are you available at 6 ? 
+ 
+Otherwise 10am tomorrow is perfect 
+ 
+Yes, 6 pm is okay for today. 
+ 
+I had a meeting that got cancelled; are you available right now by any chance?
+ 
+Sure, I am 
+ 
+SHall I call?
+ yes lets go !
+ 
+https://docs.livekit.io/agents/logic/turns/turn-detector/
+LiveKit turn detector | LiveKit Documentation
+Audio-based end-of-turn detection for voice AI.
+ 
+https://github.com/livekit/eot-bench
+GitHub - livekit/eot-bench: LiveKit End-of-Turn Benchmark
+LiveKit End-of-Turn Benchmark. Contribute to livekit/eot-bench development by creating an account on GitHub.
+ 
+Hope research is coming along okay. Don't think we can speak on Monday as will be out most of the day.  
+ 
+Hi Palani, quick update on last week.
+ 
+Bit of a change on the data side first. I moved to evaluating on LiveKit's eot-bench (a public end-of-turn benchmark, https://github.com/livekit/eot-bench ), and I'm using their dataset for training and dev since the licensing is clean (Apache 2.0 for the harness, CC-BY 4.0 for the data, so fine for research and derivatives). That frees up the Tennor production data to become the validation set instead, which I think is actually the better setup: it lets me check the method holds on real production calls rather than just a benchmark, and it's where our medical model is in-domain.
+ 
+On the results, the system decides when the caller has finished speaking by combining two signals, the audio (via Smart Turn) and the transcript text (via CamemBERT). On the French set, the audio alone gets an AUC of 0.814. Adding the text signal with a simple combination, no heavy training, brings it up to 0.900, which is just above a commercial system (Soniox at 0.888). So combining audio and text clearly beats audio on its own and gets to commercial-grade accuracy.
+ 
+One thing to be upfront about: we're ahead on that accuracy score but still behind on latency compared to the commercial streaming systems, they commit to "finished" a bit earlier. All the numbers are k-fold so there's no leakage.
+ 
+Next I'll validate the whole pipeline on the Tennor gold data, which is the result that really sets us apart, and start writing up the methodology and results in parallel.
+ 
+Let me know if you want to go through the numbers.
+GitHub - livekit/eot-bench: LiveKit End-of-Turn Benchmark
+LiveKit End-of-Turn Benchmark. Contribute to livekit/eot-bench development by creating an account on GitHub.
+ 
+Hello JB. It is good that you now have a clean validation set. 
+ 
+It is great that combining audio and text brings up the accuracy to commercial range.  You can try to reduce the latency but if we can show *statistically* on the increase in accuracy, that should be a good contribution. 
+ 
+Carry on with the Tennor data. It is good that you are writing up in parallel as the submission will happen soon. 
+ 
+I am back now but had a minor injury to my eye yesterday during the travel. Going to see a doctor in a short while. Hope the work is progressing okay, please drop an update on the outcomes and results - we can meet on Monday, maybe at 10.30 am on Teams (have a PhD review at 11 am).  
+ 
+Hi Palani, sorry to hear about your eye, I hope the doctor sorts it out quickly and it turns out to be nothing serious.
+ 
+Here is where things stand.
+ 
+On your point about showing the accuracy gain statistically, I tested it properly by resampling the data by call, three thousand times. The audio-only model scores 0.814 on the accuracy measure. Combining audio and text lifts it to 0.897. That is an improvement of 0.083, with a 95 percent confidence interval of 0.063 to 0.104, and a p-value below 0.0001. In plain terms, the gain from adding the text signal is clearly real and not down to chance.
+ 
+The combined model sits in commercial range on that same measure, around 0.90. I am being careful not to claim it beats a specific commercial system, because that margin is small, but it is comparable.
+ 
+The code is nearly packaged for the corpus submission, and I have started writing up the methodology and results at the same time. Next I will run the full pipeline on the Tennor data once there is enough volume, and then finish the write-up.
+ 
+On Monday I am not free in the morning. Would the afternoon work for you instead?
+ 
+Take care,
+ 
+Slowly my vision is getting better. Yes, we can speak in the afternoon tomorrow. 
+ 
+Not sure but if you are available, say around 2.30 pm, we could speak? Just briefly, to see where you are before the corpus submission. 
+ 
+2:30 is perfect for me !
+ 
+Just called you .... when you are available, do call back
+ 
+Hey Palani, just to let you know I uploaded my repository in Moodle; I don't know if you can see it?
+I will send you tomorrow the report plan that I created; I need to rework it a bit  
+ 
+Hope to hear from you soon
+ 
+Hello Palani hope you are doing well and enjoying your travel,
+ 
+Before I write the dissertation up in prose, here is the structure I am
+
+
+planning, with a few notes on what goes in each chapter. I would love your
+
+
+feedback on it.
+ 
+Quick context: the project decides when a caller has finished speaking for
+
+
+the French medical voice agent, by adding a meaning signal (the words) on top
+
+
+of the sound, then a calibrated, cost-based stop/wait decision.
+ 
+Planned structure:
+ 
+1. Introduction
+
+
+   - the problem and why it matters (real-time medical phone intake)
+
+
+   - my aims and objectives
+
+
+   - the contribution in one line, and an overview of the chapters
+ 
+2. The problem
+
+
+   - the stop/wait decision taken at each pause
+
+
+   - the trade-off: cutting the caller off vs responding late
+
+
+   - why silence alone fails: name spelling, numbers/dates in chunks, thinking pauses
+ 
+3. Literature and technology review
+
+
+   - existing turn detection: sound-only, words-only, and joint models
+
+
+   - the tools: Silero VAD, Smart Turn v3, CamemBERT, Azure ASR, the public benchmark
+
+
+   - the gap I address: off-the-shelf composition in a French medical setting
+ 
+4. Approaches I considered, and why I chose this one
+
+
+   - one joint trained model vs late fusion of off-the-shelf models
+
+
+   - fine-tuned vs frozen words model
+
+
+   - fixed timeout vs a cost-based decision
+
+
+   - simple threshold vs a sequential one (I tried sequential, it did not help)
+ 
+5. What I built
+
+
+   - architecture: VAD gate, then sound + words, fusion, calibration, cost decision (never blocks on the words)
+
+
+   - the method: the fusion formula, the calibration step, the cost rule
+
+
+   - the data: public benchmark plus the production in-domain set (auto-labelled)
+
+
+   - the engineering: live demos, automated tests, eval harness, production instrumentation
+ 
+6. Results, testing, verification
+
+
+   - fusion beats sound-only (0.814 to 0.900)
+
+
+   - cost decision: the wait time comes from the cost ratio, not a fixed timer
+
+
+   - the two negative results, and the 45 automated tests
+ 
+7. Conclusions and honest self-evaluation
+
+
+   - objectives vs what I achieved (the gold result is still pending)
+
+
+   - honest limits: generic-French plateau, latency gap, weak labels
+
+
+   - what I would do differently
+ 
+8. Future work
+
+
+   - a new early cue: how fast the transcript stabilises (unique to our data)
+
+
+   - sequential optimal stopping
+ 
+Plus bibliography and appendices (reproducibility, ethics, corpus map).
+ 
+Does this structure work for you, and is anything missing or worth cutting?
+
+
+Happy to adjust before I start writing.
+ 
+Thanks a lot 
+ 
+Hello Palani,
+ 
+A quick question on how to frame the novelty in the write-up.
+ 
+When I started the project in April and it was approved, to the best of my knowledge no readily available system combined a semantic (text) signal with the acoustic signal to detect end of utterance. Partway through, LiveKit released their turn detector and benchmark, which overlapped with that original angle. That pushed me to adapt the project so it still makes a genuine contribution (calibrating the probability, a cost-based decision) rather than reproduce what they had done.
+ 
+Would it be appropriate to explain this timeline in the dissertation, for example in the introduction or the related-work chapter, to show honestly how the project evolved and where the contribution now sits? And do you have a preference on where and how it should be phrased?
+ 
+Thanks a lot !
+ 
+Jean-Baptiste Azan
+Hello Palani,   A quick question on how to frame the novelty in the write-up.   When I started the project in April and it was approved, to the best of my knowledge no readily available system combin…
+Hello JB, sorry just catching up after travels. Had some issues as my stuff got pickpocketed, so had to resolve everything. Yes, it is helpful to be honest and transparent. Hence, the narrative is fine. 
+ 
+Will have a look at the other message and come back. 
+ 
+Palaniappan Ramaswamy
+Hello JB, sorry just catching up after travels. Had some issues as my stuff got pickpocketed, so had to resolve everything. Yes, it is helpful to be honest and transparent. Hence, the narrative is f…
+ok perfect !
+ 
+Palaniappan Ramaswamy
+Will have a look at the other message and come back.
+keep me updated please 
+ 
+Jean-Baptiste Azan
+Hello Palani hope you are doing well and enjoying your travel,   Before I write the dissertation up in prose, here is the structure I am planning, with a few notes on what goes in each chapter. I wou…
+The structure is very good, well aligned with the expectations of MSc thesis structure. Some thoughts to consider, not mandatory though (it is okay as it is, just some ideas to consider):  
+Merge chapters 2 and 3, to reduce number of chapters. Problem and literature review overlaps. The trade-offs of silence (e.g. spelling) are directly tied to why existing sound-only models don't do well. Combine them into Background & Related Work. Define the turn-taking trade-off first, then review current tools (Silero, CamemBERT, Smart Turn v3), and end with your identified gap in French medical intake.
+Chapter 4 title, consider something like: Design and Trade-Off Analysis (or something similar, rather than an informal title). Similarly, chapter 5 title could be System Architecture and Implementation. 
+Ensure you have enough discussion of results - often students don't spend enough on this section and lose marks. 
+Combine chapters 7 and 8. Call it something like Conclusions and Future Work. 
+
+But overall, contents looks good. Just minor restructuring.  
+ 
+Palaniappan Ramaswamy
+The structure is very good, well aligned with the expectations of MSc thesis structure. Some thoughts to consider, not mandatory though (it is okay as it is, just some ideas to consider):  • Merge c…
+thanks a lot ! 
+Did you get all your stuff back from the pickpocket ? is everything ok ? 
+ 
+Unfortunately, I realised too late. Lost credit, debit cards, driving license, some money too. The guy was quick to use the cards and made some transactions. Need to claim from insurance and card companies. But back to UK now, so okay (luckily my wife had the passports). 
+ 
+Hello JB, when time allows, please send me a draft of the report for me to have a quick read and feedback
+ 
+Hello Palani, im almost done with the writing (part 6/7), i will send you this tonight 
+ 
+Quick question about the ethics appendix before I write it up.
+ 
+The in-domain set is 709 calls captured from the live agent. Roughly 80% are
+
+
+genuine inbound calls and about 20% are calls placed by internal testers, but all
+
+
+of them on production organisations - capture was feature-flag gated at
+
+
+organisation level. Names, first names and ages are masked at capture, everything
+
+
+stays on Tennor's infrastructure, and none of it is in the submitted corpus.
+ 
+The problem: the ethics statement I submitted with the corpus on 21 August
+
+
+describes the capture as limited to internal test organisations. That is narrower
+
+
+than what actually happened.
+ 
+Three options as I see them:
+ 
+1. Describe it accurately in the dissertation appendix - production traffic,
+
+
+   pseudonymised rather than anonymised (the caller audio is retained and linked
+
+
+   to a call id, so it stays personal data under GDPR, with Tennor as controller)
+
+
+   - and flag the correction to the statement I already submitted.
+ 
+2. Same correction, but only in the dissertation, leaving the submitted corpus as
+
+
+   it stands.
+ 
+3. Drop the in-domain validation from the dissertation altogether. I would rather
+
+
+   not: it removes my objective to instrument the technic in production env, and the in-domain result is my main negative finding (the
+
+
+   acoustic model saturates on 8 kHz telephony, and weak supervision caps the
+
+
+   lexical signal at around 0.60). The gold-dataset-pipeline codebase is also already visible in
+
+
+   the corpus I submitted.
+ 
+I am leaning towards 1. Does that sound right to you, and how would you want the
+
+
+correction flagged?
+ 
+Thanks!
+
+ 

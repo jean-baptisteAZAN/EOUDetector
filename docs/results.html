@@ -49,22 +49,28 @@ a lexical trained in-distribution and fused with the acoustic beats acoustic-onl
   <tbody>
     <tr><td>Smart Turn v3 (acoustic-only)</td><td>0.814</td><td>873 ms</td><td>608 ms</td></tr>
     <tr><td>+ fusion, out-of-domain medical lexical</td><td>0.789</td><td>850 ms</td><td>659 ms</td></tr>
-    <tr><td>+ fusion, in-dist TF-IDF lexical</td><td>0.876</td><td>759 ms</td><td>548 ms</td></tr>
-    <tr class="ours"><td>+ fusion, in-dist CamemBERT lexical</td><td>0.900</td><td>715 ms</td><td>510 ms</td></tr>
-    <tr class="dim"><td>Soniox (commercial STT)</td><td>0.888</td><td>557 ms</td><td>463 ms</td></tr>
-    <tr class="dim"><td>LiveKit v1 (commercial)</td><td>0.938</td><td>635 ms</td><td>376 ms</td></tr>
+    <tr><td>+ fusion, in-dist TF-IDF lexical</td><td>0.872</td><td>759 ms</td><td>548 ms</td></tr>
+    <tr class="ours"><td>+ fusion, in-dist CamemBERT lexical</td><td>0.897</td><td>715 ms</td><td>510 ms</td></tr>
+    <tr class="dim"><td>LiveKit v1-mini (commercial)</td><td>0.884</td><td>798 ms</td><td>541 ms</td></tr>
+    <tr class="dim"><td>Deepgram Flux (commercial)</td><td>0.915</td><td>676 ms</td><td>353 ms</td></tr>
+    <tr class="dim"><td>LiveKit v1 (commercial)</td><td>0.937</td><td>635 ms</td><td>376 ms</td></tr>
+    <tr class="dim"><td>Soniox (streaming STT)</td><td>n/a</td><td>557 ms</td><td>463 ms</td></tr>
   </tbody>
 </table>
 <p class="note">With an in-distribution lexical (frozen CamemBERT embeddings plus a logistic head, no
-fine-tuning), the fusion reaches AUC 0.900, above Soniox (0.888), from Smart Turn's 0.814. Caveat:
-we lead on ranking (AUC) but trail on latency (715 ms versus Soniox 557 ms and LiveKit 635 ms) as the
-commercial streaming systems commit earlier. This is generic French; the medical lexical is in-domain
-on the gold set, where the gap should widen in our favour.</p>
+fine-tuning), the fusion reaches AUC 0.897, up from Smart Turn's 0.814 (a gain of 0.083). On the same
+per-span metric it sits above LiveKit v1-mini (0.884) but below Deepgram Flux (0.915) and LiveKit v1
+(0.937). The streaming STT systems (Soniox, AssemblyAI, OpenAI) cannot be scored on this per-span AUC
+because of a score-point misalignment, so only their latency is shown. On latency we trail the commercial
+systems (715 ms versus Soniox 557 ms and LiveKit 635 ms at a 5% cut-in budget), which commit earlier.
+This is generic French; the medical lexical is in-domain on the gold set, where the gap should widen in
+our favour.</p>
 
 <h2>3. Calibration is a universal gap</h2>
 <p class="lead">None of the leaderboard systems calibrate their end-of-turn probability. Measured on a
-held-out split, all ten are miscalibrated (ECE &gt; 0.05), and a simple post-hoc calibration fixes
-every one. A calibrated probability is the prerequisite for a cost-based decision, and nobody reports it.</p>
+held-out split, all eight external systems are miscalibrated (ECE &gt; 0.05; 13 of the 14 models evaluated
+overall), and a simple post-hoc calibration lowers the error for almost all of them. A calibrated
+probability is the prerequisite for a cost-based decision, and nobody reports it.</p>
 <table>
   <thead><tr><th>Model</th><th>ECE (raw)</th><th>ECE (calibrated)</th></tr></thead>
   <tbody>
@@ -84,10 +90,10 @@ the endpoint (lower cut-in, higher latency). The endpoint is derived, not a fixe
 <table>
   <thead><tr><th>λ (interruption cost)</th><th>Cut-in rate</th><th>Latency</th></tr></thead>
   <tbody>
-    <tr><td>1 (cheap)</td><td>26.7%</td><td>354 ms</td></tr>
-    <tr><td>5</td><td>7.2%</td><td>699 ms</td></tr>
-    <tr><td>10</td><td>1.8%</td><td>1080 ms</td></tr>
-    <tr><td>50 (costly)</td><td>0.9%</td><td>1285 ms</td></tr>
+    <tr><td>1 (cheap)</td><td>16.8%</td><td>330 ms</td></tr>
+    <tr><td>5</td><td>5.4%</td><td>674 ms</td></tr>
+    <tr><td>10</td><td>1.8%</td><td>981 ms</td></tr>
+    <tr><td>50 (costly)</td><td>0.2%</td><td>1525 ms</td></tr>
   </tbody>
 </table>
 <p class="note">A calibrated cost-derived threshold tracks the swept oracle at moderate λ; at high λ the
@@ -97,23 +103,33 @@ optimal-stopping formulation.</p>
 <h2>5. Negative results</h2>
 <ul>
   <li>Out-of-domain medical lexical on generic French lowers AUC (0.814 → 0.789): fusion only helps with an in-distribution lexical.</li>
-  <li>Time-aware sequential threshold did not beat the harness sweep (0.814 → 0.798): the frontier is bounded by score quality, and the sweep already extracts the temporal policy.</li>
-  <li>Dialogue-context augmentation of the lexical did not help (0.900 → 0.86/0.90): frozen-embedding pooling dilutes the caller's completion signal.</li>
+  <li>Time-aware sequential threshold did not beat the harness sweep (0.814 → 0.811): the frontier is bounded by score quality, and the sweep already extracts the temporal policy.</li>
+  <li>Dialogue-context augmentation of the lexical did not help (0.897 → 0.854): frozen-embedding pooling dilutes the caller's completion signal.</li>
 </ul>
 
 <h2>6. Status</h2>
 <p class="lead">Demonstrated so far:</p>
 <ul>
   <li>End-to-end eot-bench evaluation (French, full leaderboard).</li>
-  <li>Fusion (frozen CamemBERT + logistic) reaches AUC 0.900, above Soniox (0.888), with no fine-tuning.</li>
-  <li>Calibration is a universal gap (10/10 models) and is fixable post-hoc.</li>
-  <li>The fused probability is itself well-calibrated (ECE 0.06) and drives the cost-based decision.</li>
+  <li>Fusion (frozen CamemBERT + logistic) reaches AUC 0.897 (from 0.814), with no fine-tuning; above LiveKit v1-mini but below Deepgram and LiveKit v1 on the same per-span metric.</li>
+  <li>Calibration is a universal gap (8/8 external models, 13/14 overall) and is fixable post-hoc.</li>
+  <li>The fused probability is much better calibrated than the leaderboard (ECE 0.064 versus 0.2 to 0.37), lowered to 0.043 by post-hoc calibration, and drives the cost-based decision.</li>
   <li>Cost-sensitive operating point derived from the cost ratio.</li>
   <li>The fused lexical model (CamemBERT) is wired into the live pipeline (CLI and browser demo).</li>
 </ul>
+<h2>7. In-domain validation (gold): the pipeline does not transfer</h2>
+<p class="lead">The same pipeline was run on 709 production French medical calls (5,342 decision
+pauses, 1,015 end-of-turn / 4,327 hold, weak-supervision labels, 8&nbsp;kHz telephone band). Per pause:
+acoustic-only (Smart Turn) AUC 0.49, lexical-only (CamemBERT) 0.60, fusion 0.59. Two causes, once bugs
+were ruled out (caller channel confirmed left by pre-pause speech energy; timestamp alignment and score
+point verified): Smart Turn is trained on 16&nbsp;kHz wideband and saturates upward on 8&nbsp;kHz
+narrowband, answering &ldquo;finished&rdquo; for nearly every pause; and weak supervision caps the
+attainable signal &mdash; label cleaning lifts the lexical AUC only from 0.60 to 0.61, for both frozen
+and fine-tuned models alike. The off-the-shelf pipeline does not transfer directly to production.</p>
 <p class="lead">Next:</p>
 <ul>
-  <li>Run the same pipeline on the gold French-medical set to confirm generalisation.</li>
+  <li>An acoustic model adapted to the 8&nbsp;kHz telephone band, to remove the saturation.</li>
+  <li>A small hand-annotated gold subset, for a trustworthy in-domain measurement.</li>
   <li>Sequential optimal-stopping decision beyond the myopic threshold.</li>
 </ul>
 
