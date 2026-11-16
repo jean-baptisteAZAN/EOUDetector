@@ -1,0 +1,39 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{amsmath}
+\renewcommand\baselinestretch{1.15}
+\pagestyle{empty}
+\begin{document}
+\begin{center}
+{\large\bfseries Towards Semantically-Aware End-of-Utterance Detection\\for Conversational AI Systems}
+
+\medskip
+Jean-Baptiste Azan\\
+MSc Artificial Intelligence, University of Kent
+\end{center}
+
+\vspace{6mm}
+\begin{center}\textbf{Abstract}\end{center}
+
+A conversational voice agent has to decide, in real time, when a caller has finished
+speaking. On a French medical telephone line that decision is delicate: ending a turn too
+early cuts a patient off part-way through a spelled name or a dictated number, while ending
+it too late makes the exchange feel slow. Systems that rely on silence alone hear sound but not meaning, and cut off utterances that
+are grammatically incomplete.
+
+This dissertation asks whether adding a lexical, meaning-aware signal improves that
+decision, and how that probability should become an endpoint. Two off-the-shelf models, an acoustic end-of-turn detector and a French
+language model reading the partial transcript, are fused into one probability; that
+probability is calibrated; and the operating point is chosen, in the offline evaluation, from an explicit
+interruption-versus-latency cost rather than from a timer. No base model is fine-tuned in the pipeline that produces this result, and no large language
+model sits in the decision loop.
+
+On a public French benchmark the fusion raises the per-span AUC from 0.814 to 0.897, a gain of 0.083 (95\,\% confidence interval $[0.063, 0.104]$, $p < 1/3000$, bootstrap
+resampled by call). Across the
+leaderboard, calibration proves a field-wide blind spot: every external detector evaluated
+is miscalibrated and none reports it. Validation on 636 production medical calls is
+negative, the acoustic branch saturating on 8\,kHz telephony and weak supervision capping
+the lexical signal, marking where the approach does not transfer. The contribution is a calibration-first, cost-aware method for composing existing models,
+with its limits measured.
+\end{document}

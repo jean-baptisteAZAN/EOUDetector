@@ -188,105 +188,104 @@ ty
 (/usr/local/texlive/2026basic/texmf-dist/tex/latex/latexconfig/epstopdf-sys.cfg
 )) (./diss.out) (./diss.out) [1{/usr/local/texlive/2026basic/texmf-var/fonts/ma
 p/pdftex/updmap/pdftex.map} <./kent-new-eps-converted-to.pdf>] [2] [3] [4]
-(./diss.toc [5]) [6] (./diss.lof) [7] (./diss.lot) [8]
+[5] (./diss.toc [6]) [7] (./diss.lof) [8] (./diss.lot) [9]
 (./chapters/ch1-introduction.tex
 Chapter 1.
-[9]
-Overfull \hbox (2.13586pt too wide) in paragraph at lines 61--63
+[10]
+Overfull \hbox (2.13586pt too wide) in paragraph at lines 65--67
 []\T1/cmr/bx/n/12 O1. \T1/cmr/m/n/12 Build a mod-u-lar, real-time end-point-ing
  pipeline (VAD, acous-tic branch,
-) [10] (./chapters/ch2-background.tex
+[11]) [12] (./chapters/ch2-background.tex
 Chapter 2.
-[11] [12] [13]
-Overfull \hbox (4.1957pt too wide) in paragraph at lines 137--147
+[13] [14] [15] [16]
+Overfull \hbox (4.1957pt too wide) in paragraph at lines 165--175
 \T1/cmr/m/n/12 uni-fies stream-ing con-nec-tion-ist tem-po-ral clas-si-fi-ca-ti
 on (CTC) de-cod-ing with acous-
-[14]
-Underfull \hbox (badness 10000) in paragraph at lines 191--191
+[17]
+Underfull \hbox (badness 10000) in paragraph at lines 217--217
 []\T1/cmr/m/n/10 Easy Turn
 
-Underfull \hbox (badness 10000) in paragraph at lines 191--191
+Underfull \hbox (badness 10000) in paragraph at lines 217--217
 []\T1/cmr/m/n/10 argmax over 4
 
-Underfull \hbox (badness 10000) in paragraph at lines 192--192
+Underfull \hbox (badness 10000) in paragraph at lines 218--218
 []\T1/cmr/m/n/10 Phoenix-VAD
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
+Underfull \hbox (badness 10000) in paragraph at lines 219--219
 []\T1/cmr/m/n/10 JAL-Turn
 
-Underfull \hbox (badness 10000) in paragraph at lines 193--193
+Underfull \hbox (badness 10000) in paragraph at lines 219--219
 []\T1/cmr/m/n/10 head only,
 
-Underfull \hbox (badness 10000) in paragraph at lines 194--194
+Underfull \hbox (badness 10000) in paragraph at lines 220--220
 []\T1/cmr/m/n/10 FastTurn
 
-Underfull \hbox (badness 10000) in paragraph at lines 194--194
+Underfull \hbox (badness 10000) in paragraph at lines 220--220
 []\T1/cmr/m/n/10 acoustic +
 
-Underfull \hbox (badness 10000) in paragraph at lines 195--195
+Underfull \hbox (badness 10000) in paragraph at lines 221--221
 []\T1/cmr/m/n/10 X2-Turn
 
-Underfull \hbox (badness 10000) in paragraph at lines 195--195
+Underfull \hbox (badness 10000) in paragraph at lines 221--221
 []\T1/cmr/m/n/10 shared ASR
 
-Underfull \hbox (badness 2229) in paragraph at lines 196--196
+Underfull \hbox (badness 2229) in paragraph at lines 222--222
 []\T1/cmr/m/n/10 Endpoint an-
 
-Underfull \hbox (badness 10000) in paragraph at lines 196--196
+Underfull \hbox (badness 10000) in paragraph at lines 222--222
 []\T1/cmr/m/n/10 per-horizon
 
-Underfull \hbox (badness 10000) in paragraph at lines 196--197
+Underfull \hbox (badness 10000) in paragraph at lines 222--223
 []\T1/cmr/m/n/10 anticipation
 
-Underfull \hbox (badness 10000) in paragraph at lines 197--197
+Underfull \hbox (badness 10000) in paragraph at lines 223--223
 []\T1/cmr/m/n/10 LiveKit v1
 
-Underfull \hbox (badness 10000) in paragraph at lines 197--198
+Underfull \hbox (badness 10000) in paragraph at lines 223--224
 []\T1/cmr/m/n/10 14-language
 
-Underfull \hbox (badness 5847) in paragraph at lines 199--199
+Underfull \hbox (badness 5847) in paragraph at lines 225--225
 []\T1/cmr/bx/n/10 frozen bases\T1/cmr/m/n/10 ;
 
-Underfull \hbox (badness 4291) in paragraph at lines 199--199
+Underfull \hbox (badness 4291) in paragraph at lines 225--225
 \T1/cmr/m/n/10 lin-ear head +
 
-Underfull \hbox (badness 10000) in paragraph at lines 199--199
+Underfull \hbox (badness 10000) in paragraph at lines 225--225
 []\T1/cmr/bx/n/10 cost-derived,
 
-Underfull \hbox (badness 10000) in paragraph at lines 199--200
+Underfull \hbox (badness 10000) in paragraph at lines 225--226
 []\T1/cmr/m/n/10 French bench-
-[15]) [16] (./chapters/ch3-design.tex
+[18]) [19] (./chapters/ch3-design.tex
 Chapter 3.
-[17]
+[20]
 Overfull \hbox (0.53476pt too wide) in paragraph at lines 43--43
 []\T1/cmr/bx/n/17.28 Late fu-sion rather than a jointly trained model 
-[18] [19]) [20] (./chapters/ch4-implementation.tex
+[21] [22] [23]) [24] (./chapters/ch4-implementation.tex
 Chapter 4.
-[21] [22] [23] [24]) [25] (./chapters/ch5-results.tex
+[25] [26] [27] [28]) [29] (./chapters/ch5-results.tex
 Chapter 5.
 
-Overfull \hbox (2.69603pt too wide) in paragraph at lines 39--56
+Overfull \hbox (2.69603pt too wide) in paragraph at lines 41--59
  [][] 
-[26] [27] [28 <./figures/fig_pareto.pdf>] [29] [30] [31]
-Overfull \hbox (0.43315pt too wide) in paragraph at lines 280--287
-\T1/cmr/m/n/12 than thresh-old the acous-tic prob-a-bil-ity di-rectly, this var
-i-ant re-fits $\OML/cmm/m/it/12 g\OT1/cmr/m/n/12 (\OML/cmm/m/it/12 p[]; d; p[]d
-; d[]\OT1/cmr/m/n/12 )$
-[32]) [33] (./chapters/ch6-conclusions.tex
+[30] [31] [32] [33 <./figures/fig_pareto.pdf>] [34] [35] [36] [37]) [38]
+(./chapters/ch6-conclusions.tex
 Chapter 6.
-[34] [35]) [36] (./chapters/appB-ethics.tex
+[39] [40]) [41] (./chapters/appB-ethics.tex
 Appendix A.
-[37]
-Underfull \hbox (badness 4621) in paragraph at lines 81--82
+[42] [43]
+Underfull \hbox (badness 4621) in paragraph at lines 89--90
 []\T1/cmr/m/n/10.95 Names, first names and ages masked in
 
-Underfull \hbox (badness 3612) in paragraph at lines 81--82
+Underfull \hbox (badness 3612) in paragraph at lines 89--90
 \T1/cmr/m/n/10.95 data through-out rather than de-scribed as
-[38]) [39] (./diss.bbl
+
+Underfull \hbox (badness 1184) in paragraph at lines 95--98
+[]\T1/cmr/m/n/10.95 Cost-sensitive de-ci-sion with the in-ter-rup-tion
+) [44] (./diss.bbl
 Underfull \hbox (badness 2790) in paragraph at lines 28--32
 []$\T1/cmss/m/n/12 https : / / huggingface . co / datasets / livekit / eot-[]be
 nch-[]data$[]\T1/cmr/m/n/12 , CC-BY-4.0, 14 lan-
-[40]) [41] (./diss.aux) )
+[45]) [46] (./diss.aux) )
 (see the transcript file for additional information) </Users/jean-baptisteazan/
 Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecss1200.600pk>
  </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/
@@ -299,28 +298,29 @@ ic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1095.600pk> </Users/jean-baptistea
 zan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ectt1200.60
 0pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljf
 our/jknappen/ec/ecbx1000.600pk> </Users/jean-baptisteazan/Library/texlive/2026b
-asic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1000.600pk> </Users/jean-baptist
-eazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecti1200.
+asic/texmf-var/fonts/pk/ljfour/jknappen/ec/tcrm1200.600pk> </Users/jean-baptist
+eazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.
 600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/l
-jfour/jknappen/ec/tcrm1200.600pk> </Users/jean-baptisteazan/Library/texlive/202
-6basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecsl1200.600pk> </Users/jean-bapti
-steazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx120
+jfour/jknappen/ec/ecbx2488.600pk> </Users/jean-baptisteazan/Library/texlive/202
+6basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1728.600pk> </Users/jean-bapti
+steazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm100
 0.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk
-/ljfour/jknappen/ec/ecbx2488.600pk> </Users/jean-baptisteazan/Library/texlive/2
-026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1200.600pk> </Users/jean-bap
-tisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1
-728.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/
-pk/ljfour/jknappen/ec/ecrm1728.600pk> </Users/jean-baptisteazan/Library/texlive
-/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm2074.600pk> </Users/jean-b
+/ljfour/jknappen/ec/ecti1200.600pk> </Users/jean-baptisteazan/Library/texlive/2
+026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1200.600pk> </Users/jean-bap
+tisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1
+200.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/fonts/
+pk/ljfour/jknappen/ec/ecbx1440.600pk> </Users/jean-baptisteazan/Library/texlive
+/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm1728.600pk> </Users/jean-b
 aptisteazan/Library/texlive/2026basic/texmf-var/fonts/pk/ljfour/jknappen/ec/ecr
-m2488.600pk></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/amsfont
-s/cm/cmex10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public/ams
-fonts/cm/cmmi10.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/public
-/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1/pu
-blic/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/type1
-/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/ty
-pe1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2026basic/texmf-dist/fonts/
-type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2026basic/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmsy8.pfb>
-Output written on diss.pdf (41 pages, 406143 bytes).
+m2074.600pk> </Users/jean-baptisteazan/Library/texlive/2026basic/texmf-var/font
+s/pk/ljfour/jknappen/ec/ecrm2488.600pk></usr/local/texlive/2026basic/texmf-dist
+/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2026basic/texmf-
+dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2026basic/te
+xmf-dist/fonts/type1/public/amsfonts/cm/cmmi12.pfb></usr/local/texlive/2026basi
+c/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2026b
+asic/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/20
+26basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/
+2026basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texl
+ive/2026basic/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb>
+Output written on diss.pdf (46 pages, 427379 bytes).
 Transcript written on diss.log.

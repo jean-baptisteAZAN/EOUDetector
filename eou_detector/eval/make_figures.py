@@ -59,8 +59,9 @@ def fig_pareto(ss, out):
         x, y = frontier(p)
         ax.plot(x, y, lw=1.6, color=colour, label=label, zorder=3)
         ax.plot(x[::6], y[::6], marker, ms=4.0, color=colour, mec="white", mew=0.7, zorder=4)
-    ax.axvline(5, lw=0.9, ls=(0, (3, 3)), color=MUTED, zorder=1)
-    ax.text(4.8, 1700, "5% budget", fontsize=7.5, color=MUTED, ha="right")
+    for xb, lab in ((5, "5%"), (10, "10%")):
+        ax.axvline(xb, lw=0.9, ls=(0, (3, 3)), color=MUTED, zorder=1)
+        ax.text(xb - 0.2, 1700, lab + " budget", fontsize=7.5, color=MUTED, ha="right")
     ax.set_xlim(0, 20); ax.set_ylim(200, 1800)
     ax.set_xlabel("Cut-in rate (%)  →  worse")
     ax.set_ylabel("Mean latency (ms)  →  worse")

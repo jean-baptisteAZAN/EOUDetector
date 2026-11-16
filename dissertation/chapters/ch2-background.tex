@@ -37,27 +37,48 @@ Section~\ref{sec:fusionresults} answers it.
 \section{Tools and technologies}
 \label{sec:tools}
 
-The system reuses several existing components, described briefly here.
+The system reuses several existing components. Each is introduced with the reason it was
+chosen, because for a project whose contribution is the composition of off-the-shelf parts
+the selection is itself a design decision.
 
 Voice activity detection is handled by Silero VAD \citep{silero_vad}, an open-source
 package with no accompanying academic publication, which labels each short audio frame as
-speech or silence. It is the entry point of the pipeline: it triggers an evaluation at
-every transition from speech to silence.
+speech or silence. It is the entry point of the pipeline: it triggers an evaluation at every
+transition from speech to silence. It was chosen because Tennor had already selected it for
+the production agent on the basis of an internal comparison; I did not repeat that
+comparison, and I take the choice as given. Using the same detector keeps the evaluated
+pipeline aligned with the deployed one.
 
 The acoustic end-of-turn estimate comes from Smart Turn v3, a model released by Pipecat
 and Daily \citep{smartturn_v3}, likewise without an academic publication and documented
 only by its model card and a technical blog post. It uses the encoder layers of Whisper
 Tiny \citep{radford2023whisper} with a single linear classification head on top, for
 roughly eight million parameters. From the recent audio it produces a probability that the
-turn has ended, without reading any text. This project uses version 3.2 in its CPU export.
-Versions 3.1 and 3.2 improved the handling of short utterances and robustness to noise,
-and the exact version is stated because the reported figures depend on it.
+turn has ended, without reading any text. This project uses version 3.2 in its CPU export. Versions 3.1 and 3.2 improved the handling
+of short utterances and robustness to noise, and the exact version is stated because the
+reported figures depend on it.
+
+Smart Turn was chosen for three reasons, and the absence of alternatives is one of them. It
+is open source under a permissive licence, so it can be run, inspected and redistributed
+inside a dissertation; it is the model the open turn-taking ecosystem has converged on, so
+comparing against it compares against what practitioners actually deploy; and it runs on CPU
+at eight million parameters, which the real-time constraint of Section~\ref{sec:tradeoff}
+requires. No other openly available end-of-turn detector met all three at the time of
+selection.
 
 The lexical estimate comes from CamemBERT \citep{martin2020camembert}, a French
-BERT-style language model applied to the partial transcript. Unlike the acoustic signal,
-it judges completeness from the meaning of the words. Continuous transcription is provided
-by a commercial speech recognition service (Azure), which emits partial hypotheses as
-speech unfolds.
+BERT-style language model applied to the partial transcript. Unlike the acoustic signal, it
+judges completeness from the meaning of the words. It was chosen because the target language
+is French and CamemBERT is pre-trained on French rather than adapted to it from a
+multilingual model, which matters for a judgement that turns on grammatical completeness;
+and because it is small enough to fine-tune on a modest dataset, which Section~\ref{sec:frozen}
+takes up.
+
+Continuous transcription is provided by Azure Speech, which emits partial hypotheses as
+speech unfolds. The reason here is continuity rather than superiority: it is the recogniser
+the production agent already uses, so the transcripts the lexical branch reads in evaluation
+are the ones it would read in deployment. Substituting a different service would have
+measured a pipeline that does not exist.
 
 Evaluation relies on eot-bench \citep{eotbench}, which its authors describe as the first
 open collection of genuine human-to-agent turns with aligned audio and textual context,
@@ -80,13 +101,18 @@ it. Both views are reported throughout.
 Neither of the two bodies of method underpinning the decision layer is specific to
 turn-taking.
 
-The first is probability calibration. A classifier is calibrated when, among the cases it
-assigns a probability of $0.8$, roughly eight in ten are positive. Modern neural networks
+The first is probability calibration. A classifier is calibrated when its scores match
+observed frequencies at every level: among the cases it assigns a probability of $p$, a
+proportion close to $p$ should be positive. Taking $p = 0.8$ as an illustration, roughly
+eight in ten of the cases it calls $0.8$ should turn out positive, and the same must hold at
+$0.2$, at $0.5$ and everywhere else. Modern neural networks
 are systematically miscalibrated and typically overconfident;
 \citet{guo2017calibration} attribute this to model capacity and to training choices such as
 batch normalisation, and show that accuracy and calibration can move in opposite directions.
-Calibration is therefore not implied by good discrimination: a model can rank correctly, and
-so obtain a high AUC, while the values it emits are meaningless as frequencies. 
+Calibration is therefore not implied by good discrimination. A model can rank correctly, and
+so obtain a high AUC, while the numbers it emits do not correspond to any real rate of
+occurrence: a score of $0.9$ might be right nine times in ten, or six, or four. The ordering
+is informative, the value is not. 
 
 The standard remedies are post-hoc and monotonic. Platt scaling fits a sigmoid; isotonic regression
 \citep{zadrozny2002isotonic} fits an arbitrary non-decreasing step function, more flexible
@@ -126,7 +152,9 @@ utterances, however, and never inside a running dialogue system, so it is not sh
 timing it saves survives streaming constraints. That gap shaped the present design.
 
 \emph{Purely lexical} approaches read the transcribed text and judge whether the utterance
-is complete. They supply the meaning the acoustic signal lacks, but they inherit a dependency that shapes
+is complete. Phoenix-VAD \citep{phoenixvad2025} is the most elaborate of them and takes the
+opposite route to the one adopted here, putting a large language model inside the endpoint
+decision itself. They supply the meaning the acoustic signal lacks, but they inherit a dependency that shapes
 both the design of Chapter~\ref{ch:approach} and the failure reported in
 Section~\ref{sec:gold}. A lexical branch is only as good as the transcript it reads, and a
 streaming transcript is late, unstable and imperfect: partials arrive behind the audio, are
@@ -146,9 +174,7 @@ modalities to be retrained together, and its labels are extracted automatically 
 large-scale dialogue corpora. 
 
 X2-Turn \citep{x2turn2026} goes further, placing a frame-synchronous turn state head
-alongside the ASR head on shared streaming features. Phoenix-VAD \citep{phoenixvad2025}
-takes the opposite route to the one adopted here, putting a large language model inside the
-endpoint decision itself.
+alongside the ASR head on shared streaming features.
 
 On the benchmarking side, the LiveKit detector and test set provide the policy-sweep
 evaluation framework this project adopts. Other work remains purely acoustic: endpoint

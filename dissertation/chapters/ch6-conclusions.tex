@@ -43,16 +43,18 @@ delay, but that derivation lives in the evaluation: the shipped controller still
 confidence onto a hand-set silence ladder.
 
 \textbf{O4}, instrumenting production and validating in domain, was carried out, and its
-result is negative. The capture and the gold pipeline work, with 709 calls captured and 636 scored, and a validated
-converter, but the validation showed that the off-the-shelf pipeline does not transfer: the
+result is negative. The capture works, with 709 calls recorded and 636 scored. The eot-bench converter was
+written but never exercised end to end, because the harness route was blocked by a
+dependency conflict (Section~\ref{sec:tooling}), so the in-domain figures come from a
+standalone scorer instead. The validation showed that the off-the-shelf pipeline does not transfer: the
 acoustic branch is at chance on 8\,kHz audio and the lexical branch plateaus near 0.60 on
 weak labels. The objective was delivered as engineering and as measurement; the hypothesis
 it was built to test was not confirmed.
 
 Several limitations bound what has been shown. On generic French the method plateaus around
-0.897, and passing that needs larger models, which is outside the contribution. The system
-trails the commercial streaming services on latency, because it waits for a micro-pause
-while they commit as the text arrives. The in-domain labels are weak, and the French
+0.897, and passing that needs larger models, which is outside the contribution. The system trails the fastest commercial detectors on latency, because it waits for a
+micro-pause rather than deciding as the text arrives, though two of the three streaming
+services are slower still. The in-domain labels are weak, and the French
 benchmark subset is small at roughly a thousand silences.
 
 There are things I would do differently. I would instrument production in the first week rather
@@ -87,8 +89,8 @@ telephone band, by retraining or by starting from a natively narrowband model, t
 saturation, and hand-annotate a few hundred pauses to obtain clean end-of-turn labels and a
 trustworthy in-domain measurement, which weak supervision cannot provide.
 
-The third is a sequential optimal-stopping formulation. The current rule applies a myopic
-threshold to a calibrated probability. At high cost ratios the swept oracle turns
-conservative through timing rather than through the threshold, and a myopic rule cannot
-match that. A multi-step cost model, in the tradition of \citet{wald1945sequential}, would
+The third is a sequential optimal-stopping formulation. The current rule is myopic: it
+decides on the evidence available at one instant, applying a threshold to the calibrated
+probability without weighing what waiting a little longer might reveal. At high cost ratios the swept oracle turns
+conservative through timing rather than through the threshold, and a rule that only looks at the present instant cannot match that. A multi-step cost model, in the tradition of \citet{wald1945sequential}, would
 track the oracle across every cost regime.

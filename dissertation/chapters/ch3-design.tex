@@ -91,16 +91,43 @@ Section~\ref{sec:related}.
 \section{The form of the fusion}
 \label{sec:fusionform}
 
-The two probabilities are combined by logistic regression on $p_{\mathrm{ac}}$,
-$p_{\mathrm{lex}}$ and their product. With weights $w_0 \dots w_3$,
+The fusion takes two forms, and the difference between them runs through the rest of this
+dissertation. A rule-based form applies a bilateral veto and then a fixed
+average; it needs no data to fit, so it was the committed deliverable and it is what the
+system runs (Section~\ref{sec:fusionimpl}). The two operations are sequential rather than
+combined: the veto is a gate, and when either signal falls below its threshold the decision
+is to wait and the average is never computed. Only when both signals clear the gate are
+they averaged, and the result is then mapped onto how much trailing silence to demand. A learned form fits the combination, and it is
+the one every result in Chapter~\ref{ch:results} is measured on. The rule form is described
+with the implementation because it is an engineering artefact; the learned form is set out
+here because its shape is a design decision.
+
+In the learned form the two probabilities are combined by logistic regression on
+$p_{\mathrm{ac}}$, $p_{\mathrm{lex}}$ and their product. With weights $w_0 \dots w_3$,
 \begin{equation}
 z = w_0 + w_1 p_{\mathrm{ac}} + w_2 p_{\mathrm{lex}} + w_3\, p_{\mathrm{ac}} p_{\mathrm{lex}},
 \qquad
 p_{\mathrm{raw}} = \sigma(z) = \frac{1}{1 + e^{-z}} .
 \label{eq:fusion}
 \end{equation}
-The interaction term lets the model capture the case where both signals agree, which a
-weighted sum cannot represent. 
+Here $p_{\mathrm{ac}} \in [0,1]$ is the probability of end of turn produced by the acoustic
+model and $p_{\mathrm{lex}} \in [0,1]$ the one produced by the lexical model, both read at
+the same micro-pause; $z$ is the linear score they are combined into; $\sigma$ is the
+logistic function; and $p_{\mathrm{raw}} \in [0,1]$ is the fused probability before any
+calibration. There are four weights because the model has four terms and no more: an
+intercept $w_0$, one weight per input signal, and $w_3$ on their product.
+
+This form contains the rule-based one as a special case. The fixed average
+$0.5\,p_{\mathrm{ac}} + 0.5\,p_{\mathrm{lex}}$ is Equation~\ref{eq:fusion} with
+$w_0 = 0$, $w_1 = w_2 = 0.5$ and $w_3 = 0$: the same shape, with the weights set by hand
+instead of fitted, and with the interaction term switched off. What fitting them adds is
+visible in the values Section~\ref{sec:fusionresults} reports: the lexical branch receives
+roughly $2.2$ times the weight of the acoustic one, so the equal split the rule form
+assumes is not what the data supports. The veto and the silence ladder run the other way:
+they are gating structure that Equation~\ref{eq:fusion} has no counterpart for. The interaction
+term $p_{\mathrm{ac}} p_{\mathrm{lex}}$ lets the model treat the case where both signals
+agree as different from the sum of their separate contributions, which a purely additive
+form cannot represent. 
 
 I preferred logistic regression to richer combinations because it is light, its weights stay interpretable, so one can read off which of the
 two signals carries more of the decision, and its output is a probability that can then
@@ -128,8 +155,12 @@ predictions untouched, so the AUC does not move, and only the probability values
 \mathrm{ECE} = \sum_{b} \frac{n_b}{N} \, \bigl| \mathrm{acc}_b - \mathrm{conf}_b \bigr| ,
 \label{eq:ece}
 \end{equation}
-the weighted average gap, across probability bins, between the confidence claimed and the
-accuracy observed. The cost of the approach is that it consumes held-out data and can
+The predictions are sorted into bins $b$ by the probability they carry. For each bin,
+$n_b$ is the number of predictions it holds, $N$ the total number of predictions,
+$\mathrm{conf}_b$ the mean probability claimed within the bin, and $\mathrm{acc}_b$ the
+proportion of those cases that turned out positive. The ECE is therefore the average gap
+between claimed confidence and observed frequency, each bin weighted by how many predictions
+fall into it. The cost of the approach is that it consumes held-out data and can
 overfit on small sets, which I limit with a held-out split rather than reusing the fitting
 data.
 
@@ -157,5 +188,4 @@ The operating point is then a consequence of a stated preference rather than a n
 Equation~\ref{eq:cost} is the only form of the rule used here: the policy minimising the
 combined cost is selected directly, with no closed-form threshold derived from $\lambda$. A richer variant would fold the elapsed silence into the probability and
 decide sequentially, in the spirit of \citet{wald1945sequential}. I built it and it did not
-improve on the swept frontier (Section~\ref{sec:negative}), so the calibrated myopic rule
-stands, and the full sequential formulation is left to Chapter~\ref{ch:conclusions}.
+improve on the swept frontier (Section~\ref{sec:negative}), so the calibrated single-instant rule stands, and the full sequential formulation is left to Chapter~\ref{ch:conclusions}.

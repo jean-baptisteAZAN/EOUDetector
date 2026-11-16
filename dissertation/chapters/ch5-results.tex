@@ -4,20 +4,22 @@
 \section{Evaluation protocol}
 \label{sec:protocol}
 
-Evaluation runs through the eot-bench harness on the French subset, which contains 400
-turns and 1{,}054 silences, of which 400 are ends of turn and 654 are holds. The harness sweeps the endpointing policy and reports a per-span AUC, that is, the ability
-to tell a silence that ends a turn from a silence that is merely a pause, and the frontier between latency and cut-in rate, the rate at which the system speaks over
-a caller who has not finished. 
+Evaluation runs through the eot-bench harness on the French subset: 400 turns and
+1{,}054 silences, of which 400 are ends of turn and 654 are holds. Each of those silences is one micro-pause in the sense of
+Section~\ref{sec:realtime}: one moment at which the system must decide. The harness sweeps
+the endpointing policy and reports two measures. Per-span AUC says how well a model tells a
+silence that ends a turn from one that is only a pause. The latency and cut-in frontier says
+how long the system waits, and how often it speaks over a caller who has not finished. 
 
-Intuitively, the per-span AUC is the probability that, shown
-one silence that ends a turn and one that does not, the model scores the first higher: 0.5
-is a coin flip and 1.0 is a perfect ordering. All lexical and fusion figures are cross-validated with folds split by call,
+Take one silence that ends a turn and one that
+does not. The per-span AUC is the probability that the model scores the first higher. 0.5 is
+a coin flip, 1.0 is a perfect ordering. All lexical and fusion figures are cross-validated with folds split by call,
 so no call appears in both training and test.
 
-One methodological point conditions the comparisons. Adapters that decide as the transcript
-arrives, the streaming recognition services Soniox, AssemblyAI and OpenAI, cannot be
-scored on per-span AUC, because their scoring point does not align with the moment of
-evaluation. Their latency is reported and their AUC omitted, rather than printing a number that is not
+One methodological point conditions the comparisons. Three of the systems decide as the transcript
+arrives: the streaming recognisers Soniox, AssemblyAI and OpenAI GPT-Realtime 2. They cannot
+be scored on per-span AUC, because they score at a different moment from the one evaluated
+here. Their latency is reported and their AUC left out, since the number would not be
 comparable. 
 
 \section{Fusion against the acoustic baseline}
@@ -47,6 +49,7 @@ Fusion, medical-fitted lexical & 0.789 & 850\,ms & 659\,ms \\
 Fusion, benchmark-fitted TF-IDF & 0.872 & 759\,ms & 548\,ms \\
 \textbf{Fusion, benchmark-fitted CamemBERT} & \textbf{0.897} & \textbf{715\,ms} & \textbf{510\,ms} \\
 \midrule
+ultraVAD & 0.817 & 846\,ms & 613\,ms \\
 LiveKit v1-mini (commercial) & 0.884 & 798\,ms & 541\,ms \\
 Deepgram Flux (commercial) & 0.915 & 676\,ms & 353\,ms \\
 LiveKit v1 (commercial) & 0.937 & 635\,ms & 376\,ms \\
@@ -55,15 +58,15 @@ Soniox (streaming STT) & n/a & 557\,ms & 463\,ms \\
 \end{tabular}
 \end{table}
 
-Fusion lifts the AUC from 0.814, for the acoustic model, to 0.897: a gain of 0.083. That is the comparison against the baseline the objectives are stated against, and it is not
-the whole picture: the lexical branch alone reaches 0.845, so what fusion adds over the
-better of its two inputs is 0.052, not 0.083. The first number says what the deployed system
+Fusion lifts the AUC from 0.814, for the acoustic model, to 0.897: a gain of 0.083. That is the comparison the objectives are stated against,
+but not the whole picture. The lexical branch alone reaches 0.845, so what fusion adds over
+the better of its two inputs is 0.052, not 0.083. The first number says what the deployed system
 would gain, the second whether combining the signals beats taking the stronger one.
 
 A gain is only a contribution if it can be shown statistically, so the data was resampled
 by call, three thousand times. The 95\,\% confidence interval on
-the gain is $[0.063, 0.104]$; no resample produced a non-positive gain, so
-$p < 3 \times 10^{-4}$, the finest resolution three thousand resamples allow. Resampling by
+the gain is $[0.063, 0.104]$; no resample produced a non-positive gain, so $p < 1/3000$, which is the finest bound three
+thousand resamples can support. Resampling by
 call rather than by silence matters, because silences from one call are not
 independent and treating them as such would inflate the significance. The gain is not noise.
 
@@ -82,13 +85,19 @@ it was meant to improve. Fusion
 is not beneficial in itself. It is beneficial on condition that the lexical model matches
 the data, and that condition bounds where this method can be deployed.
 
-The comparison against commercial systems needs care. At 0.897 the fusion sits above
-LiveKit v1-mini (0.884) but below Deepgram Flux (0.915) and LiveKit v1 (0.937). It does not
-beat the strongest commercial detectors on AUC, and the margin against v1-mini is too small to claim a win there either. On latency it trails as well: 715\,ms
-against 557\,ms for Soniox and 635\,ms for LiveKit at a 5\,\% budget. The streaming services
-commit earlier because they decide as the text arrives, whereas the design here waits for a
-micro-pause. That is a deliberate consequence of not blocking on transcription
-(Section~\ref{sec:nonblocking}), and it is a genuine limitation.
+The comparison against the other systems needs care. The table adds ultraVAD, an
+open-source detector that scores on audio alone, like Smart Turn. At 0.817 it edges past the
+acoustic baseline. That is worth recording, because it is the only comparator here that is
+neither commercial nor part of this project. At 0.897 the fusion sits above it and above
+LiveKit v1-mini (0.884), but below Deepgram Flux (0.915) and LiveKit v1 (0.937). It does not
+beat the strongest commercial detectors on AUC, and the margin against v1-mini is too small
+to claim a win there either.
+
+On latency it trails as well: 715\,ms against 557\,ms for Soniox and 635\,ms for LiveKit v1
+at a 5\,\% budget. Deciding at a micro-pause rather than as the text arrives is a real cost,
+and a deliberate consequence of not blocking on transcription
+(Section~\ref{sec:nonblocking}). It is not the whole explanation, though: two of the three
+streaming services are slower still, AssemblyAI at 822\,ms and GPT-Realtime 2 at 837\,ms.
 
 Figure~\ref{fig:pareto} extends the two budgets of the table to the whole frontier.
 The fusion curve sits below the acoustic one across the entire range, so the gain is not an
@@ -99,8 +108,8 @@ throughout, so neither is the shortfall.
 \centering
 \includegraphics{figures/fig_pareto.pdf}
 \caption[Latency against cut-in frontier]{Swept latency-versus-cut-in frontier on the
-French benchmark. Lower and to the left is better. The dashed line marks the 5\,\%
-cut-in budget quoted in Table~\ref{tab:fusion}.}
+French benchmark. Lower and to the left is better. The dashed lines mark the 5\,\% and 10\,\% cut-in budgets quoted in
+Table~\ref{tab:fusion}.}
 \label{fig:pareto}
 \end{figure}
 
@@ -182,13 +191,15 @@ LiveKit Turn Detector v1-mini & 0.084 & 0.051 \\
 The three streaming services are excluded here. An expected calibration error pairs a
 predicted probability with the outcome of the same span, which is exactly the pairing
 Section~\ref{sec:protocol} rejects for their AUC; reporting one while refusing the other
-would be inconsistent. Their behaviour bears this out: sampled at the evaluation point,
-GPT-Realtime 2 falls from an ECE of 0.374 to 0.007 under recalibration, a collapse
-characteristic of a near-constant score rather than a miscalibrated one.
+would be inconsistent. One figure from those excluded runs is worth quoting, not as a result but as evidence for
+the exclusion itself: sampled at the evaluation point, GPT-Realtime 2 falls from an ECE of
+0.374 to 0.007 under recalibration. A collapse that large is what a near-constant score
+looks like, and a system that has not yet decided emits exactly that. No row is given for it
+in Table~\ref{tab:ece}.
 
-Taking ECE $> 0.05$ as the working line for miscalibration, a convention adopted here rather
-than drawn from a standard, all five external detectors that can be scored at the evaluation
-point fall above it, as do ten of the eleven runs in the span set overall.
+This chapter treats ECE $> 0.05$ as miscalibrated. The line is a working convention, not a
+standard. All five external detectors that can be scored at the evaluation point fall above
+it, as do ten of the eleven runs in the span set.
 \texttt{calibration\_study.py} in the submitted corpus prints every run.
 
 Before any correction, the fused probability is the best calibrated of the set, at 0.064
@@ -200,17 +211,17 @@ of these values. The ordering among the four leading systems is not a result thi
 dissertation can defend.
 
 The calibrated column does not favour this work. Recalibration needs only a held-out split,
-so any integrator can apply it to any row, and applied uniformly it compresses the range:
-v1-mini reaches 0.051 and LiveKit v1 0.052 against the 0.043 here, so the ordering survives
-but the distance does not. Across all eleven runs the best-calibrated is this project's own
+so any integrator can apply it to any row. Applied uniformly it compresses the range:
+v1-mini reaches 0.051 and LiveKit v1 0.052 against 0.043 here. The ordering survives, the
+distance does not. Across all eleven runs the best-calibrated is this project's own
 dialogue-context variant at 0.039, which Section~\ref{sec:negative} reports as a failure on
 every other measure. The finding this section supports is therefore about the field and not
 about a ranking: miscalibration is universal, correcting it is cheap, and nobody does it.
 Nor does that spare this work, which sits uncorrected at 0.064, above the same line.
 
-The mechanism is the one described in Section~\ref{sec:calibration-lit}: these are neural classifiers trained to discriminate, and
-nothing in a discriminative objective rewards a probability that matches a frequency, nor
-does the leaderboard ask for one. 
+The mechanism is the one described in Section~\ref{sec:calibration-lit}: these are neural classifiers trained to
+discriminate. Nothing in a discriminative objective rewards a probability that matches a
+frequency, and the leaderboard never asks for one. 
 
 The consequence is practical. A threshold
 placed on a probability that does not correspond to a real frequency cannot be connected to
@@ -250,9 +261,9 @@ nowhere in the calculation. The behaviour is monotone and readable: the more cos
 more conservative the endpoint becomes.
 
 For medical telephone intake, $\lambda = 10$ is the setting this work would put forward:
-1.8\,\% cut-in at 981\,ms. In the units of Section~\ref{sec:costdesign} that claims one
-interruption costs about ten seconds, roughly what a repair turn takes when a caller cut off
-mid-identifier has to be asked again, and ten seconds plainly outweighs the 307\,ms saved by
+1.8\,\% cut-in at 981\,ms. Section~\ref{sec:costdesign} puts the cost of one
+interruption at about ten seconds, roughly the length of a repair turn when a caller cut off
+mid-identifier has to be asked again. Ten seconds plainly outweighs the 307\,ms saved by
 moving to $\lambda = 5$. That rests on judgement: the cost of a repair turn was never
 measured, and measuring it on production dialogues is the proper way to fix $\lambda$. What
 the framework provides is the means to act on such a cost once known.
@@ -277,30 +288,31 @@ the method. The first, a medical-fitted lexical read on generic French, is the 0
 Table~\ref{tab:fusion} and was discussed in Section~\ref{sec:fusionresults}; the other two
 follow.
 
-Folding the elapsed silence into the score did not beat the harness sweep. Rather than
-threshold the acoustic probability directly, this variant refits
-$g(p_{\mathrm{ac}}, d, p_{\mathrm{ac}}d, d^{2})$ on the silence duration $d$, so a single
-threshold on $g$ behaves as a time-varying threshold on the original score. Applied to the
-acoustic baseline it moved the AUC from 0.814 to 0.811. The frontier is bounded by the quality of the score, and
-the sweep already extracts the best temporal policy, and folding time into the probability adds
-nothing that the sweep was not already finding.
+Folding the elapsed silence into the score did not beat the harness sweep. This variant does not
+threshold the acoustic probability directly. It refits $g$ on the acoustic
+probability and the silence duration $d$, over the terms $p_{\mathrm{ac}}$, $d$,
+$p_{\mathrm{ac}}d$ and $d^{2}$, so one threshold on $g$ acts as a time-varying threshold on
+the original score. Applied to the
+acoustic baseline it moved the AUC from 0.814 to 0.811. The frontier is bounded by the quality of the score.
+The sweep already extracts the best temporal policy, so folding time into the probability
+adds nothing it was not already finding.
 
 Augmenting the lexical input with dialogue context did not help either, dropping from 0.897
 to 0.854. The completion signal lives in the caller's own words, and mean-pooling frozen
 embeddings over the agent's turn as well dilutes it.
 
 On generic French, then, the method plateaus around 0.897. Going
-further needs either larger models, which is not what this project is about, or in-domain
-data, which is what the next section tests.
+further needs either larger models, outside the scope of this project, or in-domain data,
+which the next section tests.
 
 \section{In-domain validation}
 \label{sec:gold}
 
 Everything above runs on a clean, generic, public dataset. The in-domain validation uses
 French medical calls captured by instrumenting production. Of the 709 calls captured
-(Section~\ref{sec:instrumentation}), 636 contribute at least one scored decision pause; those
-636 calls are cut into 5{,}342 decision pauses, of which 1{,}015 are ends of turn and 4{,}327
-holds, labelled by weak supervision. The recordings are stereo, caller on the left channel, sampled at 8\,kHz, the
+(Section~\ref{sec:instrumentation}), 636 contribute at least one scored micro-pause. Those
+calls yield 5{,}342 micro-pauses: 1{,}015 ends of turn and 4{,}327 holds. The labels come
+from weak supervision. The recordings are stereo, caller on the left channel, sampled at 8\,kHz, the
 standard telephone band.
 
 Contrary to my hypothesis, fusion does not win in domain. Per pause the AUCs are 0.49 for
@@ -315,15 +327,25 @@ Two causes explain this, once bugs are ruled out. The caller channel was confirm
 left one by measuring speech energy in the audio preceding each pause, and both the
 timestamp alignment and the scoring point were checked against the benchmark path.
 
-The first cause is bandwidth. Production audio is 8\,kHz narrowband while Smart Turn is
-trained on 16\,kHz wideband. On this audio its probability saturates upward: it answers
-``finished'' for almost every pause, whether the pause ends a turn or not, and so
-discriminates nothing. A generic acoustic detector does not transfer to 8\,kHz telephony.
+The first cause is bandwidth, and it can be measured rather than assumed. The recordings
+are sampled at 8\,kHz, so by Nyquist they carry nothing above 4\,kHz; across sixty of
+them, 0.32\,\% of the energy sits above the 3.4\,kHz telephone cut-off and 0.007\,\%
+above 4\,kHz. Smart Turn is trained on 16\,kHz wideband, so half the spectrum it learned
+on is simply absent.
+
+The effect on its output is visible in the distribution. On the benchmark the score is
+spread across the range, with an interquartile range of 0.94 and 41\,\% of spans scored
+below 0.1. In domain it collapses against the ceiling: median 0.98, interquartile range
+0.09, and 75\,\% of pauses scored above 0.9. The separation between the two classes
+disappears with it. On the benchmark the mean score is 0.738 for ends of turn against
+0.287 for holds, a gap of $+0.45$; in domain it is 0.820 against 0.844, a gap of
+$-0.02$. The model scores holds marginally higher than ends of turn, which is what an
+AUC of 0.49 means. A generic acoustic detector does not transfer to 8\,kHz telephony.
 
 The second is the labels. The comparison to draw is between the same lexical branch on the
 two datasets. On the public benchmark, where boundaries are human-verified, a frozen
-CamemBERT embedding under a logistic head reaches 0.845; on the in-domain set the identical
-construction, on labels inferred from resume behaviour, plateaus near 0.60. Nearly a quarter
+CamemBERT embedding under a logistic head reaches 0.845. The identical construction on the
+in-domain set, with labels inferred from resume behaviour, plateaus near 0.60. Nearly a quarter
 in absolute AUC separates them, and the only thing that changed is where the labels came
 from. Whether a patient resumes speaking is weakly predicted by the words uttered so far,
 because a pause followed by a resume and a final pause often have near-identical preceding
@@ -337,7 +359,7 @@ Chapter~\ref{ch:conclusions}, which the project timescale did not allow.
 
 So the in-domain validation does not confirm that the method transfers. It shows where it
 breaks. This does not contradict the headline result, which stands on clean labels, but it
-does show that reaching production takes adaptation. Three directions follow, and
-Chapter~\ref{ch:conclusions} takes them up: human annotation of a sample to obtain a clean
-in-domain test set, an acoustic model adapted to the 8\,kHz telephone band, and causal text
-reconstructed from per-turn final transcripts rather than concatenated partial hypotheses.
+does show that reaching production takes adaptation. Three directions follow, taken up in
+Chapter~\ref{ch:conclusions}: annotate a sample by hand to obtain a clean in-domain test
+set; adapt an acoustic model to the 8\,kHz telephone band; rebuild the causal text from
+per-turn final transcripts instead of concatenated partial hypotheses.

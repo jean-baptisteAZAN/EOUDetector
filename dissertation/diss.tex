@@ -51,35 +51,99 @@
 \pagestyle{empty}
 
 % ---------------------------------------------------------------------------
-% Declaration page: paste the completed, dated and signed Access Form here.
+% Access Form (COMP7300), completed, dated and signed.
 % ---------------------------------------------------------------------------
-{\Large Declaration}
+\begin{center}
+{\large\bfseries UNIVERSITY OF KENT}
 
-\vspace{0.75cm}
+\medskip
+{\large\bfseries ACCESS TO A MASTER'S DEGREE OR\\POSTGRADUATE DIPLOMA DISSERTATION}
+\end{center}
 
-% TODO: copy and paste the content of the Access Form file from Moodle here,
-% dated and signed by you.
+\vspace{0.4cm}
+
+In accordance with the Regulations, I hereby confirm that I shall permit general access to
+my dissertation at the discretion of the University Librarian. I agree that copies of my
+dissertation may be made for Libraries and research workers on the understanding that no
+publication in any form is made of the contents without my permission.
+
+\medskip
+\noindent\textbf{Notes for Candidates:} by submitting your dissertation, you agree with the
+following:
+
+\begin{enumerate}
+\item Where the examiners consider the dissertation to be of distinction standard, one copy
+may be deposited in the University Library and/or uploaded into Moodle as an example of good
+dissertation for future students.
+
+\item If a copy is sent to the Library, it becomes the property of the University Library.
+The copyright in its contents remains with the candidate. A duplicated sheet is pasted into
+the front of every thesis or dissertation deposited in the Library. The wording on the sheet
+is:
+
+\begin{quote}
+\emph{``I undertake not to use any matter contained in this thesis for publication in any
+form without the prior knowledge of the author.''}
+\end{quote}
+
+Every reader of the dissertation must sign and date this sheet.
+
+\item The University has the right to publish the title of the dissertation and the abstract
+and to authorise others to do so.
+\end{enumerate}
+
+\vspace{0.6cm}
+\noindent\textbf{SIGNATURE}\quad Jean-Baptiste Azan \hfill \textbf{DATE}\quad 01/09/2026
+
+\medskip
+\noindent\textbf{F U L L\ \ N A M E}\quad Jean-Baptiste \underline{AZAN}
+
+\noindent\footnotesize (Please print, underlining surname, in order to assist the
+cataloguing of theses deposited in the Library.)\normalsize
+
+\vspace{0.5cm}
+\noindent\rule{\textwidth}{0.4pt}
+
+\begin{center}
+{\bfseries CERTIFICATE ON SUBMISSION OF DISSERTATION}
+\end{center}
+
+\noindent I certify that:
+
+\begin{enumerate}
+\item I have read the University Degree Regulations under which this submission is made;
+
+\item In so far as the dissertation involves any collaborative research, the extent of this
+collaboration has been clearly indicated; and that any material which has been previously
+presented and accepted for the award of an academic qualification at this University or
+elsewhere has also been clearly identified in the dissertation.
+\end{enumerate}
+
+\vspace{0.6cm}
+\noindent\textbf{SIGNATURE}\quad Jean-Baptiste Azan \hfill \textbf{DATE}\quad 01/09/2026
 
 \cleardoublepage
+
+\medskip
+Word count: 9,452 % chapters 1-6; excludes abstract, bibliography and appendix.
 
 \section*{Abstract}
 
 A conversational voice agent has to decide, in real time, when a caller has finished
 speaking. On a French medical telephone line that decision is delicate: ending a turn too
 early cuts a patient off part-way through a spelled name or a dictated number, while ending
-it too late makes the exchange feel slow. Systems that rely on silence alone, a
-voice-activity detector and a fixed timeout, hear sound but not meaning, and cut off
-utterances that are grammatically incomplete.
+it too late makes the exchange feel slow. Systems that rely on silence alone hear sound but not meaning, and cut off utterances that
+are grammatically incomplete.
 
 This dissertation asks whether adding a lexical, meaning-aware signal improves that
-decision, and how the resulting probability should be turned into an endpoint. Two off-the-shelf models, an acoustic end-of-turn detector and a French
+decision, and how that probability should become an endpoint. Two off-the-shelf models, an acoustic end-of-turn detector and a French
 language model reading the partial transcript, are fused into one probability; that
 probability is calibrated; and the operating point is chosen, in the offline evaluation, from an explicit
 interruption-versus-latency cost rather than from a timer. No base model is fine-tuned in the pipeline that produces this result, and no large language
 model sits in the decision loop.
 
-On a public French benchmark the fusion raises the per-span AUC from 0.814 to 0.897, a gain of 0.083, with a 95\,\% confidence interval of $[0.063, 0.104]$ and
-$p < 3\times10^{-4}$ under a bootstrap resampled by call. Across the
+On a public French benchmark the fusion raises the per-span AUC from 0.814 to 0.897, a gain of 0.083 (95\,\% confidence interval $[0.063, 0.104]$, $p < 1/3000$, bootstrap
+resampled by call). Across the
 leaderboard, calibration proves a field-wide blind spot: every external detector evaluated
 is miscalibrated and none reports it. Validation on 636 production medical calls is
 negative, the acoustic branch saturating on 8\,kHz telephony and weak supervision capping
@@ -88,9 +152,29 @@ with its limits measured.
 
 \cleardoublepage
 
-\section*{Acknowledgments -> todo}
-\vspace{10mm}
-% Optional. Thank supervisor and industry partner if you wish.
+\section*{Acknowledgements}
+\vspace{6mm}
+
+I thank my supervisor, Dr Palaniappan Ramaswamy, for his availability throughout the project
+and for holding the work to a standard of evidence rather than of effort. His insistence
+that a gain is only a contribution once it has been demonstrated statistically shaped how
+the results in this dissertation are reported.
+
+I thank Jean-Baptiste Debize, co-founder and Chief Technology Officer of Tennor, without whom
+this project would not have existed. He made the partnership possible, gave me access to the
+production system and to the data on which the in-domain work rests, and acted as an adviser
+throughout the explorations that led to the approach taken here.
+
+I thank Samuel Shemtov, also a co-founder of Tennor, who completed this same MSc in Artificial
+Intelligence at Kent in 2025 and whose example is the reason I applied. His support has been
+a daily one, and it has mattered more than he probably knows.
+
+My thanks go to the whole team at Tennor, who looked at this project at every significant
+iteration and whose questions repeatedly sent me back to the data.
+
+Finally, to my family. Their support has been constant and unconditional, through the
+moments of doubt and through a difficult year for my health. They are the reason this
+was finished.
 
 \clearpage
 \pagestyle{fancy}

@@ -32,20 +32,28 @@ Tennor agent: 709 calls placed on a single production organisation, of which rou
 are genuine inbound calls and the remainder calls made by internal testers to the same line.
 It is used only as an in-domain validation set, and it is not included in the corpus.
 
-\section{Legal basis}
+\section{Legal basis and agreement with the controller}
 
-\textbf{[todo check with tennor dpo]}
+Tennor is the data controller. Every use of Tennor data in this project was agreed with the
+company before it took place, and the company reviewed the scope of the capture, the fields
+retained, this appendix, and the dissertation itself. Tennor is aware of what the work covers
+and of what it implies for the production agent. Nothing was collected, processed, or released
+outside that agreement, and the partnership was conducted transparently on both sides.
+
+One consequence follows directly. The in-domain production set described above, referred to as
+the \emph{gold} set in the submitted corpus, cannot be shared or made public. The reason is data
+sovereignty: these are French medical call recordings and transcripts held in Tennor's own
+infrastructure, and they stay there. The set is therefore described and measured in this
+dissertation but not distributed with it, which is why the public benchmark carries every
+headline result (Section~\ref{sec:datastrategy}).
 
 \section{Pseudonymisation, not anonymisation}
 
 Names, first names and ages are masked in the retained transcripts, and the export is
-reduced to the fields the task uses. The data nonetheless remains personal data under the
-GDPR: the caller-side audio is retained and every record is linked to a production call
-identifier, so re-identification by the controller remains possible. It is therefore treated
-as personal data throughout: the
-caller-side audio is retained and every record is linked to a production call identifier, so
-re-identification by the controller remains possible. Describing it as anonymised would be
-incorrect. The fields the task uses are the caller text, the recogniser's interim trajectory, the pause
+reduced to the fields the task uses. The data nonetheless remains personal data under the GDPR: the caller-side audio is
+retained and every record is linked to a production call identifier, so re-identification by
+the controller remains possible. It is treated as personal data throughout, and describing
+it as anonymised would be incorrect. The fields the task uses are the caller text, the recogniser's interim trajectory, the pause
 and decision timestamps, an audio reference, and the resume and interruption flags. The
 export is reduced to these.
 
@@ -69,7 +77,7 @@ the design documents and this statement.
 
 \section{Risks and mitigations}
 
-\begin{table}[tbp]
+\begin{table}[H]
 \centering
 \small
 \begin{tabular}{@{}p{5.5cm}p{8.0cm}@{}}

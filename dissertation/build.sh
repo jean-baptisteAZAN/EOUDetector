@@ -33,4 +33,59 @@ for i,p in enumerate(pages,1):
        and re.match(r'^(Table|Figure)\s+\d', body[0]): bad.append(f"{i-1}->{i}")
 print("  phrase coupee par un flottant :", ", ".join(bad) if bad else "aucune")
 PY
+# --- abstract en fichier separe (livrable Moodle) ---
+python3 - <<'PYEOF'
+import io, re
+s = io.open('diss.tex', encoding='utf-8').read()
+i = s.index('\\section*{Abstract}') + len('\\section*{Abstract}')
+j = s.index('\\cleardoublepage', i)
+t = s[i:j]
+t = re.sub(r'^%.*$', '', t, flags=re.M)
+t = re.sub(r'\\citep?t?\{[^}]*\}', '', t)
+t = re.sub(r'\$([^$]*)\$', r'\1', t)                       # math inline
+t = (t.replace('\\,', ' ').replace('\\%', '%').replace('\\&', '&')
+       .replace('\\times', 'x').replace('\\emph{', '').replace('~', ' '))
+t = re.sub(r'\\[a-zA-Z]+\*?(\[[^\]]*\])?(\{([^}]*)\})?', r'\3', t)
+t = re.sub(r'[{}]', '', t)
+paras = [re.sub(r'\s+', ' ', p).strip() for p in re.split(r'\n\s*\n', t) if p.strip()]
+n = sum(len([w for w in p.split() if any(c.isalpha() for c in w)]) for p in paras)
+out = ("Towards Semantically-Aware End-of-Utterance Detection for Conversational AI Systems\n"
+       "Jean-Baptiste Azan - MSc Artificial Intelligence - University of Kent\n\n"
+       "ABSTRACT\n\n" + "\n\n".join(paras) + "\n")
+io.open('abstract.txt', 'w', encoding='utf-8').write(out)
+print(f"  abstract.txt    : {n} mots (limite 250)")
+PYEOF
+
+# --- abstract en PDF (meme typographie que le memoire) ---
+python3 - <<'PYEOF'
+import io, re
+s = io.open('diss.tex', encoding='utf-8').read()
+i = s.index('\\section*{Abstract}') + len('\\section*{Abstract}')
+body = s[i:s.index('\\cleardoublepage', i)]
+body = re.sub(r'^%.*$', '', body, flags=re.M).strip()
+tex = r"""\documentclass[12pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{amsmath}
+\renewcommand\baselinestretch{1.15}
+\pagestyle{empty}
+\begin{document}
+\begin{center}
+{\large\bfseries Towards Semantically-Aware End-of-Utterance Detection\\for Conversational AI Systems}
+
+\medskip
+Jean-Baptiste Azan\\
+MSc Artificial Intelligence, University of Kent
+\end{center}
+
+\vspace{6mm}
+\begin{center}\textbf{Abstract}\end{center}
+
+""" + body + "\n\\end{document}\n"
+io.open('abstract.tex', 'w', encoding='utf-8').write(tex)
+PYEOF
+pdflatex -interaction=nonstopmode abstract.tex >/dev/null 2>&1
+rm -f abstract.aux abstract.log
+[ -f abstract.pdf ] && echo "  abstract.pdf    : ok"
+
 echo "  -> $(pwd)/diss.pdf"

@@ -41,22 +41,22 @@ guarantees it fires at most once per turn.
 \centering
 \resizebox{\textwidth}{!}{%
 \begin{tikzpicture}[
-  font=\small,
-  box/.style={draw=black!60, rounded corners=1.5pt, align=center,
-              minimum height=9mm, inner xsep=2.5mm, inner ysep=1.5mm},
-  fl/.style={-{Stealth[length=2mm]}, draw=black!60},
-  sn/.style={-{Stealth[length=2mm]}, draw=black!60, dashed}]
+ font=\small,
+ box/.style={draw=black!60, rounded corners=1.5pt, align=center,
+ minimum height=9mm, inner xsep=2.5mm, inner ysep=1.5mm},
+ fl/.style={-{Stealth[length=2mm]}, draw=black!60},
+ sn/.style={-{Stealth[length=2mm]}, draw=black!60, dashed}]
 
-\node[box] (src)  at (0,0)      {Audio source\\\footnotesize 512 samples / 32\,ms};
-\node[box] (asr)  at (0,2.0)    {ASR (Azure)\\\footnotesize interim hypotheses};
-\node[box] (ring) at (0,-2.0)   {Ring buffer\\\footnotesize last 8\,s};
-\node[box] (vad)  at (4.3,0)    {VAD\\\footnotesize speech / silence};
-\node[box] (gate) at (8.2,0)    {Micro-pause\\\footnotesize silence $>$ 200\,ms};
-\node[box] (ac)   at (12.6,1.6) {Acoustic branch\\\footnotesize Smart Turn v3};
-\node[box] (lex)  at (12.6,-1.6){Lexical branch\\\footnotesize CamemBERT};
-\node[box] (fus)  at (16.9,0)   {Fusion\\\footnotesize \texttt{RuleFusion}};
-\node[box] (ep)   at (20.9,0)   {Endpoint\\\footnotesize controller};
-\node      (out)  at (24.2,0)   {\textbf{END} / \textbf{WAIT}};
+\node[box] (src) at (0,0) {Audio source\\\footnotesize 512 samples / 32\,ms};
+\node[box] (asr) at (0,2.0) {ASR (Azure)\\\footnotesize interim hypotheses};
+\node[box] (ring) at (0,-2.0) {Ring buffer\\\footnotesize last 8\,s};
+\node[box] (vad) at (4.3,0) {VAD\\\footnotesize speech / silence};
+\node[box] (gate) at (8.2,0) {Micro-pause\\\footnotesize silence $>$ 200\,ms};
+\node[box] (ac) at (12.6,1.6) {Acoustic branch\\\footnotesize Smart Turn v3};
+\node[box] (lex) at (12.6,-1.6){Lexical branch\\\footnotesize CamemBERT};
+\node[box] (fus) at (16.9,0) {Fusion\\\footnotesize \texttt{RuleFusion}};
+\node[box] (ep) at (20.9,0) {Endpoint\\\footnotesize controller};
+\node (out) at (24.2,0) {\textbf{END} / \textbf{WAIT}};
 
 \draw[fl] (src) -- (vad);
 \draw[fl] (src) -- (asr);
@@ -65,7 +65,7 @@ guarantees it fires at most once per turn.
 \draw[fl] (gate) |- (ac);
 \draw[fl] (gate) |- (lex);
 \draw[fl] (ring) -| (ac);
-\draw[sn] (asr)  -| (lex) node[midway, above, font=\footnotesize] {snapshot, never awaited};
+\draw[sn] (asr) -| (lex) node[midway, above, font=\footnotesize] {snapshot, never awaited};
 \draw[fl] (ac) -| (fus);
 \draw[fl] (lex) -| (fus);
 \draw[fl] (fus) -- (ep);
@@ -73,8 +73,8 @@ guarantees it fires at most once per turn.
 
 \begin{scope}[on background layer]
 \node[draw=black!35, dashed, rounded corners=2pt, fit=(ac)(lex),
-      inner sep=3.5mm, label={[font=\footnotesize, black!55]below:%
-      concurrent, in an executor}] {};
+ inner sep=3.5mm, label={[font=\footnotesize, black!55]below:%
+ concurrent, in an executor}] {};
 \end{scope}
 \end{tikzpicture}}
 \caption[Pipeline architecture]{The decision pipeline. Every frame feeds the ring buffer,
@@ -186,7 +186,7 @@ followed by the agent replying without a resume is an end of turn.
 
 The resulting set is 709 calls placed on a single production organisation, of which roughly
 four in five are genuine inbound calls and the rest calls made by internal testers to the
-same line. Of those, 636 contribute at least one scored decision pause.
+same line. Of those, 636 contribute at least one scored micro-pause.
 Names, first names and ages are masked in the retained transcripts, and the data stays
 within Tennor's infrastructure. Because caller audio is retained and linked to a call identifier, it remains
 personal data and is treated as such throughout. Appendix~\ref{app:ethics} sets out the
@@ -198,6 +198,4 @@ governance in full.
 The system is covered by 45 automated tests, exercising the VAD, the ring buffer, the fusion
 and endpoint logic, the lexical rules, the types and the metrics. Integration tests that
 need heavy models, credentials or audio hardware skip themselves when those are absent, so
-the suite runs anywhere. Every result reported in Chapter~\ref{ch:results} has a
-documented command that reproduces it, listed in \texttt{reproduce.md} in the submitted
-code corpus.
+the suite runs anywhere. 
