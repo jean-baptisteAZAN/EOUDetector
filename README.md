@@ -1,10 +1,26 @@
-# EOU Detector
+<h1 align="center">EOU Detector</h1>
 
-**When has the caller finished speaking?** A real-time end-of-utterance detector for a
-French medical voice agent, built for an MSc AI dissertation (University of Kent, 2026).
+<p align="center">
+  <b>When has the caller finished speaking?</b><br>
+  Real-time end-of-utterance detection for French voice agents: sound + meaning, calibrated.
+</p>
 
-<p align="center"><img src="docs/eou_demo.gif" width="420" alt="Silence-only cuts the caller off mid-spelling; sound + meaning waits, then answers"></p>
-<p align="center"><sub>Illustrative animation. Gauge values are indicative; the AUC figures are measured.</sub></p>
+<p align="center">
+  <a href="#results"><img src="https://img.shields.io/badge/AUC-0.814%20%E2%86%92%200.897-1a7f37" alt="AUC 0.814 to 0.897"></a>
+  <a href="https://github.com/livekit/eot-bench"><img src="https://img.shields.io/badge/benchmark-eot--bench%20(fr)-0969da" alt="Benchmark: eot-bench (fr)"></a>
+  <a href="dissertation/diss.pdf"><img src="https://img.shields.io/badge/MSc%20dissertation-PDF-b31b1b" alt="MSc dissertation PDF"></a>
+  <img src="https://img.shields.io/badge/python-3.11%2B-3776ab?logo=python&logoColor=white" alt="Python 3.11+">
+  <img src="https://img.shields.io/badge/runtime-ONNX-005ced?logo=onnx&logoColor=white" alt="ONNX runtime">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-lightgrey" alt="MIT license"></a>
+</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/hero-dark.gif">
+    <img src="docs/hero-light.gif" width="820" alt="A caller spells a name. Acoustic-only probability crosses the threshold at every pause; the calibrated fusion stays below it and ends the turn 300 ms after 'That's it.'">
+  </picture>
+  <br><sub>Illustrative curves. The AUC figures below are measured.</sub>
+</p>
 
 ## The problem
 
